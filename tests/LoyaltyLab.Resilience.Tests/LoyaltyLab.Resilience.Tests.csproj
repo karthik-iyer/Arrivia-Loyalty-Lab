@@ -1,0 +1,20 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <!-- References both hosts: chaos tests run the API against the real payment simulator. -->
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\LoyaltyLab.Api\LoyaltyLab.Api.csproj" />
+    <ProjectReference Include="..\..\src\LoyaltyLab.PaymentSim\LoyaltyLab.PaymentSim.csproj" />
+  </ItemGroup>
+
+</Project>

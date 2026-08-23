@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <!--
+    Intentionally has no PackageReference and no ProjectReference.
+    ArchitectureTests.Domain_has_no_project_dependencies asserts this.
+  -->
+
+</Project>

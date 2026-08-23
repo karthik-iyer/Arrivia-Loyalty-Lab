@@ -1,0 +1,8 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LoyaltyLab.Application\LoyaltyLab.Application.csproj" />
+    <ProjectReference Include="..\LoyaltyLab.Domain\LoyaltyLab.Domain.csproj" />
+  </ItemGroup>
+
+</Project>

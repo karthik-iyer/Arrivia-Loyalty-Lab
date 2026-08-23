@@ -1,0 +1,16 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LoyaltyLab.Api/LoyaltyLab.Api.csproj" />
+    <Project Path="src/LoyaltyLab.Application/LoyaltyLab.Application.csproj" />
+    <Project Path="src/LoyaltyLab.Domain/LoyaltyLab.Domain.csproj" />
+    <Project Path="src/LoyaltyLab.Infrastructure/LoyaltyLab.Infrastructure.csproj" />
+    <Project Path="src/LoyaltyLab.PaymentSim/LoyaltyLab.PaymentSim.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LoyaltyLab.Api.Tests/LoyaltyLab.Api.Tests.csproj" />
+    <Project Path="tests/LoyaltyLab.Application.Tests/LoyaltyLab.Application.Tests.csproj" />
+    <Project Path="tests/LoyaltyLab.Architecture.Tests/LoyaltyLab.Architecture.Tests.csproj" />
+    <Project Path="tests/LoyaltyLab.Domain.Tests/LoyaltyLab.Domain.Tests.csproj" />
+    <Project Path="tests/LoyaltyLab.Resilience.Tests/LoyaltyLab.Resilience.Tests.csproj" />
+  </Folder>
+</Solution>

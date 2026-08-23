@@ -1,0 +1,10 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <!--
+    Standalone by design. The payment simulator shares no code with the
+    platform, because a shared type would let the saga cheat: it would be
+    able to know things about the far side that a real integration cannot.
+    See ADR-0006.
+  -->
+
+</Project>

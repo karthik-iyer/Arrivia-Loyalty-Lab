@@ -1,0 +1,9 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <ItemGroup>
+    <ProjectReference Include="..\LoyaltyLab.Infrastructure\LoyaltyLab.Infrastructure.csproj" />
+    <ProjectReference Include="..\LoyaltyLab.Application\LoyaltyLab.Application.csproj" />
+    <ProjectReference Include="..\LoyaltyLab.Domain\LoyaltyLab.Domain.csproj" />
+  </ItemGroup>
+
+</Project>
