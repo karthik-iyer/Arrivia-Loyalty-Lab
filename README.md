@@ -50,6 +50,7 @@ The `docs/` folder is the design record, written before the code. Read in order:
 | [ADRs](docs/adr/) | 14 decision records, each with the alternatives that were rejected and why |
 | [06 — Future improvements](docs/06-future-improvements.md) | Honest gaps, production roadmap, and what one more day, week, or month would buy |
 | [07 — Task breakdown](docs/07-task-breakdown.md) | Task-by-task implementation plan, day plan, and a pre-agreed scope cut line |
+| [08 — Session handoff](docs/08-session-handoff.md) | Where we stopped and what to do first in the next session |
 
 ## Getting started
 

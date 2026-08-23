@@ -1,0 +1,17 @@
+---
+description: Clean Architecture and domain rules for Loyalty Lab
+alwaysApply: true
+---
+
+# Architecture
+
+Layers: Domain → Application → Infrastructure → Api. Dependencies point inward only. Features are vertical slices (`Pricing`, `Loyalty`, `Booking`, `Concierge`, `Opportunity`) inside each layer.
+
+- Domain has **no** package or project references. No EF, ASP.NET, HttpClient, `System.Text.Json`, `double`/`float`, or ambient time.
+- Time only through `IClock`. The sole `DateTime.UtcNow` belongs in `SystemClock.cs`.
+- Expected business failures return `Result<T>` with a catalog `Error` code. Exceptions are defects.
+- `ILedgerRepository` is append + read only — no update or delete members.
+- Cross-tenant access returns **404**, never 403.
+- Architecture tests in `tests/LoyaltyLab.Architecture.Tests` must stay green. A failing layer test is a stop-the-line defect.
+
+Commit messages: `[T-xxx] …` and name the requirements satisfied. If behaviour differs from `docs/04`, update the doc in the same commit.
