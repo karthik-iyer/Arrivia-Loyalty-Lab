@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** fix CA1707 so architecture tests compile (`NoWarn` on test projects + set `IsTestProject`), run `dotnet test`, then implement **T-003** (`Money`, `Result<T>`, `IClock`).
+**Next work:** **T-006** deterministic seed, then **T-007** API host (tenant middleware, correlation, problem details, clocks, health).
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already shipped on `main`:** design (`cc3a4d9`), solution scaffold + architecture tests (`be95d3a`). F5 is stretch. Payment is out-of-process. Checkout is a saga (ADR-0006).
+**Already implemented locally (not necessarily pushed):** T-002–T-005 (architecture tests, domain commons, tenancy/catalog, EF + tenant query filter + InitialCreate migration). Payment is out-of-process. Checkout is a saga (ADR-0006).

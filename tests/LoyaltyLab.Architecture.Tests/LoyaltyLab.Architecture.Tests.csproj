@@ -11,6 +11,7 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
   </ItemGroup>
 
   <!-- References every production project so layer rules can be asserted over all of them. -->
