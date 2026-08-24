@@ -1,27 +1,25 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-015** pricing HTTP. F5 stays stretch.
+Stop here and resume from **T-016** remaining pricing suite. F5 stays stretch.
 
 ## Where we are
 
 | Item | Status |
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
-| T-010 … T-013 | Done — rules, pipeline, traces, quotes |
-| T-014 SearchOffers / QuoteOffer / ExplainQuote | Done — use cases with fake ports |
-| Next | **T-015** `GET /offers`, `POST /offers/{id}/quote`, `GET /quotes/{id}/explain` |
+| T-010 … T-015 | Done — rules, pipeline, traces, quotes, use cases, HTTP |
+| Next | **T-016** pricing test suite (precedence, floor, rounding-once, effective dating, two-partner divergence) |
 
 ## Verify
 
-- Anonymous search lists permitted inventory with `MemberPrice` null and no `NetRate` on the DTO.
-- SUMMIT Gold quotes Coral Bay at **120.75** with max tender **48.30** (4830 credits).
-- NIMBUS cannot quote OCEANIC (`OFFER_NOT_ELIGIBLE`). Wrong-member explain is `QUOTE_NOT_FOUND`.
-- Member explain does not reveal net rate; AccountManager explain includes net cost and margin.
+- `GET /api/offers?stayDate=2026-03-15` with `X-Partner-Code: SUMMIT` lists Coral Bay; anonymous JSON has no `netRate` and no `memberPrice`.
+- Maya (`X-Member-Id` = seed Maya) search/quote of Coral Bay is **120.75** / max credits **4830**.
+- NIMBUS cannot see or quote OCEANIC (`OFFER_NOT_ELIGIBLE` / 422). Cross-partner explain is `QUOTE_NOT_FOUND` / 404.
 
 ## First actions next session
 
-1. **T-015** HTTP + **raw-JSON** assertion that anonymous responses contain no `netRate`. Persist/seed pricing rules (TPH) and EF ports for rules and partner-suppliers.
-2. **T-016** remaining pricing suite, then Phase 2 ledger.
+1. **T-016** extra pricing suite, then Phase 2 ledger (**T-020**).
+2. Do not start Angular until Phase 4.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

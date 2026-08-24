@@ -22,6 +22,11 @@ public static class InfrastructureServiceCollectionExtensions
             options.UseSqlite(connectionString);
         });
         services.AddScoped<IQuoteRepository, QuoteRepository>();
+        services.AddScoped<IPartnerRepository, PartnerRepository>();
+        services.AddScoped<IMemberRepository, MemberRepository>();
+        services.AddScoped<IOfferRepository, OfferRepository>();
+        services.AddScoped<IPartnerSupplierRepository, PartnerSupplierRepository>();
+        services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }

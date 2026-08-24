@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-015** pricing HTTP (`GET /offers`, `POST /offers/{id}/quote`, `GET /quotes/{id}/explain`) plus the raw-JSON no-`netRate` assertion.
+**Next work:** **T-016** remaining pricing suite (precedence, floor clamp, rounding-once, effective dating, two-partner divergence).
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-014 (pricing rules, pipeline, traces, quotes, use cases with fake ports). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.
+**Already implemented:** T-001–T-007 (Phase 0), T-010–T-015 (pricing through HTTP; anonymous JSON has no `netRate`). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.

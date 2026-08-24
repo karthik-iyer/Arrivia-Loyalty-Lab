@@ -89,6 +89,66 @@ internal sealed class QuoteConfiguration : IEntityTypeConfiguration<LoyaltyLab.D
     }
 }
 
+internal sealed class PricingRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.PricingRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.PricingRule> builder)
+    {
+        builder.ToTable("PricingRules");
+        builder.HasKey(r => r.Id);
+        builder.Property(r => r.Id).HasConversion(id => id.Value, v => new PricingRuleId(v));
+        builder.Property(r => r.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(r => r.Scope).HasConversion(PersistenceJson.JsonConverter<LoyaltyLab.Domain.Pricing.RuleScope>());
+        builder.Ignore(r => r.Specificity);
+        builder.HasIndex(r => new { r.PartnerId, r.Kind, r.EffectiveFrom, r.EffectiveTo });
+        builder.HasDiscriminator(r => r.Kind)
+            .HasValue<LoyaltyLab.Domain.Pricing.EligibilityExclusionRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.EligibilityExclusion)
+            .HasValue<LoyaltyLab.Domain.Pricing.BaseMarkupRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.BaseMarkup)
+            .HasValue<LoyaltyLab.Domain.Pricing.TierAdjustmentRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.TierAdjustment)
+            .HasValue<LoyaltyLab.Domain.Pricing.CampaignDiscountRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.CampaignDiscount)
+            .HasValue<LoyaltyLab.Domain.Pricing.MarginFloorRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.MarginFloor)
+            .HasValue<LoyaltyLab.Domain.Pricing.BurnCapRule>(
+                LoyaltyLab.Domain.Pricing.PricingRuleKind.BurnCap);
+    }
+}
+
+internal sealed class BaseMarkupRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.BaseMarkupRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.BaseMarkupRule> builder) =>
+        builder.Property(r => r.Markup).HasConversion(new PercentConverter());
+}
+
+internal sealed class TierAdjustmentRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.TierAdjustmentRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.TierAdjustmentRule> builder) =>
+        builder.Property(r => r.Adjustment).HasConversion(new PercentConverter()).HasColumnName("Adjustment");
+}
+
+internal sealed class CampaignDiscountRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.CampaignDiscountRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.CampaignDiscountRule> builder)
+    {
+        builder.Property(r => r.CampaignCode).HasMaxLength(64).IsRequired();
+        builder.Property(r => r.Adjustment).HasConversion(new PercentConverter()).HasColumnName("Adjustment");
+    }
+}
+
+internal sealed class MarginFloorRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.MarginFloorRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.MarginFloorRule> builder) =>
+        builder.Property(r => r.FloorAboveNet).HasConversion(new PercentConverter());
+}
+
+internal sealed class BurnCapRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.BurnCapRule>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.BurnCapRule> builder) =>
+        builder.Property(r => r.Cap).HasConversion(new PercentConverter());
+}
+
 internal sealed class PartnerSupplierConfiguration : IEntityTypeConfiguration<PartnerSupplier>
 {
     public void Configure(EntityTypeBuilder<PartnerSupplier> builder)

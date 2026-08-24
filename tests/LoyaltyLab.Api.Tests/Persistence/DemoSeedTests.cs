@@ -36,6 +36,7 @@ public sealed class DemoSeedTests : IDisposable
         (await db.Offers.CountAsync()).Should().Be(24);
         (await db.Members.IgnoreQueryFilters().CountAsync()).Should().Be(3);
         (await db.PartnerSuppliers.IgnoreQueryFilters().CountAsync()).Should().Be(5);
+        (await db.PricingRules.IgnoreQueryFilters().CountAsync()).Should().Be(8);
     }
 
     [Fact]
@@ -68,6 +69,13 @@ public sealed class DemoSeedTests : IDisposable
 
         nimbusSuppliers.Should().BeEquivalentTo([SeedIds.Alpine, SeedIds.Metro]);
         nimbusSuppliers.Should().NotContain(SeedIds.Oceanic);
+
+        var summitRules = await db.PricingRules.IgnoreQueryFilters()
+            .Where(r => r.PartnerId == SeedIds.Summit)
+            .ToListAsync();
+        summitRules.Should().HaveCount(5);
+        summitRules.OfType<LoyaltyLab.Domain.Pricing.CampaignDiscountRule>()
+            .Should().ContainSingle(r => r.CampaignCode == "MARCH-BEACH");
     }
 
     private LoyaltyLabDbContext CreateContext()

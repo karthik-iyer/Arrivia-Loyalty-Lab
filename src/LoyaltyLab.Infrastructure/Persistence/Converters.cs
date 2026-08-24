@@ -13,10 +13,13 @@ internal static class PersistenceJson
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         Converters =
         {
+            new JsonStringEnumConverter(),
             new PercentJsonConverter(),
             new CurrencyJsonConverter(),
             new MoneyJsonConverter(),
             new PricingRuleIdJsonConverter(),
+            new OfferIdJsonConverter(),
+            new SupplierIdJsonConverter(),
         },
     };
 
@@ -139,4 +142,42 @@ internal sealed class PricingRuleIdJsonConverter : JsonConverter<LoyaltyLab.Doma
         LoyaltyLab.Domain.Common.PricingRuleId value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
+}
+
+internal sealed class OfferIdJsonConverter : JsonConverter<LoyaltyLab.Domain.Common.OfferId>
+{
+    public override LoyaltyLab.Domain.Common.OfferId Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options) =>
+        new(reader.GetGuid());
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        LoyaltyLab.Domain.Common.OfferId value,
+        JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Value);
+}
+
+internal sealed class SupplierIdJsonConverter : JsonConverter<LoyaltyLab.Domain.Common.SupplierId>
+{
+    public override LoyaltyLab.Domain.Common.SupplierId Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options) =>
+        new(reader.GetGuid());
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        LoyaltyLab.Domain.Common.SupplierId value,
+        JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Value);
+}
+
+internal sealed class PercentConverter : ValueConverter<Percent, decimal>
+{
+    public PercentConverter()
+        : base(v => v.Value, v => Percent.From(v))
+    {
+    }
 }

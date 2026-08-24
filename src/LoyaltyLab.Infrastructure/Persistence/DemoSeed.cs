@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -28,10 +29,13 @@ public static class SeedIds
 
     public static OfferId Offer(int index) =>
         new(Guid.Parse($"a11ce001-0004-7000-8000-{index:D12}"));
+
+    public static PricingRuleId Rule(int index) =>
+        new(Guid.Parse($"a11ce001-0005-7000-8000-{index:D12}"));
 }
 
 /// <summary>
-/// Idempotent demo catalog from docs/04 §8.3. Pricing rules, ledger opening balances,
+/// Idempotent demo catalog from docs/04 §8.3. Ledger opening balances
 /// and F5 windows land with those features — the partner policies already encode
 /// burn caps and drift so later slices do not invent configuration.
 /// </summary>
@@ -73,6 +77,11 @@ public static class DemoSeed
         if (!await db.Offers.AnyAsync(cancellationToken))
         {
             db.Offers.AddRange(CreateOffers());
+        }
+
+        if (!await db.PricingRules.IgnoreQueryFilters().AnyAsync(cancellationToken))
+        {
+            db.PricingRules.AddRange(CreateRules());
         }
 
         await db.SaveChangesAsync(cancellationToken);
@@ -159,5 +168,35 @@ public static class DemoSeed
                 window.Item2,
                 SeedIds.Offer(index + 1));
         }).ToList();
+    }
+
+    private static List<PricingRule> CreateRules()
+    {
+        var from = new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero);
+
+        return
+        [
+            BaseMarkupRule.Create(
+                SeedIds.Summit, Percent.From(12m), RuleScope.PartnerWide, from, id: SeedIds.Rule(1)),
+            TierAdjustmentRule.Create(
+                SeedIds.Summit, Percent.From(-3m), new RuleScope(tier: TierCode.Gold), from, id: SeedIds.Rule(2)),
+            CampaignDiscountRule.Create(
+                SeedIds.Summit,
+                "MARCH-BEACH",
+                Percent.From(-5m),
+                new RuleScope(tag: OfferTag.Beach),
+                from,
+                id: SeedIds.Rule(3)),
+            MarginFloorRule.Create(
+                SeedIds.Summit, Percent.From(5m), RuleScope.PartnerWide, from, id: SeedIds.Rule(4)),
+            BurnCapRule.Create(
+                SeedIds.Summit, Percent.From(40m), RuleScope.PartnerWide, from, id: SeedIds.Rule(5)),
+            BaseMarkupRule.Create(
+                SeedIds.Nimbus, Percent.From(18m), RuleScope.PartnerWide, from, id: SeedIds.Rule(6)),
+            MarginFloorRule.Create(
+                SeedIds.Nimbus, Percent.From(5m), RuleScope.PartnerWide, from, id: SeedIds.Rule(7)),
+            BurnCapRule.Create(
+                SeedIds.Nimbus, Percent.From(100m), RuleScope.PartnerWide, from, id: SeedIds.Rule(8)),
+        ];
     }
 }

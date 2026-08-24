@@ -1,5 +1,7 @@
+using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Application.Pricing;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Tenancy;
 using LoyaltyLab.Infrastructure;
@@ -7,6 +9,7 @@ using LoyaltyLab.Infrastructure.Persistence;
 using LoyaltyLab.Infrastructure.Tenancy;
 using LoyaltyLab.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -14,6 +17,14 @@ builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddLoyaltyLabInfrastructure();
 builder.Services.AddSingleton<IClock>(sp => CreateClock(sp.GetRequiredService<IConfiguration>()));
+builder.Services.AddScoped<SearchOffers>();
+builder.Services.AddScoped<QuoteOffer>();
+builder.Services.AddScoped<ExplainQuote>();
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+    options.SerializerOptions.Converters.Add(new JsonStringEnumConverter());
+});
 
 var app = builder.Build();
 
@@ -23,6 +34,7 @@ app.UseStatusCodePages();
 app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapPricingEndpoints();
 
 app.MapGet("/api/partners/current/theme", async (
     ITenantContextAccessor tenant,

@@ -20,14 +20,22 @@ internal sealed class UnhandledExceptionHandler : IExceptionHandler
             return false;
         }
 
+        var extensions = new Dictionary<string, object?>
+        {
+            ["correlationId"] = httpContext.TraceIdentifier,
+        };
+
+        var environment = httpContext.RequestServices.GetService<IHostEnvironment>();
+        if (environment?.IsDevelopment() == true)
+        {
+            extensions["detail"] = exception.ToString();
+        }
+
         await Results.Problem(
             title: "An unexpected error occurred.",
             statusCode: StatusCodes.Status500InternalServerError,
             type: "https://tools.ietf.org/html/rfc9110#section-15.6.1",
-            extensions: new Dictionary<string, object?>
-            {
-                ["correlationId"] = httpContext.TraceIdentifier,
-            }).ExecuteAsync(httpContext);
+            extensions: extensions).ExecuteAsync(httpContext);
 
         return true;
     }
