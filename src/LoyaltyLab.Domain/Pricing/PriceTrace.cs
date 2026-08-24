@@ -51,6 +51,21 @@ public sealed record PriceExplanation(
         return new(stages, state.RunningTotal, state.MaxCreditTender, NetCost: null, Margin: null);
     }
 
+    public static PriceExplanation FromQuote(Quote quote, AccessRole role)
+    {
+        ArgumentNullException.ThrowIfNull(quote);
+
+        var state = new PricingState(
+            quote.MemberPrice,
+            quote.NetCostSnapshot,
+            quote.MaxCreditTender,
+            IsRejected: false,
+            RejectionReason: null,
+            quote.Trace);
+
+        return From(state, role);
+    }
+
     public bool RevealsNetRate => NetCost is not null || Margin is not null
         || Stages.Any(stage => stage.Stage is PricingStageKind.BaseCost or PricingStageKind.Eligibility);
 

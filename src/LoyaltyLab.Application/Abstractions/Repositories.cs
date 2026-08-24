@@ -31,6 +31,21 @@ public interface IQuoteRepository
     Task AddAsync(Quote quote, CancellationToken cancellationToken);
 }
 
+public interface IPricingRuleRepository
+{
+    Task<IReadOnlyList<PricingRule>> ListForPartnerAsync(
+        PartnerId partnerId,
+        DateTimeOffset asOf,
+        CancellationToken cancellationToken);
+}
+
+public interface IPartnerSupplierRepository
+{
+    Task<IReadOnlySet<SupplierId>> GetPermittedSupplierIdsAsync(
+        PartnerId partnerId,
+        CancellationToken cancellationToken);
+}
+
 public interface ISupplierRepository
 {
     Task<Supplier?> GetByIdAsync(SupplierId id, CancellationToken cancellationToken);

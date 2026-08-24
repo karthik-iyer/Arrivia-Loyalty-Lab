@@ -1,27 +1,27 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-014** pricing use cases. F5 stays stretch.
+Stop here and resume from **T-015** pricing HTTP. F5 stays stretch.
 
 ## Where we are
 
 | Item | Status |
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
-| T-010 … T-011 | Done — rules + eight-stage pipeline |
-| T-012 price trace + role-aware projection | Done — member view has no net rate |
-| T-013 Quote + expiry + rate drift | Done — persisted with trace |
-| Next | **T-014** `SearchOffers`, `QuoteOffer`, `ExplainQuote` |
+| T-010 … T-013 | Done — rules, pipeline, traces, quotes |
+| T-014 SearchOffers / QuoteOffer / ExplainQuote | Done — use cases with fake ports |
+| Next | **T-015** `GET /offers`, `POST /offers/{id}/quote`, `GET /quotes/{id}/explain` |
 
 ## Verify
 
-- Member/anonymous trace omits base-cost and net cost; internal roles see net cost, margin, and the clamp.
-- Expired quotes return `QUOTE_EXPIRED`. Drift beyond tolerance or a broken floor returns `RATE_CHANGED`. Absorb-within-2% still holds the NIMBUS floor.
+- Anonymous search lists permitted inventory with `MemberPrice` null and no `NetRate` on the DTO.
+- SUMMIT Gold quotes Coral Bay at **120.75** with max tender **48.30** (4830 credits).
+- NIMBUS cannot quote OCEANIC (`OFFER_NOT_ELIGIBLE`). Wrong-member explain is `QUOTE_NOT_FOUND`.
+- Member explain does not reveal net rate; AccountManager explain includes net cost and margin.
 
 ## First actions next session
 
-1. **T-014** SearchOffers / QuoteOffer / ExplainQuote with fake ports.
-2. **T-015** HTTP + raw-JSON assertion that anonymous responses contain no `netRate`.
-3. **T-016** remaining pricing suite, then Phase 2 ledger.
+1. **T-015** HTTP + **raw-JSON** assertion that anonymous responses contain no `netRate`. Persist/seed pricing rules (TPH) and EF ports for rules and partner-suppliers.
+2. **T-016** remaining pricing suite, then Phase 2 ledger.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

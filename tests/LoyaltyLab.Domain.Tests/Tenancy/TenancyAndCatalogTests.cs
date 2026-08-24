@@ -98,6 +98,12 @@ public sealed class PolicyTests
 
         act.Should().Throw<DomainException>().WithMessage("*#RRGGBB*");
     }
+
+    [Fact]
+    public void ToCredits_divides_by_the_unit_value()
+    {
+        Fixtures.Credits.ToCredits(Money.Of(48.30m, Currency.Usd)).Should().Be(4830);
+    }
 }
 
 public sealed class CatalogTests

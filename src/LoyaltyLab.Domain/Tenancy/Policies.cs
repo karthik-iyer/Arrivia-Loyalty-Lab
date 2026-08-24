@@ -37,6 +37,16 @@ public sealed record CreditPolicy
     public int CreditLifetimeDays { get; }
 
     public Percent EarnRateOnMargin { get; }
+
+    public int ToCredits(Money amount)
+    {
+        if (amount.IsNegative)
+        {
+            throw new DomainException("Cannot convert a negative amount to credits.");
+        }
+
+        return (int)decimal.Round(amount.Amount / CreditUnitValue, 0, MidpointRounding.AwayFromZero);
+    }
 }
 
 public sealed record QuotePolicy
