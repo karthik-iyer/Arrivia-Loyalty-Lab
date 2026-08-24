@@ -1,0 +1,7 @@
+root = true
+
+# EF Core scaffolding emits inline string arrays. Treat those files as generated
+# so CA1861 does not fail the build on every migration.
+
+[src/LoyaltyLab.Infrastructure/Persistence/Migrations/*.cs]
+generated_code = true

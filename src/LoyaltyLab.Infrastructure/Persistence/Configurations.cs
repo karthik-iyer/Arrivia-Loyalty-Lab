@@ -68,3 +68,14 @@ internal sealed class TravelOfferConfiguration : IEntityTypeConfiguration<Travel
         builder.HasIndex(o => new { o.SupplierId, o.AvailableFrom, o.AvailableTo });
     }
 }
+
+internal sealed class PartnerSupplierConfiguration : IEntityTypeConfiguration<PartnerSupplier>
+{
+    public void Configure(EntityTypeBuilder<PartnerSupplier> builder)
+    {
+        builder.ToTable("PartnerSuppliers");
+        builder.HasKey(p => new { p.PartnerId, p.SupplierId });
+        builder.Property(p => p.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(p => p.SupplierId).HasConversion(id => id.Value, v => new SupplierId(v));
+    }
+}

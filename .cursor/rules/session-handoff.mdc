@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-006** deterministic seed, then **T-007** API host (tenant middleware, correlation, problem details, clocks, health).
+**Next work:** **T-010** pricing rule hierarchy, `RuleScope`, `Specificity`, and the total precedence comparator.
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already implemented locally (not necessarily pushed):** T-002–T-005 (architecture tests, domain commons, tenancy/catalog, EF + tenant query filter + InitialCreate migration). Payment is out-of-process. Checkout is a saga (ADR-0006).
+**Already implemented:** T-001–T-007 (Phase 0 green: architecture tests, domain commons, tenancy/catalog, EF + tenant filters, deterministic seed, API host). Payment is out-of-process. Checkout is a saga (ADR-0006).

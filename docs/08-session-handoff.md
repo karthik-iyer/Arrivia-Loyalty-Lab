@@ -1,15 +1,22 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-006 seed**, then **T-007 API host**. F5 stays stretch.
+Stop here and resume from **T-010** pricing rule hierarchy. F5 stays stretch.
 
 ## Where we are
 
 | Item | Status |
 |---|---|
-| T-001 … T-004 | Done |
-| T-005 EF + tenant filters | Done — query filter proven; `InitialCreate` migration generated |
-| T-006 seed | Not started |
-| T-007 API host | Not started |
+| T-001 … T-005 | Done |
+| T-006 deterministic seed | Done — idempotent SUMMIT/NIMBUS catalog, 24 offers, NIMBUS cannot sell OCEANIC |
+| T-007 API host | Done — tenant + correlation middleware, problem details, clocks, `/health` |
+| Phase 0 | Green |
+| Next | **T-010** `PricingRule` hierarchy, `RuleScope`, `Specificity`, total precedence comparator |
+
+## Verify
+
+- Seeding twice does not duplicate rows.
+- Missing `X-Partner-Code` returns RFC 7807 with `errorCode: PARTNER_NOT_RESOLVED`.
+- `GET /health` does not require a partner. API listens on **5180**.
 
 ## WDAC note (resolved)
 
@@ -17,22 +24,14 @@ A 4 KB unsigned `LoyaltyLab.Application.dll` stub was blocked (`0x800711C7`). Ad
 
 ## First actions next session
 
-1. **T-006** deterministic seed (SUMMIT / NIMBUS, Maya / Ravi / Chen).
-2. **T-007** tenant middleware, correlation, problem details, clocks, health.
-
-Do not start F1 until Phase 0 is green. Do not start F5 unless Phases 0–5 are complete.
-
-## What T-002/T-003/T-004 already enforce
-
-- `Directory.Build.props` sets `IsTestProject` and `NoWarn` CA1707 for `*.Tests`.
-- Cross-currency `Money` arithmetic throws `DomainException`.
-- `ApplyPercent` does not round; `RoundToCents` is AwayFromZero.
-- Member is `ITenantOwned`. `LoyaltyLabDbContext` has a global query filter on `Member.PartnerId`.
-- Policies live on `Partner` (FR-X-07). Theme colours are `#RRGGBB`.
+1. **T-010** pricing rule hierarchy and total precedence comparator (FR-P-02, FR-P-03, FR-P-04).
+2. Do not start F5 unless Phases 0–5 are complete.
 
 ## Scope we already agreed
 
 Five features, one solution. F5 stretch. Payment out of process. Checkout is a saga (ADR-0006). Cut line in `docs/07-task-breakdown.md` §12.
+
+Ledger opening balances, pricing rule rows, and F5 busy periods are **not** in the seed yet — those entities land with their features. Partner policies already encode burn caps and drift.
 
 ## Do not redo
 

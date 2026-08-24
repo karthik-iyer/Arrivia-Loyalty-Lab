@@ -23,11 +23,14 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<TravelOffer> Offers => Set<TravelOffer>();
 
+    public DbSet<PartnerSupplier> PartnerSuppliers => Set<PartnerSupplier>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyLabDbContext).Assembly);
 
         // Tenant isolation is structural: a forgotten Where cannot leak members (FR-X-02).
         modelBuilder.Entity<Member>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<PartnerSupplier>().HasQueryFilter(p => p.PartnerId == _tenant.Current.PartnerId);
     }
 }
