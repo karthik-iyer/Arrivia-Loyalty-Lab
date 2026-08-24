@@ -1,6 +1,8 @@
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Infrastructure.Payments;
 using LoyaltyLab.Infrastructure.Persistence;
+using LoyaltyLab.Infrastructure.Suppliers;
 using LoyaltyLab.Infrastructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +37,13 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<IBookingTenderQuery, BookingTenderQuery>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddSingleton<SupplierReservationStore>();
+        services.AddScoped<SupplierFaultHooks>();
+        services.AddScoped<ISupplierClient>(sp => new SimulatedSupplierClient(
+            sp.GetRequiredService<IOfferRepository>(),
+            sp.GetRequiredService<SupplierReservationStore>(),
+            sp.GetRequiredService<SupplierFaultHooks>(),
+            sp.GetRequiredService<IClock>()));
         services.AddPaymentGateway();
         return services;
     }

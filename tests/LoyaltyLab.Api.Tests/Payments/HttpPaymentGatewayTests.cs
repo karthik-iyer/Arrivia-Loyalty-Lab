@@ -3,6 +3,7 @@ using System.Text;
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Infrastructure.Payments;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http.Resilience;
 using Polly;

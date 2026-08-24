@@ -57,6 +57,11 @@ internal static class ProblemResults
             return StatusCodes.Status402PaymentRequired;
         }
 
+        if (error == Errors.SupplierUnavailable)
+        {
+            return StatusCodes.Status503ServiceUnavailable;
+        }
+
         if (error == Errors.RoleNotPermitted)
         {
             return StatusCodes.Status403Forbidden;
@@ -72,6 +77,7 @@ internal static class ProblemResults
         StatusCodes.Status403Forbidden => "https://tools.ietf.org/html/rfc9110#section-15.5.4",
         StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc9110#section-15.5.10",
         StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",
+        StatusCodes.Status503ServiceUnavailable => "https://tools.ietf.org/html/rfc9110#section-15.6.4",
         _ => "https://tools.ietf.org/html/rfc9110#section-15.5.1",
     };
 }

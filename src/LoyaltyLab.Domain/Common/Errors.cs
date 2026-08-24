@@ -53,4 +53,7 @@ public static class Errors
 
     public static Error PaymentNotFound { get; } =
         Error.Of("PAYMENT_NOT_FOUND", "The payment was not found.");
+
+    public static Error SupplierUnavailable { get; } =
+        Error.Of("SUPPLIER_UNAVAILABLE", "The reservation could not be placed.");
 }
