@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
@@ -209,5 +210,18 @@ internal sealed class LedgerTransactionConfiguration : IEntityTypeConfiguration<
                 entries.Property(e => e.AccountId).HasConversion(id => id.Value, v => new LedgerAccountId(v));
                 entries.HasIndex(e => e.AccountId);
             });
+    }
+}
+
+internal sealed class IdempotencyRecordConfiguration : IEntityTypeConfiguration<IdempotencyRecord>
+{
+    public void Configure(EntityTypeBuilder<IdempotencyRecord> builder)
+    {
+        builder.ToTable("IdempotencyRecords");
+        builder.HasKey(r => new { r.PartnerId, r.Operation, r.Key });
+        builder.Property(r => r.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(r => r.Operation).HasMaxLength(64).IsRequired();
+        builder.Property(r => r.Key).HasMaxLength(128).IsRequired();
+        builder.Property(r => r.PayloadHash).HasMaxLength(64).IsRequired();
     }
 }

@@ -33,7 +33,7 @@ internal static class ProblemResults
             return StatusCodes.Status422UnprocessableEntity;
         }
 
-        if (error == Errors.QuoteExpired || error == Errors.RateChanged)
+        if (error == Errors.QuoteExpired || error == Errors.RateChanged || error == Errors.IdempotencyKeyReused)
         {
             return StatusCodes.Status409Conflict;
         }

@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
@@ -67,6 +68,21 @@ public interface ILedgerRepository
     Task<LedgerTransaction?> GetByIdAsync(LedgerTransactionId id, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken);
+}
+
+public interface IIdempotencyStore
+{
+    Task<IdempotencyRecord?> FindAsync(
+        PartnerId partnerId,
+        string operation,
+        string key,
+        CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Inserts the record. Returns <see langword="false"/> if the unique key already exists.
+    /// The database unique index is the source of truth under concurrent first-saves (FR-L-05).
+    /// </summary>
+    Task<bool> SaveAsync(IdempotencyRecord record, CancellationToken cancellationToken);
 }
 
 public interface IUnitOfWork

@@ -1,6 +1,7 @@
 using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Application.Idempotency;
 using LoyaltyLab.Application.Pricing;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Tenancy;
@@ -20,6 +21,7 @@ builder.Services.AddSingleton<IClock>(sp => CreateClock(sp.GetRequiredService<IC
 builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();
 builder.Services.AddScoped<ExplainQuote>();
+builder.Services.AddScoped<ClaimIdempotency>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

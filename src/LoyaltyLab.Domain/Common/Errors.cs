@@ -26,4 +26,7 @@ public static class Errors
 
     public static Error LedgerUnbalanced { get; } =
         Error.Of("LEDGER_UNBALANCED", "A ledger transaction must consist of legs that sum to zero.");
+
+    public static Error IdempotencyKeyReused { get; } =
+        Error.Of("IDEMPOTENCY_KEY_REUSED", "This idempotency key was already used with a different payload.");
 }

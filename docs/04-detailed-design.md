@@ -485,11 +485,11 @@ With `CreditUnitValue = 0.01`, a 48.30 tender is exactly 4 830 credits. Choosing
 public interface IIdempotencyStore
 {
     Task<IdempotencyRecord?> FindAsync(PartnerId partner, string operation, string key, CancellationToken ct);
-    Task SaveAsync(IdempotencyRecord record, CancellationToken ct);
+    Task<bool> SaveAsync(IdempotencyRecord record, CancellationToken ct);
 }
 ```
 
-Uniqueness is `(PartnerId, Operation, IdempotencyKey)`, backed by a database unique index so two concurrent requests cannot both pass a check-then-act race — the second insert fails and that request returns the first one's stored result.
+Uniqueness is `(PartnerId, Operation, IdempotencyKey)`, backed by a database unique index (the composite primary key) so two concurrent requests cannot both pass a check-then-act race. Callers insert first: `SaveAsync` returns `true` when this request reserved the key, and `false` when the unique index already holds a row — the loser then `FindAsync` and either replays the stored result or returns `IDEMPOTENCY_KEY_REUSED`.
 
 The record also stores a hash of the request payload. A replay with the same key but a different payload is a client defect and returns `IDEMPOTENCY_KEY_REUSED` rather than silently returning an unrelated result.
 
