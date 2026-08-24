@@ -72,6 +72,13 @@ public readonly record struct LedgerTransactionId(Guid Value)
     public override string ToString() => Value.ToString();
 }
 
+public readonly record struct LedgerAccountId(Guid Value)
+{
+    public static LedgerAccountId New() => new(EntityIds.NewValue());
+
+    public override string ToString() => Value.ToString();
+}
+
 public readonly record struct NudgeId(Guid Value)
 {
     public static NudgeId New() => new(EntityIds.NewValue());

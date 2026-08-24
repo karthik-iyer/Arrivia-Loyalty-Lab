@@ -23,4 +23,7 @@ public static class Errors
 
     public static Error RateChanged { get; } =
         Error.Of("RATE_CHANGED", "The supplier rate moved beyond tolerance.");
+
+    public static Error LedgerUnbalanced { get; } =
+        Error.Of("LEDGER_UNBALANCED", "A ledger transaction must consist of legs that sum to zero.");
 }
