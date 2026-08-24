@@ -72,6 +72,17 @@ public interface ILedgerRepository
     Task<LedgerTransaction?> FindByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<LedgerAccount>> ListAccountsAsync(CancellationToken cancellationToken);
+}
+
+public interface IBookingTenderQuery
+{
+    /// <summary>
+    /// Independent total of settled booking credit tenders as of <paramref name="asOf"/>.
+    /// Compared to ledger burns less reversals; never used to rewrite the ledger (FR-L-11).
+    /// </summary>
+    Task<int> SumSettledCreditTendersAsync(DateOnly asOf, CancellationToken cancellationToken);
 }
 
 public interface IIdempotencyStore

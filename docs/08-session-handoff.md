@@ -1,6 +1,6 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-024** balances, statement, liability, reconcile, expire worker. F5 stays stretch.
+Stop here and resume from **T-025** wallet and liability HTTP. F5 stays stretch.
 
 ## Where we are
 
@@ -8,19 +8,19 @@ Stop here and resume from **T-024** balances, statement, liability, reconcile, e
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
-| T-020 … T-023 | Done — ledger domain, persistence, idempotency, posting operations |
-| Next | **T-024** GetBalance, GetStatement, GetLiabilityReport, ReconcileLedger, ExpireCredits worker |
+| T-020 … T-024 | Done — ledger through derived balance, statement, liability, reconcile, FIFO expiry |
+| Next | **T-025** `/wallet/balance`, `/wallet/statement`, `/reports/liability` |
 
 ## Verify
 
-- Reversal of a burn restores the exact original legs and the pre-burn member balance.
-- Burn above the 40% SUMMIT cap on 120.75 (`4831` credits) is `BURN_CAP_EXCEEDED`; `4830` is accepted.
-- Expire is an explicit posting; overdrafts return `INSUFFICIENT_CREDITS`.
+- Past-dated liability (issued 500 / burned 200 / expired 50 / outstanding 250) is unchanged after a later earn.
+- Reconcile reports a booking-vs-ledger gap and does not post a correction.
+- FIFO expiry lapses the oldest remaining lot and leaves younger lots.
 
 ## First actions next session
 
-1. **T-024** balances, statement, past-dated liability, reconcile (report, never auto-correct), FIFO expire worker using `CreditLifetimeDays`.
-2. Then T-025 wallet and liability HTTP.
+1. **T-025** wallet HTTP and finance-only liability report.
+2. Then T-026 property-based invariant tests.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-024** GetBalance, GetStatement, GetLiabilityReport, ReconcileLedger, ExpireCredits worker.
+**Next work:** **T-025** `/wallet/balance`, `/wallet/statement`, `/reports/liability` (finance role for the report).
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-023 (ledger domain, append-only persistence, idempotency, earn/burn/expire/reverse/adjust). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.
+**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-024 (ledger through posting, derived balance, statement, liability, reconcile, FIFO expiry). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.

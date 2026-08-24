@@ -811,7 +811,7 @@ Plain classes registered in DI, no mediator library ([ADR-0003](adr/)). Dependen
 | `GetBalance` / `GetStatement` | F2 | FR-L-04, FR-L-12 |
 | `EarnCredits` / `BurnCredits` / `AdjustCredits` / `ReverseLedger` | F2 | FR-L-03, FR-L-05, FR-L-06, FR-L-08 |
 | `GetLiabilityReport` / `ReconcileLedger` | F2 | FR-L-10, FR-L-11 |
-| `ExpireCredits` | F2 | FR-L-09 |
+| `ExpireCredits` / `ExpireDueCredits` | F2 | FR-L-09 |
 | `StartBookingSaga` / `AdvanceSaga` / `CompensateSaga` | F3 | FR-B-01 … FR-B-07 |
 | `RecoverStalledSagas` / `GetSagaInstance` | F3 | FR-B-08, FR-B-11 |
 | `CancelBooking` | F3 | FR-L-08 |

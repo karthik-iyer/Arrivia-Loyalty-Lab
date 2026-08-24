@@ -104,6 +104,12 @@ public sealed class PolicyTests
     {
         Fixtures.Credits.ToCredits(Money.Of(48.30m, Currency.Usd)).Should().Be(4830);
     }
+
+    [Fact]
+    public void ToMoney_multiplies_by_the_unit_value()
+    {
+        Fixtures.Credits.ToMoney(4830, Currency.Usd).Should().Be(Money.Of(48.30m, Currency.Usd));
+    }
 }
 
 public sealed class CatalogTests

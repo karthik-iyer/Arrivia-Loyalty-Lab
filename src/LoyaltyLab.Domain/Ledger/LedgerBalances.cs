@@ -25,4 +25,15 @@ public static class LedgerBalances
 
         return total;
     }
+
+    public static IReadOnlyList<LedgerTransaction> OnOrBefore(
+        IEnumerable<LedgerTransaction> history,
+        DateOnly asOf)
+    {
+        ArgumentNullException.ThrowIfNull(history);
+
+        return [.. history
+            .Where(transaction => DateOnly.FromDateTime(transaction.OccurredAt.UtcDateTime) <= asOf)
+            .OrderBy(transaction => transaction.OccurredAt)];
+    }
 }

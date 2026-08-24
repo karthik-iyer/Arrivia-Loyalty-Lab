@@ -47,6 +47,16 @@ public sealed record CreditPolicy
 
         return (int)decimal.Round(amount.Amount / CreditUnitValue, 0, MidpointRounding.AwayFromZero);
     }
+
+    public Money ToMoney(int credits, Currency currency)
+    {
+        if (credits < 0)
+        {
+            throw new DomainException("Cannot convert a negative credit balance to money.");
+        }
+
+        return Money.Of(credits * CreditUnitValue, currency);
+    }
 }
 
 public sealed record QuotePolicy

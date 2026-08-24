@@ -54,4 +54,7 @@ public sealed class LedgerRepository(LoyaltyLabDbContext db) : ILedgerRepository
 
         return [.. loaded.OrderBy(transaction => transaction.OccurredAt)];
     }
+
+    public async Task<IReadOnlyList<LedgerAccount>> ListAccountsAsync(CancellationToken cancellationToken) =>
+        await db.LedgerAccounts.AsNoTracking().ToListAsync(cancellationToken);
 }

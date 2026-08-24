@@ -28,6 +28,11 @@ builder.Services.AddScoped<BurnCredits>();
 builder.Services.AddScoped<ExpireCredits>();
 builder.Services.AddScoped<ReverseLedger>();
 builder.Services.AddScoped<AdjustCredits>();
+builder.Services.AddScoped<GetBalance>();
+builder.Services.AddScoped<GetStatement>();
+builder.Services.AddScoped<GetLiabilityReport>();
+builder.Services.AddScoped<ReconcileLedger>();
+builder.Services.AddScoped<ExpireDueCredits>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

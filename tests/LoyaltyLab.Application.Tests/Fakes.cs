@@ -164,6 +164,25 @@ internal sealed class FakeLedger : ILedgerRepository
         Task.FromResult(_transactions.SingleOrDefault(transaction => transaction.IdempotencyKey == idempotencyKey));
 
     public Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken) =>
-        Task.FromResult<IReadOnlyList<LedgerTransaction>>(_transactions);
+        Task.FromResult<IReadOnlyList<LedgerTransaction>>([.. _transactions]);
+
+    public Task<IReadOnlyList<LedgerAccount>> ListAccountsAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<LedgerAccount>>([.. _accounts]);
+}
+
+internal sealed class FakeBookingTenders : IBookingTenderQuery
+{
+    public int Tenders { get; set; }
+
+    public Task<int> SumSettledCreditTendersAsync(DateOnly asOf, CancellationToken cancellationToken)
+    {
+        _ = asOf;
+        return Task.FromResult(Tenders);
+    }
+}
+
+internal sealed class MutableFakeClock(DateTimeOffset utcNow) : IClock
+{
+    public DateTimeOffset UtcNow { get; set; } = utcNow;
 }
 
