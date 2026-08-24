@@ -850,8 +850,10 @@ public interface ISupplierClient         { Task<Result<Money>> GetCurrentNetRate
                                            Task<StepOutcome> ReserveAsync(ReservationRequest r, CancellationToken ct);
                                            Task<StepOutcome> ReleaseAsync(string reference, CancellationToken ct);
                                            Task<StepOutcome> QueryReservationAsync(string idempotencyKey, CancellationToken ct); }
-public interface IPaymentGateway         { Task<StepOutcome> AuthorizeAsync(...); Task<StepOutcome> CaptureAsync(...);
-                                           Task<StepOutcome> VoidAsync(...);      Task<StepOutcome> RefundAsync(...);
+public interface IPaymentGateway         { Task<StepOutcome> AuthorizeAsync(PaymentAuthorizeRequest r, CancellationToken ct);
+                                           Task<StepOutcome> CaptureAsync(PaymentReferenceRequest r, CancellationToken ct);
+                                           Task<StepOutcome> VoidAsync(PaymentReferenceRequest r, CancellationToken ct);
+                                           Task<StepOutcome> RefundAsync(PaymentReferenceRequest r, CancellationToken ct);
                                            Task<StepOutcome> QueryByKeyAsync(string idempotencyKey, CancellationToken ct); }
 public interface IOutbox                 { void Enqueue(OutboxMessage message); }
 public interface IOfferNarrator          { }
@@ -929,6 +931,7 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `TRANSACTION_ALREADY_REVERSED` | 409 | The referenced ledger transaction was already reversed |
 | `ROLE_NOT_PERMITTED` | 403 | Caller role cannot perform this operation |
 | `PAYMENT_DECLINED` | 402 | Authorization or capture refused |
+| `PAYMENT_NOT_FOUND` | 404 | Unknown payment, or the hold never landed |
 | `SUPPLIER_UNAVAILABLE` | 503 | Reservation could not be placed |
 | `BOOKING_IN_PROGRESS` | 409 | A saga is already running for this booking |
 | `SAGA_REQUIRES_REVIEW` | 409 | Terminal state needing manual intervention |

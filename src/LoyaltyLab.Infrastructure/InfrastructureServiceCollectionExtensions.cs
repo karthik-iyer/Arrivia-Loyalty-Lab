@@ -1,9 +1,13 @@
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Infrastructure.Payments;
 using LoyaltyLab.Infrastructure.Persistence;
 using LoyaltyLab.Infrastructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http.Resilience;
+using Microsoft.Extensions.Options;
+using Polly;
 
 namespace LoyaltyLab.Infrastructure;
 
@@ -31,6 +35,33 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<IBookingTenderQuery, BookingTenderQuery>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
+        services.AddPaymentGateway();
         return services;
     }
+
+    public static IHttpClientBuilder AddPaymentGateway(this IServiceCollection services)
+    {
+        ArgumentNullException.ThrowIfNull(services);
+
+        services.AddOptions<PaymentGatewayOptions>().BindConfiguration(PaymentGatewayOptions.SectionName);
+
+        var builder = services.AddHttpClient<IPaymentGateway, HttpPaymentGateway>((sp, client) =>
+        {
+            var options = sp.GetRequiredService<IOptions<PaymentGatewayOptions>>().Value;
+            client.BaseAddress = new Uri(TrailingSlash(options.BaseUrl));
+        });
+        builder.AddStandardResilienceHandler(options =>
+        {
+            options.AttemptTimeout.Timeout = TimeSpan.FromSeconds(2);
+            options.TotalRequestTimeout.Timeout = TimeSpan.FromSeconds(10);
+            options.Retry.MaxRetryAttempts = 3;
+            options.Retry.Delay = TimeSpan.FromMilliseconds(100);
+            options.Retry.BackoffType = DelayBackoffType.Exponential;
+            options.Retry.UseJitter = true;
+        });
+        return builder;
+    }
+
+    private static string TrailingSlash(string url) =>
+        url.Length > 0 && url[^1] == '/' ? url : url + "/";
 }

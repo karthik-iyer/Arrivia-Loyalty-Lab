@@ -1,6 +1,6 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-031** payment gateway port and HTTP adapter. F5 stays stretch.
+Stop here and resume from **T-032** simulated supplier client. F5 stays stretch.
 
 ## Where we are
 
@@ -9,18 +9,18 @@ Stop here and resume from **T-031** payment gateway port and HTTP adapter. F5 st
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
 | T-020 … T-026 | Done — ledger through property-based invariants |
-| T-030 | Done — payment simulator (authorize / capture / void / refund / query-by-key) |
-| Next | **T-031** `IPaymentGateway` port and `HttpPaymentGateway` with Polly timeout → `Unknown` |
+| T-030 … T-031 | Done — payment simulator and `HttpPaymentGateway` (timeout → `Unknown`) |
+| Next | **T-032** `SimulatedSupplierClient`: reserve, release, query-by-key |
 
 ## Verify
 
-- Same `Idempotency-Key` twice yields one authorization at `http://localhost:5190`.
-- A client timeout still leaves a queryable hold (hang is after the store).
+- Forced payment timeout produces `StepResult.Unknown`, never `Failed`.
+- A 402 decline is `Failed` / `PAYMENT_DECLINED`.
 
 ## First actions next session
 
-1. **T-031** `IPaymentGateway` + `HttpPaymentGateway` (timeout maps to `Unknown`, never to failure).
-2. Then T-032 simulated supplier client.
+1. **T-032** Simulated supplier client with fault hooks and query-by-key.
+2. Then T-033 saga domain persistence.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

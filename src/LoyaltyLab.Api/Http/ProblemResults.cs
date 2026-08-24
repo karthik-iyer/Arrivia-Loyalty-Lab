@@ -26,7 +26,8 @@ internal static class ProblemResults
         if (error == Errors.OfferNotFound
             || error == Errors.QuoteNotFound
             || error == Errors.MemberNotFound
-            || error == Errors.LedgerTransactionNotFound)
+            || error == Errors.LedgerTransactionNotFound
+            || error == Errors.PaymentNotFound)
         {
             return StatusCodes.Status404NotFound;
         }
@@ -51,6 +52,11 @@ internal static class ProblemResults
             return StatusCodes.Status400BadRequest;
         }
 
+        if (error == Errors.PaymentDeclined)
+        {
+            return StatusCodes.Status402PaymentRequired;
+        }
+
         if (error == Errors.RoleNotPermitted)
         {
             return StatusCodes.Status403Forbidden;
@@ -62,6 +68,7 @@ internal static class ProblemResults
     private static string TypeFor(int status) => status switch
     {
         StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        StatusCodes.Status402PaymentRequired => "https://tools.ietf.org/html/rfc9110#section-15.5.1",
         StatusCodes.Status403Forbidden => "https://tools.ietf.org/html/rfc9110#section-15.5.4",
         StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc9110#section-15.5.10",
         StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",

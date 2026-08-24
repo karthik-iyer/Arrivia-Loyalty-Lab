@@ -47,4 +47,10 @@ public static class Errors
 
     public static Error RoleNotPermitted { get; } =
         Error.Of("ROLE_NOT_PERMITTED", "This operation requires a different access role.");
+
+    public static Error PaymentDeclined { get; } =
+        Error.Of("PAYMENT_DECLINED", "Authorization or capture was refused.");
+
+    public static Error PaymentNotFound { get; } =
+        Error.Of("PAYMENT_NOT_FOUND", "The payment was not found.");
 }
