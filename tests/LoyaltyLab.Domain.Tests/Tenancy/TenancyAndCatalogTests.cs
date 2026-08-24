@@ -54,6 +54,16 @@ public sealed class PartnerAndMemberTests
     }
 
     [Fact]
+    public void Finance_role_has_a_partner_and_no_member()
+    {
+        var partner = Fixtures.Summit();
+        var context = TenantContext.ForRole(partner.Id, AccessRole.FinanceAnalyst);
+
+        context.Role.Should().Be(AccessRole.FinanceAnalyst);
+        context.HasMember.Should().BeFalse();
+    }
+
+    [Fact]
     public void Anonymous_context_has_a_partner_but_no_member()
     {
         var partner = Fixtures.Summit();

@@ -63,11 +63,14 @@ public sealed class LedgerQueryTests
         await world.Expire.ExecuteAsync(new ExpireCreditsCommand(world.Maya.Id, 50, "expire-1", "Lapsed"), CancellationToken.None);
 
         var asOf = new DateOnly(2026, 3, 15);
+        world.UseFinance();
         var first = await world.Liability.ExecuteAsync(new GetLiabilityReportQuery(asOf), CancellationToken.None);
 
+        world.UseMember();
         world.Clock.UtcNow = March15.AddDays(1);
         await world.Earn.ExecuteAsync(new EarnCreditsCommand(world.Maya.Id, 100, "earn-2", "Later grant"), CancellationToken.None);
 
+        world.UseFinance();
         var again = await world.Liability.ExecuteAsync(new GetLiabilityReportQuery(asOf), CancellationToken.None);
 
         first.Value.CreditsIssued.Should().Be(500);
@@ -76,6 +79,7 @@ public sealed class LedgerQueryTests
         first.Value.CreditsOutstanding.Should().Be(250);
         first.Value.MonetaryLiability.Should().Be(Money.Of(2.50m, Currency.Usd));
         again.Value.Should().Be(first.Value);
+        world.UseMember();
         (await world.Balance.ExecuteAsync(new GetBalanceQuery(), CancellationToken.None)).Value.Credits.Should().Be(350);
     }
 
@@ -135,6 +139,18 @@ public sealed class LedgerQueryTests
         var result = await world.Balance.ExecuteAsync(new GetBalanceQuery(), CancellationToken.None);
 
         result.Error.Should().Be(Errors.MemberNotFound);
+    }
+
+    [Fact]
+    public async Task A_member_cannot_read_the_liability_report()
+    {
+        var world = World.Summit();
+
+        var result = await world.Liability.ExecuteAsync(
+            new GetLiabilityReportQuery(DateOnly.FromDateTime(March15.UtcDateTime)),
+            CancellationToken.None);
+
+        result.Error.Should().Be(Errors.RoleNotPermitted);
     }
 
     private sealed class World
@@ -198,6 +214,10 @@ public sealed class LedgerQueryTests
         public ReconcileLedger Reconcile { get; }
 
         public ExpireDueCredits ExpireDue { get; }
+
+        public void UseMember() => Tenant.Current = TenantContext.ForMember(Maya);
+
+        public void UseFinance() => Tenant.Current = TenantContext.ForRole(Maya.PartnerId, AccessRole.FinanceAnalyst);
 
         public static World Summit() => Create(730, March15);
 

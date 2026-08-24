@@ -8,7 +8,7 @@ Every request needs a partner and, usually, a member. The interesting problems h
 
 ## Decision
 
-`X-Partner-Code` and `X-Member-Id` headers, resolved by middleware into a `TenantContext` that flows explicitly through the application. A demo switcher in the UI changes them without a re-login.
+`X-Partner-Code` and `X-Member-Id` headers, plus optional `X-Access-Role` for internal demo identities, resolved by middleware into a `TenantContext` that flows explicitly through the application. A demo switcher in the UI changes them without a re-login.
 
 ## Alternatives considered
 

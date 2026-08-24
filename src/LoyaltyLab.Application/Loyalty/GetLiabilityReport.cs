@@ -1,6 +1,7 @@
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Ledger;
+using LoyaltyLab.Domain.Tenancy;
 
 namespace LoyaltyLab.Application.Loyalty;
 
@@ -19,6 +20,11 @@ public sealed class GetLiabilityReport(
         if (partner is null)
         {
             return Result<LiabilityReport>.Failure(Errors.PartnerNotResolved);
+        }
+
+        if (tenant.Current.Role != AccessRole.FinanceAnalyst)
+        {
+            return Result<LiabilityReport>.Failure(Errors.RoleNotPermitted);
         }
 
         var asOf = LedgerBalances.OnOrBefore(await ledger.ListAsync(cancellationToken), request.AsOf);

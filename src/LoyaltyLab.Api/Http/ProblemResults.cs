@@ -51,12 +51,18 @@ internal static class ProblemResults
             return StatusCodes.Status400BadRequest;
         }
 
+        if (error == Errors.RoleNotPermitted)
+        {
+            return StatusCodes.Status403Forbidden;
+        }
+
         return StatusCodes.Status400BadRequest;
     }
 
     private static string TypeFor(int status) => status switch
     {
         StatusCodes.Status404NotFound => "https://tools.ietf.org/html/rfc9110#section-15.5.5",
+        StatusCodes.Status403Forbidden => "https://tools.ietf.org/html/rfc9110#section-15.5.4",
         StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc9110#section-15.5.10",
         StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",
         _ => "https://tools.ietf.org/html/rfc9110#section-15.5.1",

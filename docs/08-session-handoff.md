@@ -1,6 +1,6 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-025** wallet and liability HTTP. F5 stays stretch.
+Stop here and resume from **T-026** property-based ledger invariants. F5 stays stretch.
 
 ## Where we are
 
@@ -8,19 +8,19 @@ Stop here and resume from **T-025** wallet and liability HTTP. F5 stays stretch.
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
-| T-020 … T-024 | Done — ledger through derived balance, statement, liability, reconcile, FIFO expiry |
-| Next | **T-025** `/wallet/balance`, `/wallet/statement`, `/reports/liability` |
+| T-020 … T-025 | Done — ledger through wallet HTTP and finance liability report |
+| Next | **T-026** Property-based tests over randomized sequences (five invariants) |
 
 ## Verify
 
-- Past-dated liability (issued 500 / burned 200 / expired 50 / outstanding 250) is unchanged after a later earn.
-- Reconcile reports a booking-vs-ledger gap and does not post a correction.
-- FIFO expiry lapses the oldest remaining lot and leaves younger lots.
+- Maya's wallet is the seeded 6 000 credits (`$60.00`, 40% burn cap).
+- `GET /reports/liability` without `X-Access-Role: FinanceAnalyst` is `ROLE_NOT_PERMITTED` (403).
+- SUMMIT finance outstanding as of the demo date is 6 500 (Maya + Ravi).
 
 ## First actions next session
 
-1. **T-025** wallet HTTP and finance-only liability report.
-2. Then T-026 property-based invariant tests.
+1. **T-026** property-based tests asserting the five ledger invariants over 1 000 generated sequences.
+2. Then Phase 3 (payment simulator, T-030).
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

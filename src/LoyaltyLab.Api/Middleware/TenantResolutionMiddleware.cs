@@ -7,14 +7,17 @@ using Microsoft.EntityFrameworkCore;
 namespace LoyaltyLab.Api.Middleware;
 
 /// <summary>
-/// Resolves X-Partner-Code (and optional X-Member-Id) before any business logic (FR-X-01, FR-X-03).
-/// Health and open API paths skip resolution so probes do not need a tenant.
+/// Resolves X-Partner-Code, optional X-Member-Id, and optional X-Access-Role
+/// before any business logic (FR-X-01, FR-X-03). Health and open API paths skip
+/// resolution so probes do not need a tenant.
 /// </summary>
 public sealed class TenantResolutionMiddleware(RequestDelegate next)
 {
     public const string PartnerHeader = "X-Partner-Code";
 
     public const string MemberHeader = "X-Member-Id";
+
+    public const string RoleHeader = "X-Access-Role";
 
     public async Task InvokeAsync(
         HttpContext context,
@@ -47,20 +50,41 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
 
         tenant.Set(TenantContext.Anonymous(partner.Id));
 
+        var role = ParseRole(context.Request.Headers[RoleHeader].FirstOrDefault());
         var memberHeader = context.Request.Headers[MemberHeader].FirstOrDefault();
+        Member? member = null;
         if (Guid.TryParse(memberHeader, out var memberGuid))
         {
-            var member = await db.Members
+            member = await db.Members
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.Id == new MemberId(memberGuid), context.RequestAborted);
+        }
 
-            if (member is not null)
-            {
-                tenant.Set(TenantContext.ForMember(member));
-            }
+        if (role is AccessRole.AccountManager or AccessRole.FinanceAnalyst or AccessRole.Operator)
+        {
+            tenant.Set(
+                member is null
+                    ? TenantContext.ForRole(partner.Id, role.Value)
+                    : new TenantContext(partner.Id, member.Id, member.Tier, role.Value));
+        }
+        else if (member is not null)
+        {
+            tenant.Set(TenantContext.ForMember(member));
         }
 
         await next(context);
+    }
+
+    private static AccessRole? ParseRole(string? header)
+    {
+        if (string.IsNullOrWhiteSpace(header))
+        {
+            return null;
+        }
+
+        return Enum.TryParse<AccessRole>(header.Trim(), ignoreCase: true, out var role)
+            ? role
+            : null;
     }
 
     private static bool IsAnonymousPath(PathString path) =>

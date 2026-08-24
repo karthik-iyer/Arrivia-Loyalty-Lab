@@ -1,7 +1,9 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
+using LoyaltyLab.Infrastructure.Time;
 using Microsoft.EntityFrameworkCore;
 
 namespace LoyaltyLab.Infrastructure.Persistence;
@@ -35,9 +37,7 @@ public static class SeedIds
 }
 
 /// <summary>
-/// Idempotent demo catalog from docs/04 §8.3. Ledger opening balances
-/// and F5 windows land with those features — the partner policies already encode
-/// burn caps and drift so later slices do not invent configuration.
+/// Idempotent demo catalog from docs/04 §8.3, including opening ledger grants.
 /// </summary>
 public static class DemoSeed
 {
@@ -84,7 +84,29 @@ public static class DemoSeed
             db.PricingRules.AddRange(CreateRules());
         }
 
+        if (!await db.LedgerTransactions.IgnoreQueryFilters()
+                .AnyAsync(transaction => transaction.IdempotencyKey == "seed-earn-maya", cancellationToken))
+        {
+            SeedOpeningLedger(db);
+        }
+
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void SeedOpeningLedger(LoyaltyLabDbContext db)
+    {
+        var clock = new FixedDemoClock(new DateTimeOffset(2026, 1, 1, 0, 0, 0, TimeSpan.Zero));
+        var summitIssuance = LedgerAccount.Issuance(SeedIds.Summit);
+        var nimbusIssuance = LedgerAccount.Issuance(SeedIds.Nimbus);
+        var maya = LedgerAccount.MemberCredits(SeedIds.Summit, SeedIds.Maya);
+        var ravi = LedgerAccount.MemberCredits(SeedIds.Summit, SeedIds.Ravi);
+        var chen = LedgerAccount.MemberCredits(SeedIds.Nimbus, SeedIds.Chen);
+
+        db.LedgerAccounts.AddRange(summitIssuance, nimbusIssuance, maya, ravi, chen);
+        db.LedgerTransactions.AddRange(
+            LedgerTransaction.Earn(maya, summitIssuance, 6_000, "seed-earn-maya", "Opening grant", clock),
+            LedgerTransaction.Earn(ravi, summitIssuance, 500, "seed-earn-ravi", "Opening grant", clock),
+            LedgerTransaction.Earn(chen, nimbusIssuance, 12_000, "seed-earn-chen", "Opening grant", clock));
     }
 
     private static Partner CreateSummit() =>

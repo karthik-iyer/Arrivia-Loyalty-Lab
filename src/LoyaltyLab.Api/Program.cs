@@ -48,6 +48,7 @@ app.UseMiddleware<TenantResolutionMiddleware>();
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPricingEndpoints();
+app.MapWalletEndpoints();
 
 app.MapGet("/api/partners/current/theme", async (
     ITenantContextAccessor tenant,

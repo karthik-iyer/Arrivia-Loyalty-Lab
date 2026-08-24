@@ -81,5 +81,13 @@ public sealed record TenantContext
     public static TenantContext ForMember(Member member) =>
         new(member.PartnerId, member.Id, member.Tier, AccessRole.Member);
 
+    public static TenantContext ForRole(PartnerId partnerId, AccessRole role) =>
+        role switch
+        {
+            AccessRole.Anonymous => Anonymous(partnerId),
+            AccessRole.Member => throw new DomainException("A member-role context must include a member id."),
+            _ => new(partnerId, memberId: null, tier: null, role),
+        };
+
     public bool HasMember => MemberId is not null;
 }

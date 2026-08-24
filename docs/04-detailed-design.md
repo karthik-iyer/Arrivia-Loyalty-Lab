@@ -911,6 +911,7 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `MEMBER_NOT_FOUND` | 404 | Unknown, or belongs to another partner |
 | `LEDGER_TRANSACTION_NOT_FOUND` | 404 | Unknown, or belongs to another partner |
 | `TRANSACTION_ALREADY_REVERSED` | 409 | The referenced ledger transaction was already reversed |
+| `ROLE_NOT_PERMITTED` | 403 | Caller role cannot perform this operation |
 | `PAYMENT_DECLINED` | 402 | Authorization or capture refused |
 | `SUPPLIER_UNAVAILABLE` | 503 | Reservation could not be placed |
 | `BOOKING_IN_PROGRESS` | 409 | A saga is already running for this booking |
@@ -926,7 +927,7 @@ Cross-tenant access deliberately returns `*_NOT_FOUND` rather than a forbidden s
 
 ## 10. API contracts
 
-Base path `/api`. Partner context in `X-Partner-Code`; member identity in `X-Member-Id` for the demo, which [ADR-0005](adr/) records as a deliberate stand-in for real authentication.
+Base path `/api`. Partner context in `X-Partner-Code`; member identity in `X-Member-Id` for the demo; internal demo roles in `X-Access-Role` (`FinanceAnalyst`, `AccountManager`, `Operator`). [ADR-0005](adr/0005-header-based-demo-identity.md) records headers as a deliberate stand-in for real authentication.
 
 | Method | Route | Use case |
 |---|---|---|

@@ -1,3 +1,4 @@
+using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Tenancy;
 using LoyaltyLab.Infrastructure.Persistence;
 using LoyaltyLab.Infrastructure.Tenancy;
@@ -37,6 +38,7 @@ public sealed class DemoSeedTests : IDisposable
         (await db.Members.IgnoreQueryFilters().CountAsync()).Should().Be(3);
         (await db.PartnerSuppliers.IgnoreQueryFilters().CountAsync()).Should().Be(5);
         (await db.PricingRules.IgnoreQueryFilters().CountAsync()).Should().Be(8);
+        (await db.LedgerTransactions.IgnoreQueryFilters().CountAsync()).Should().Be(3);
     }
 
     [Fact]
@@ -76,6 +78,11 @@ public sealed class DemoSeedTests : IDisposable
         summitRules.Should().HaveCount(5);
         summitRules.OfType<LoyaltyLab.Domain.Pricing.CampaignDiscountRule>()
             .Should().ContainSingle(r => r.CampaignCode == "MARCH-BEACH");
+
+        var history = await db.LedgerTransactions.IgnoreQueryFilters().ToListAsync();
+        var maya = await db.LedgerAccounts.IgnoreQueryFilters()
+            .SingleAsync(account => account.MemberId == SeedIds.Maya);
+        LedgerBalances.For(maya.Id, history).Should().Be(6_000);
     }
 
     private LoyaltyLabDbContext CreateContext()

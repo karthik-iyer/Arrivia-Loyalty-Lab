@@ -44,4 +44,7 @@ public static class Errors
 
     public static Error TransactionAlreadyReversed { get; } =
         Error.Of("TRANSACTION_ALREADY_REVERSED", "This ledger transaction has already been reversed.");
+
+    public static Error RoleNotPermitted { get; } =
+        Error.Of("ROLE_NOT_PERMITTED", "This operation requires a different access role.");
 }
