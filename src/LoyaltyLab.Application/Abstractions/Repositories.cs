@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 
@@ -49,6 +50,23 @@ public interface IPartnerSupplierRepository
 public interface ISupplierRepository
 {
     Task<Supplier?> GetByIdAsync(SupplierId id, CancellationToken cancellationToken);
+}
+
+public interface ILedgerRepository
+{
+    Task AddAccountAsync(LedgerAccount account, CancellationToken cancellationToken);
+
+    Task<LedgerAccount?> FindAccountAsync(
+        PartnerId partnerId,
+        LedgerAccountType type,
+        MemberId? memberId,
+        CancellationToken cancellationToken);
+
+    Task AddAsync(LedgerTransaction transaction, CancellationToken cancellationToken);
+
+    Task<LedgerTransaction?> GetByIdAsync(LedgerTransactionId id, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken);
 }
 
 public interface IUnitOfWork

@@ -62,6 +62,30 @@ public sealed class TenantFilterTests : IDisposable
         (await query.Members.IgnoreQueryFilters().CountAsync()).Should().Be(2);
     }
 
+    [Fact]
+    public void Every_ITenantOwned_entity_has_a_query_filter()
+    {
+        _tenant.Set(TenantContext.Anonymous(PartnerId.New()));
+        using var db = CreateContext();
+
+        var owned = typeof(ITenantOwned).Assembly
+            .GetTypes()
+            .Where(type => type is { IsClass: true, IsAbstract: false } && typeof(ITenantOwned).IsAssignableFrom(type))
+            .ToList();
+
+        owned.Should().NotBeEmpty();
+
+        var missing = owned
+            .Select(type => db.Model.FindEntityType(type))
+            .Where(entity => entity is { BaseType: null } && entity.GetDeclaredQueryFilters().Count == 0)
+            .Select(entity => entity!.ClrType.Name)
+            .ToList();
+
+        missing.Should().BeEmpty(
+            "a forgotten query filter on an ITenantOwned type is a cross-tenant leak (FR-X-02)."
+            + Environment.NewLine + string.Join(Environment.NewLine, missing.Select(name => "  - " + name)));
+    }
+
     private LoyaltyLabDbContext CreateContext()
     {
         if (!_tenant.HasCurrent)

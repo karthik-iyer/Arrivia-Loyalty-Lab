@@ -1,5 +1,6 @@
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Catalog;
+using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -30,6 +31,10 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<PricingRule> PricingRules => Set<PricingRule>();
 
+    public DbSet<LedgerAccount> LedgerAccounts => Set<LedgerAccount>();
+
+    public DbSet<LedgerTransaction> LedgerTransactions => Set<LedgerTransaction>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyLabDbContext).Assembly);
@@ -39,5 +44,7 @@ public sealed class LoyaltyLabDbContext : DbContext
         modelBuilder.Entity<PartnerSupplier>().HasQueryFilter(p => p.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<Quote>().HasQueryFilter(q => q.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<PricingRule>().HasQueryFilter(r => r.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<LedgerAccount>().HasQueryFilter(a => a.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<LedgerTransaction>().HasQueryFilter(t => t.PartnerId == _tenant.Current.PartnerId);
     }
 }

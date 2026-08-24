@@ -1,6 +1,6 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-021** ledger persistence. F5 stays stretch.
+Stop here and resume from **T-022** idempotency store. F5 stays stretch.
 
 ## Where we are
 
@@ -8,19 +8,19 @@ Stop here and resume from **T-021** ledger persistence. F5 stays stretch.
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
-| T-020 ledger domain | Done — four accounts, balanced factory, five posting types |
-| Next | **T-021** `ILedgerRepository` append+read only, EF, architecture test |
+| T-020 … T-021 | Done — ledger domain + append-only persistence |
+| Next | **T-022** `IIdempotencyStore` unique index and payload hashing |
 
 ## Verify
 
-- Unbalanced `LedgerTransaction.Create` throws `LEDGER_UNBALANCED`.
-- Earn 500 / burn 200 / expire 50 leaves member **250**, issuance **−500**, redemption **200**, breakage **50**, books net zero.
-- Reversal mirrors the original legs; a reversal cannot be reversed.
+- `ILedgerRepository` only has Add/Get/Find/List members (architecture test).
+- Posted earn round-trips with both legs summing to zero.
+- Cross-tenant ledger rows are invisible; every `ITenantOwned` root entity has a query filter.
 
 ## First actions next session
 
-1. **T-021** `ILedgerRepository` with **no update or delete member**, EF, persistence, architecture test.
-2. Then T-022 idempotency store.
+1. **T-022** idempotency store: unique `(PartnerId, Operation, Key)`, payload hash, `IDEMPOTENCY_KEY_REUSED`.
+2. Then T-023 earn/burn/expire/reversal/adjustment operations.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

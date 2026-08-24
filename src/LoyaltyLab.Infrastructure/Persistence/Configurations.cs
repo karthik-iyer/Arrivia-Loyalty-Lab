@@ -159,3 +159,55 @@ internal sealed class PartnerSupplierConfiguration : IEntityTypeConfiguration<Pa
         builder.Property(p => p.SupplierId).HasConversion(id => id.Value, v => new SupplierId(v));
     }
 }
+
+internal sealed class LedgerAccountConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Ledger.LedgerAccount>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Ledger.LedgerAccount> builder)
+    {
+        builder.ToTable("LedgerAccounts");
+        builder.HasKey(a => a.Id);
+        builder.Property(a => a.Id).HasConversion(id => id.Value, v => new LedgerAccountId(v));
+        builder.Property(a => a.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(a => a.MemberId).HasConversion(
+            id => id.HasValue ? id.Value.Value : (Guid?)null,
+            v => v.HasValue ? new MemberId(v.Value) : null);
+        builder.HasIndex(a => new { a.PartnerId, a.Type })
+            .IsUnique()
+            .HasFilter("MemberId IS NULL");
+        builder.HasIndex(a => new { a.PartnerId, a.MemberId })
+            .IsUnique()
+            .HasFilter("MemberId IS NOT NULL");
+    }
+}
+
+internal sealed class LedgerTransactionConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Ledger.LedgerTransaction>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Ledger.LedgerTransaction> builder)
+    {
+        builder.ToTable("LedgerTransactions");
+        builder.HasKey(t => t.Id);
+        builder.Property(t => t.Id).HasConversion(id => id.Value, v => new LedgerTransactionId(v));
+        builder.Property(t => t.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(t => t.IdempotencyKey).HasMaxLength(128).IsRequired();
+        builder.Property(t => t.Reason).HasMaxLength(500).IsRequired();
+        builder.Property(t => t.ReversesTransactionId).HasConversion(
+            id => id.HasValue ? id.Value.Value : (Guid?)null,
+            v => v.HasValue ? new LedgerTransactionId(v.Value) : null);
+        builder.Property(t => t.BookingId).HasConversion(
+            id => id.HasValue ? id.Value.Value : (Guid?)null,
+            v => v.HasValue ? new BookingId(v.Value) : null);
+        builder.HasIndex(t => new { t.PartnerId, t.IdempotencyKey }).IsUnique();
+        builder.HasIndex(t => new { t.PartnerId, t.OccurredAt });
+        builder.OwnsMany(
+            t => t.Entries,
+            entries =>
+            {
+                entries.ToTable("LedgerEntries");
+                entries.WithOwner().HasForeignKey("TransactionId");
+                entries.Property<int>("Id");
+                entries.HasKey("Id");
+                entries.Property(e => e.AccountId).HasConversion(id => id.Value, v => new LedgerAccountId(v));
+                entries.HasIndex(e => e.AccountId);
+            });
+    }
+}

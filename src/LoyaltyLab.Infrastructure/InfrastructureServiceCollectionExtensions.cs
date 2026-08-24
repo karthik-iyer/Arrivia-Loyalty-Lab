@@ -27,6 +27,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IOfferRepository, OfferRepository>();
         services.AddScoped<IPartnerSupplierRepository, PartnerSupplierRepository>();
         services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
+        services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
