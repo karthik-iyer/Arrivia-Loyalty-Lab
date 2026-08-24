@@ -663,6 +663,22 @@ Registration is guarded: the fault injector is only added to the container when 
 
 `GET /api/operator/sagas/{id}` returns the instance, every step with status, attempts, timings, external references, errors, and compensation outcomes — plus any poisoned outbox messages for the correlation id. This is the artifact behind US-12, and it is a first-class endpoint rather than a log query.
 
+### 4.9 Payment simulator process (ADR-0006)
+
+`LoyaltyLab.PaymentSim` is a separate host on port **5190**. It shares no project references with the platform; a shared type would let the saga know things a real processor would not. State is in-memory.
+
+| Method | Route | Notes |
+|---|---|---|
+| `POST` | `/payments/authorizations` | Requires `Idempotency-Key`. Same key and payload replay the original hold. `402` on decline. |
+| `POST` | `/payments/authorizations/{id}/capture` | Full capture. Requires `Idempotency-Key`. |
+| `POST` | `/payments/authorizations/{id}/void` | Authorized holds only. Requires `Idempotency-Key`. |
+| `POST` | `/payments/authorizations/{id}/refund` | Captured payments only. Requires `Idempotency-Key`. |
+| `GET` | `/payments/by-key?key=` | Resolves `Unknown` after a client timeout. |
+| `GET` | `/payments` | Simulator inventory for chaos tests. |
+| `GET` | `/health` | Liveness. |
+
+`Simulator:LatencyMs`, `DeclineRate`, `TimeoutRate`, and `TimeoutHangMs` control faults. A timeout hang is a delay **after** the authorization is stored, so a client that gives up can still query a real hold.
+
 ---
 
 ## 5. Feature 4 — Grounded concierge

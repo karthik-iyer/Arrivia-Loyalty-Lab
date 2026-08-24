@@ -2,6 +2,8 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" />
+    <PackageReference Include="FluentAssertions" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
@@ -9,12 +11,18 @@
 
   <ItemGroup>
     <Using Include="Xunit" />
+    <Using Include="FluentAssertions" />
   </ItemGroup>
 
-  <!-- References both hosts: chaos tests run the API against the real payment simulator. -->
+  <!--
+    Chaos tests (T-040) run the API against the real simulator. PaymentSim is
+    aliased so both hosts can expose Program without a type collision.
+  -->
   <ItemGroup>
     <ProjectReference Include="..\..\src\LoyaltyLab.Api\LoyaltyLab.Api.csproj" />
-    <ProjectReference Include="..\..\src\LoyaltyLab.PaymentSim\LoyaltyLab.PaymentSim.csproj" />
+    <ProjectReference Include="..\..\src\LoyaltyLab.PaymentSim\LoyaltyLab.PaymentSim.csproj">
+      <Aliases>PaymentSimHost</Aliases>
+    </ProjectReference>
   </ItemGroup>
 
 </Project>
