@@ -11,4 +11,7 @@ public static class Errors
 
     public static Error OfferNotFound { get; } =
         Error.Of("OFFER_NOT_FOUND", "The offer was not found.");
+
+    public static Error OfferNotEligible { get; } =
+        Error.Of("OFFER_NOT_ELIGIBLE", "The offer is excluded by partner or tier rules.");
 }
