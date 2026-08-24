@@ -2,6 +2,7 @@ using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Application.Idempotency;
+using LoyaltyLab.Application.Loyalty;
 using LoyaltyLab.Application.Pricing;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Tenancy;
@@ -22,6 +23,11 @@ builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();
 builder.Services.AddScoped<ExplainQuote>();
 builder.Services.AddScoped<ClaimIdempotency>();
+builder.Services.AddScoped<EarnCredits>();
+builder.Services.AddScoped<BurnCredits>();
+builder.Services.AddScoped<ExpireCredits>();
+builder.Services.AddScoped<ReverseLedger>();
+builder.Services.AddScoped<AdjustCredits>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

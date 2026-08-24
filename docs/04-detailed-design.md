@@ -809,6 +809,7 @@ Plain classes registered in DI, no mediator library ([ADR-0003](adr/)). Dependen
 | `QuoteOffer` / `ExplainQuote` | F1 | FR-P-01 … FR-P-08 |
 | `SimulateRuleChange` *(COULD)* | F1 | FR-P-12 |
 | `GetBalance` / `GetStatement` | F2 | FR-L-04, FR-L-12 |
+| `EarnCredits` / `BurnCredits` / `AdjustCredits` / `ReverseLedger` | F2 | FR-L-03, FR-L-05, FR-L-06, FR-L-08 |
 | `GetLiabilityReport` / `ReconcileLedger` | F2 | FR-L-10, FR-L-11 |
 | `ExpireCredits` | F2 | FR-L-09 |
 | `StartBookingSaga` / `AdvanceSaga` / `CompensateSaga` | F3 | FR-B-01 … FR-B-07 |
@@ -907,6 +908,9 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `RATE_CHANGED` | 409 | Supplier rate moved beyond tolerance |
 | `BURN_CAP_EXCEEDED` | 422 | Credit tender above the partner cap |
 | `INSUFFICIENT_CREDITS` | 422 | Credit tender above available balance |
+| `MEMBER_NOT_FOUND` | 404 | Unknown, or belongs to another partner |
+| `LEDGER_TRANSACTION_NOT_FOUND` | 404 | Unknown, or belongs to another partner |
+| `TRANSACTION_ALREADY_REVERSED` | 409 | The referenced ledger transaction was already reversed |
 | `PAYMENT_DECLINED` | 402 | Authorization or capture refused |
 | `SUPPLIER_UNAVAILABLE` | 503 | Reservation could not be placed |
 | `BOOKING_IN_PROGRESS` | 409 | A saga is already running for this booking |

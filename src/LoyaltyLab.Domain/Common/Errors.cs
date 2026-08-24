@@ -29,4 +29,19 @@ public static class Errors
 
     public static Error IdempotencyKeyReused { get; } =
         Error.Of("IDEMPOTENCY_KEY_REUSED", "This idempotency key was already used with a different payload.");
+
+    public static Error BurnCapExceeded { get; } =
+        Error.Of("BURN_CAP_EXCEEDED", "The credit tender exceeds the partner burn cap for this booking.");
+
+    public static Error InsufficientCredits { get; } =
+        Error.Of("INSUFFICIENT_CREDITS", "The credit tender exceeds the available balance.");
+
+    public static Error MemberNotFound { get; } =
+        Error.Of("MEMBER_NOT_FOUND", "The member was not found.");
+
+    public static Error LedgerTransactionNotFound { get; } =
+        Error.Of("LEDGER_TRANSACTION_NOT_FOUND", "The ledger transaction was not found.");
+
+    public static Error TransactionAlreadyReversed { get; } =
+        Error.Of("TRANSACTION_ALREADY_REVERSED", "This ledger transaction has already been reversed.");
 }

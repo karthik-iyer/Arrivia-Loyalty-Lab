@@ -1,6 +1,8 @@
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Idempotency;
+using LoyaltyLab.Domain.Ledger;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 
@@ -99,3 +101,69 @@ internal sealed class FakeQuotes(ITenantContextAccessor tenant) : IQuoteReposito
         return Task.FromResult<Quote?>(quote);
     }
 }
+
+internal sealed class FakeIdempotencyStore : IIdempotencyStore
+{
+    private readonly Dictionary<(Guid Partner, string Operation, string Key), IdempotencyRecord> _records = [];
+
+    public Task<IdempotencyRecord?> FindAsync(
+        PartnerId partnerId,
+        string operation,
+        string key,
+        CancellationToken cancellationToken)
+    {
+        _records.TryGetValue((partnerId.Value, operation, key), out var record);
+        return Task.FromResult(record);
+    }
+
+    public Task<bool> SaveAsync(IdempotencyRecord record, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        return Task.FromResult(_records.TryAdd((record.PartnerId.Value, record.Operation, record.Key), record));
+    }
+}
+
+internal sealed class FakeLedger : ILedgerRepository
+{
+    private readonly List<LedgerAccount> _accounts = [];
+    private readonly List<LedgerTransaction> _transactions = [];
+
+    public IReadOnlyList<LedgerTransaction> Transactions => _transactions;
+
+    public Task AddAccountAsync(LedgerAccount account, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(account);
+        _accounts.Add(account);
+        return Task.CompletedTask;
+    }
+
+    public Task<LedgerAccount?> FindAccountAsync(
+        PartnerId partnerId,
+        LedgerAccountType type,
+        MemberId? memberId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(_accounts.SingleOrDefault(account =>
+            account.PartnerId == partnerId && account.Type == type && account.MemberId == memberId));
+
+    public Task<LedgerAccount?> GetAccountAsync(LedgerAccountId id, CancellationToken cancellationToken) =>
+        Task.FromResult(_accounts.SingleOrDefault(account => account.Id == id));
+
+    public Task AddAsync(LedgerTransaction transaction, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(transaction);
+        _transactions.Add(transaction);
+        return Task.CompletedTask;
+    }
+
+    public Task<LedgerTransaction?> GetByIdAsync(LedgerTransactionId id, CancellationToken cancellationToken) =>
+        Task.FromResult(_transactions.SingleOrDefault(transaction => transaction.Id == id));
+
+    public Task<LedgerTransaction?> FindByIdempotencyKeyAsync(
+        string idempotencyKey,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(_transactions.SingleOrDefault(transaction => transaction.IdempotencyKey == idempotencyKey));
+
+    public Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<LedgerTransaction>>(_transactions);
+}
+

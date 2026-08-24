@@ -1,7 +1,5 @@
-using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Application.Idempotency;
 using LoyaltyLab.Domain.Common;
-using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Tenancy;
 
 namespace LoyaltyLab.Application.Tests;
@@ -66,26 +64,5 @@ public sealed class IdempotencyUseCaseTests
             };
             return new World(new ClaimIdempotency(tenant, new FakeIdempotencyStore(), new FakeClock(AsOf)));
         }
-    }
-}
-
-internal sealed class FakeIdempotencyStore : IIdempotencyStore
-{
-    private readonly Dictionary<(Guid Partner, string Operation, string Key), IdempotencyRecord> _records = [];
-
-    public Task<IdempotencyRecord?> FindAsync(
-        PartnerId partnerId,
-        string operation,
-        string key,
-        CancellationToken cancellationToken)
-    {
-        _records.TryGetValue((partnerId.Value, operation, key), out var record);
-        return Task.FromResult(record);
-    }
-
-    public Task<bool> SaveAsync(IdempotencyRecord record, CancellationToken cancellationToken)
-    {
-        ArgumentNullException.ThrowIfNull(record);
-        return Task.FromResult(_records.TryAdd((record.PartnerId.Value, record.Operation, record.Key), record));
     }
 }

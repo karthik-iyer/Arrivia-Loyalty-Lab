@@ -23,17 +23,25 @@ internal static class ProblemResults
 
     private static int StatusCode(Error error)
     {
-        if (error == Errors.OfferNotFound || error == Errors.QuoteNotFound)
+        if (error == Errors.OfferNotFound
+            || error == Errors.QuoteNotFound
+            || error == Errors.MemberNotFound
+            || error == Errors.LedgerTransactionNotFound)
         {
             return StatusCodes.Status404NotFound;
         }
 
-        if (error == Errors.OfferNotEligible)
+        if (error == Errors.OfferNotEligible
+            || error == Errors.BurnCapExceeded
+            || error == Errors.InsufficientCredits)
         {
             return StatusCodes.Status422UnprocessableEntity;
         }
 
-        if (error == Errors.QuoteExpired || error == Errors.RateChanged || error == Errors.IdempotencyKeyReused)
+        if (error == Errors.QuoteExpired
+            || error == Errors.RateChanged
+            || error == Errors.IdempotencyKeyReused
+            || error == Errors.TransactionAlreadyReversed)
         {
             return StatusCodes.Status409Conflict;
         }

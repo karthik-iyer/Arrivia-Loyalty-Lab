@@ -63,9 +63,13 @@ public interface ILedgerRepository
         MemberId? memberId,
         CancellationToken cancellationToken);
 
+    Task<LedgerAccount?> GetAccountAsync(LedgerAccountId id, CancellationToken cancellationToken);
+
     Task AddAsync(LedgerTransaction transaction, CancellationToken cancellationToken);
 
     Task<LedgerTransaction?> GetByIdAsync(LedgerTransactionId id, CancellationToken cancellationToken);
+
+    Task<LedgerTransaction?> FindByIdempotencyKeyAsync(string idempotencyKey, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken);
 }

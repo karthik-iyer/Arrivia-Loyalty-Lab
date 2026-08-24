@@ -26,6 +26,9 @@ public sealed class LedgerRepository(LoyaltyLabDbContext db) : ILedgerRepository
                 account => account.PartnerId == partnerId && account.Type == type && account.MemberId == memberId,
                 cancellationToken);
 
+    public Task<LedgerAccount?> GetAccountAsync(LedgerAccountId id, CancellationToken cancellationToken) =>
+        db.LedgerAccounts.AsNoTracking().FirstOrDefaultAsync(account => account.Id == id, cancellationToken);
+
     public Task AddAsync(LedgerTransaction transaction, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(transaction);
@@ -35,6 +38,13 @@ public sealed class LedgerRepository(LoyaltyLabDbContext db) : ILedgerRepository
 
     public Task<LedgerTransaction?> GetByIdAsync(LedgerTransactionId id, CancellationToken cancellationToken) =>
         db.LedgerTransactions.FirstOrDefaultAsync(transaction => transaction.Id == id, cancellationToken);
+
+    public Task<LedgerTransaction?> FindByIdempotencyKeyAsync(
+        string idempotencyKey,
+        CancellationToken cancellationToken) =>
+        db.LedgerTransactions.FirstOrDefaultAsync(
+            transaction => transaction.IdempotencyKey == idempotencyKey,
+            cancellationToken);
 
     public async Task<IReadOnlyList<LedgerTransaction>> ListAsync(CancellationToken cancellationToken)
     {
