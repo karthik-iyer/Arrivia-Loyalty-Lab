@@ -7,15 +7,11 @@ namespace LoyaltyLab.Domain.Tests.Pricing;
 
 public sealed class PricingPipelineTests
 {
-    private static readonly DateTimeOffset AsOf = new(2026, 3, 15, 12, 0, 0, TimeSpan.Zero);
-    private static readonly DateOnly Stay = new(2026, 3, 15);
-    private static readonly PricingPipeline Pipeline = new();
-
     [Fact]
     public void Stages_run_in_documented_order()
     {
-        Pipeline.Stages.Select(s => s.Order).Should().Equal(1, 2, 3, 4, 5, 6, 7, 8);
-        Pipeline.Stages.Select(s => s.Kind).Should().Equal(
+        PricingExamples.Pipeline.Stages.Select(s => s.Order).Should().Equal(1, 2, 3, 4, 5, 6, 7, 8);
+        PricingExamples.Pipeline.Stages.Select(s => s.Kind).Should().Equal(
             PricingStageKind.Eligibility,
             PricingStageKind.BaseCost,
             PricingStageKind.BaseMarkup,
@@ -30,106 +26,133 @@ public sealed class PricingPipelineTests
     public void Summit_gold_in_march_matches_the_worked_example()
     {
         var partner = PartnerId.New();
-        var offer = OceanicBeachOffer();
-        var state = Pipeline.Execute(Request(partner, offer, TierCode.Gold, SummitRules(partner)));
+        var offer = PricingExamples.OceanicBeachOffer();
+        var state = PricingExamples.Pipeline.Execute(
+            PricingExamples.Request(partner, offer, TierCode.Gold, PricingExamples.SummitRules(partner)));
 
         state.IsRejected.Should().BeFalse();
         state.NetCost.Amount.Should().Be(115.00m);
         state.RunningTotal.Amount.Should().Be(120.75m);
         state.MaxCreditTender!.Value.Amount.Should().Be(48.30m);
+        state.Trace.Should().Contain(e => e.WasClamped);
     }
 
     [Fact]
     public void Nimbus_without_tiers_matches_the_worked_example()
     {
         var partner = PartnerId.New();
-        var offer = OceanicBeachOffer();
-        var state = Pipeline.Execute(Request(partner, offer, tier: null, NimbusRules(partner)));
+        var offer = PricingExamples.OceanicBeachOffer();
+        var state = PricingExamples.Pipeline.Execute(
+            PricingExamples.Request(partner, offer, tier: null, PricingExamples.NimbusRules(partner)));
 
         state.IsRejected.Should().BeFalse();
         state.NetCost.Amount.Should().Be(115.00m);
         state.RunningTotal.Amount.Should().Be(135.70m);
         state.MaxCreditTender!.Value.Amount.Should().Be(135.70m);
+        state.Trace.Should().NotContain(e => e.WasClamped);
     }
 
     [Fact]
     public void Ineligible_supplier_short_circuits_before_markup()
     {
         var partner = PartnerId.New();
-        var offer = OceanicBeachOffer();
+        var offer = PricingExamples.OceanicBeachOffer();
         var request = new PricingRequest(
-            PricingContext.ForOffer(partner, offer, TierCode.Gold, Stay),
+            PricingContext.ForOffer(partner, offer, TierCode.Gold, PricingExamples.Stay),
             offer,
             PermittedSuppliers: new HashSet<SupplierId>(),
-            SummitRules(partner),
-            AsOf);
+            PricingExamples.SummitRules(partner),
+            PricingExamples.AsOf);
 
-        var state = Pipeline.Execute(request);
+        var state = PricingExamples.Pipeline.Execute(request);
 
         state.IsRejected.Should().BeTrue();
         state.RejectionReason.Should().Be(Errors.OfferNotEligible);
         state.RunningTotal.Amount.Should().Be(0m);
+        state.Trace.Should().ContainSingle(e => e.Stage == PricingStageKind.Eligibility);
     }
 
     [Fact]
     public void Exclusion_rule_rejects_the_offer()
     {
         var partner = PartnerId.New();
-        var offer = OceanicBeachOffer();
+        var offer = PricingExamples.OceanicBeachOffer();
         var exclusion = EligibilityExclusionRule.Create(
             partner,
             new RuleScope(supplierId: offer.SupplierId),
-            AsOf);
-        var rules = SummitRules(partner).Append(exclusion).ToList();
+            PricingExamples.AsOf);
+        var rules = PricingExamples.SummitRules(partner).Append(exclusion).ToList();
 
-        var state = Pipeline.Execute(Request(partner, offer, TierCode.Gold, rules));
+        var state = PricingExamples.Pipeline.Execute(
+            PricingExamples.Request(partner, offer, TierCode.Gold, rules));
 
         state.IsRejected.Should().BeTrue();
         state.RejectionReason.Should().Be(Errors.OfferNotEligible);
     }
+}
 
-    private static PricingRequest Request(
-        PartnerId partner,
-        TravelOffer offer,
-        TierCode? tier,
-        IReadOnlyList<PricingRule> rules) =>
-        new(
-            PricingContext.ForOffer(partner, offer, tier, Stay),
-            offer,
-            new HashSet<SupplierId> { offer.SupplierId },
-            rules,
-            AsOf);
+public sealed class PriceExplanationTests
+{
+    [Fact]
+    public void Internal_trace_includes_net_cost_margin_and_the_clamp()
+    {
+        var state = PriceSummit();
+        var explanation = PriceExplanation.From(state, AccessRole.AccountManager);
 
-    private static TravelOffer OceanicBeachOffer() =>
-        TravelOffer.Create(
-            SupplierId.New(),
-            "Coral Bay Resort",
-            new Destination("MBJ", "Montego Bay"),
-            Money.Of(100.00m, Currency.Usd),
-            Money.Of(15.00m, Currency.Usd),
-            [OfferTag.Beach],
-            starRating: 4,
-            availableFrom: new DateOnly(2026, 1, 1),
-            availableTo: new DateOnly(2026, 6, 30));
+        explanation.NetCost!.Value.Amount.Should().Be(115.00m);
+        explanation.Margin!.Value.Amount.Should().Be(5.75m);
+        explanation.MemberPrice.Amount.Should().Be(120.75m);
+        explanation.Stages.Should().Contain(e => e.Stage == PricingStageKind.BaseCost);
+        explanation.Stages.Should().Contain(e => e.WasClamped && e.ClampReason!.Contains("net cost", StringComparison.Ordinal));
+    }
 
-    private static List<PricingRule> SummitRules(PartnerId partner) =>
-    [
-        BaseMarkupRule.Create(partner, Percent.From(12m), RuleScope.PartnerWide, AsOf),
-        TierAdjustmentRule.Create(partner, Percent.From(-3m), new RuleScope(tier: TierCode.Gold), AsOf),
-        CampaignDiscountRule.Create(
-            partner,
-            "MARCH-BEACH",
-            Percent.From(-5m),
-            new RuleScope(tag: OfferTag.Beach),
-            AsOf),
-        MarginFloorRule.Create(partner, Percent.From(5m), RuleScope.PartnerWide, AsOf),
-        BurnCapRule.Create(partner, Percent.From(40m), RuleScope.PartnerWide, AsOf),
-    ];
+    [Fact]
+    public void Member_projection_contains_no_net_rate()
+    {
+        var state = PriceSummit();
+        var explanation = PriceExplanation.From(state, AccessRole.Member);
 
-    private static List<PricingRule> NimbusRules(PartnerId partner) =>
-    [
-        BaseMarkupRule.Create(partner, Percent.From(18m), RuleScope.PartnerWide, AsOf),
-        MarginFloorRule.Create(partner, Percent.From(5m), RuleScope.PartnerWide, AsOf),
-        BurnCapRule.Create(partner, Percent.From(100m), RuleScope.PartnerWide, AsOf),
-    ];
+        explanation.NetCost.Should().BeNull();
+        explanation.Margin.Should().BeNull();
+        explanation.RevealsNetRate.Should().BeFalse();
+        explanation.Stages.Should().NotContain(e => e.Stage == PricingStageKind.BaseCost);
+        explanation.Stages.Should().NotContain(e => e.Stage == PricingStageKind.Eligibility);
+        explanation.Stages.Should().OnlyContain(e => e.Order >= 3);
+
+        var leaked = Flatten(explanation);
+        leaked.Should().NotContain("100");
+        leaked.Should().NotContain("115");
+        leaked.Should().NotContain("net cost");
+        leaked.Should().NotContain("net 100");
+
+        explanation.Stages.Should().Contain(e => e.WasClamped);
+        explanation.Stages.Single(e => e.WasClamped).ClampReason.Should().Contain("partner minimum");
+        explanation.Stages[0].SubtotalBefore.Amount.Should().Be(0m);
+    }
+
+    [Fact]
+    public void Anonymous_projection_matches_member_visibility()
+    {
+        var state = PriceSummit();
+        var member = PriceExplanation.From(state, AccessRole.Member);
+        var anonymous = PriceExplanation.From(state, AccessRole.Anonymous);
+
+        anonymous.NetCost.Should().BeNull();
+        anonymous.Margin.Should().BeNull();
+        anonymous.Stages.Select(s => s.Stage).Should().Equal(member.Stages.Select(s => s.Stage));
+    }
+
+    private static PricingState PriceSummit()
+    {
+        var partner = PartnerId.New();
+        var offer = PricingExamples.OceanicBeachOffer();
+        return PricingExamples.Pipeline.Execute(
+            PricingExamples.Request(partner, offer, TierCode.Gold, PricingExamples.SummitRules(partner)));
+    }
+
+    private static string Flatten(PriceExplanation explanation) =>
+        string.Join(
+            '|',
+            explanation.Stages.Select(e =>
+                $"{e.Description}:{e.SubtotalBefore.Amount}:{e.SubtotalAfter.Amount}:{e.ClampReason}"));
 }

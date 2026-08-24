@@ -1,5 +1,6 @@
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Catalog;
+using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -25,6 +26,8 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<PartnerSupplier> PartnerSuppliers => Set<PartnerSupplier>();
 
+    public DbSet<Quote> Quotes => Set<Quote>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyLabDbContext).Assembly);
@@ -32,5 +35,6 @@ public sealed class LoyaltyLabDbContext : DbContext
         // Tenant isolation is structural: a forgotten Where cannot leak members (FR-X-02).
         modelBuilder.Entity<Member>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<PartnerSupplier>().HasQueryFilter(p => p.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<Quote>().HasQueryFilter(q => q.PartnerId == _tenant.Current.PartnerId);
     }
 }

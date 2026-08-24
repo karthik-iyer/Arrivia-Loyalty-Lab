@@ -20,13 +20,52 @@ public sealed record PricingState(
     Money NetCost,
     Money? MaxCreditTender,
     bool IsRejected,
-    Error? RejectionReason)
+    Error? RejectionReason,
+    IReadOnlyList<PriceTraceEntry> Trace)
 {
     public static PricingState Start(Currency currency) =>
-        new(Money.Zero(currency), Money.Zero(currency), MaxCreditTender: null, IsRejected: false, RejectionReason: null);
+        new(
+            Money.Zero(currency),
+            Money.Zero(currency),
+            MaxCreditTender: null,
+            IsRejected: false,
+            RejectionReason: null,
+            Trace: []);
 
     public PricingState Reject(Error reason) =>
         this with { IsRejected = true, RejectionReason = reason };
+
+    public PricingState Record(
+        IPricingStage stage,
+        string description,
+        Money subtotalAfter,
+        PricingRuleId? appliedRule = null,
+        bool wasClamped = false,
+        string? clampReason = null,
+        Money? netCost = null,
+        Money? maxCreditTender = null)
+    {
+        ArgumentNullException.ThrowIfNull(stage);
+        ArgumentNullException.ThrowIfNull(description);
+
+        var entry = new PriceTraceEntry(
+            stage.Kind,
+            stage.Order,
+            description,
+            appliedRule,
+            RunningTotal,
+            subtotalAfter,
+            wasClamped,
+            clampReason);
+
+        return this with
+        {
+            RunningTotal = subtotalAfter,
+            NetCost = netCost ?? NetCost,
+            MaxCreditTender = maxCreditTender ?? MaxCreditTender,
+            Trace = [.. Trace, entry],
+        };
+    }
 }
 
 /// <summary>

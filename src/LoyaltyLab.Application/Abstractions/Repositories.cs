@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 
 namespace LoyaltyLab.Application.Abstractions;
@@ -21,6 +22,13 @@ public interface IOfferRepository
     Task<TravelOffer?> GetByIdAsync(OfferId id, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<TravelOffer>> ListAsync(CancellationToken cancellationToken);
+}
+
+public interface IQuoteRepository
+{
+    Task<Quote?> GetByIdAsync(QuoteId id, CancellationToken cancellationToken);
+
+    Task AddAsync(Quote quote, CancellationToken cancellationToken);
 }
 
 public interface ISupplierRepository

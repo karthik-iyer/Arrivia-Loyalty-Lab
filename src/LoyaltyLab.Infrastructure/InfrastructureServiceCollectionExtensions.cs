@@ -21,6 +21,8 @@ public static class InfrastructureServiceCollectionExtensions
             var connectionString = configuration.GetConnectionString("LoyaltyLab") ?? "Data Source=loyaltylab.db";
             options.UseSqlite(connectionString);
         });
+        services.AddScoped<IQuoteRepository, QuoteRepository>();
+        services.AddScoped<IUnitOfWork, UnitOfWork>();
         return services;
     }
 }

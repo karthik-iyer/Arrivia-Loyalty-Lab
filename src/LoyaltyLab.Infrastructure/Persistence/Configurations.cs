@@ -69,6 +69,26 @@ internal sealed class TravelOfferConfiguration : IEntityTypeConfiguration<Travel
     }
 }
 
+internal sealed class QuoteConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.Quote>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.Quote> builder)
+    {
+        builder.ToTable("Quotes");
+        builder.HasKey(q => q.Id);
+        builder.Property(q => q.Id).HasConversion(id => id.Value, v => new QuoteId(v));
+        builder.Property(q => q.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(q => q.MemberId).HasConversion(id => id.Value, v => new MemberId(v));
+        builder.Property(q => q.OfferId).HasConversion(id => id.Value, v => new OfferId(v));
+        builder.Property(q => q.NetRateSnapshot).HasConversion(new MoneyConverter());
+        builder.Property(q => q.NetCostSnapshot).HasConversion(new MoneyConverter());
+        builder.Property(q => q.MemberPrice).HasConversion(new MoneyConverter());
+        builder.Property(q => q.MaxCreditTender).HasConversion(new MoneyConverter());
+        builder.Property(q => q.Trace).HasConversion(
+            PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Pricing.PriceTraceEntry>>());
+        builder.HasIndex(q => new { q.PartnerId, q.MemberId, q.ExpiresAt });
+    }
+}
+
 internal sealed class PartnerSupplierConfiguration : IEntityTypeConfiguration<PartnerSupplier>
 {
     public void Configure(EntityTypeBuilder<PartnerSupplier> builder)

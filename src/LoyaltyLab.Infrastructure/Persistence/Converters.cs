@@ -11,7 +11,13 @@ internal static class PersistenceJson
     public static JsonSerializerOptions Options { get; } = new()
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
-        Converters = { new PercentJsonConverter(), new CurrencyJsonConverter() },
+        Converters =
+        {
+            new PercentJsonConverter(),
+            new CurrencyJsonConverter(),
+            new MoneyJsonConverter(),
+            new PricingRuleIdJsonConverter(),
+        },
     };
 
     public static ValueConverter<T, string> JsonConverter<T>() =>
@@ -70,4 +76,67 @@ internal sealed class DestinationConverter : ValueConverter<LoyaltyLab.Domain.Ca
         var separator = stored.IndexOf('|', StringComparison.Ordinal);
         return new LoyaltyLab.Domain.Catalog.Destination(stored[..separator], stored[(separator + 1)..]);
     }
+}
+
+internal sealed class MoneyJsonConverter : JsonConverter<Money>
+{
+    public override Money Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("Money must be a JSON object.");
+        }
+
+        decimal? amount = null;
+        Currency? currency = null;
+
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+        {
+            if (reader.TokenType != JsonTokenType.PropertyName)
+            {
+                continue;
+            }
+
+            var name = reader.GetString();
+            reader.Read();
+            if (string.Equals(name, "amount", StringComparison.OrdinalIgnoreCase))
+            {
+                amount = reader.GetDecimal();
+            }
+            else if (string.Equals(name, "currency", StringComparison.OrdinalIgnoreCase))
+            {
+                currency = Currency.Of(reader.GetString()!);
+            }
+        }
+
+        if (amount is null || currency is null)
+        {
+            throw new JsonException("Money requires amount and currency.");
+        }
+
+        return Money.Of(amount.Value, currency.Value);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Money value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteNumber("amount", value.Amount);
+        writer.WriteString("currency", value.Currency.Code);
+        writer.WriteEndObject();
+    }
+}
+
+internal sealed class PricingRuleIdJsonConverter : JsonConverter<LoyaltyLab.Domain.Common.PricingRuleId>
+{
+    public override LoyaltyLab.Domain.Common.PricingRuleId Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options) =>
+        new(reader.GetGuid());
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        LoyaltyLab.Domain.Common.PricingRuleId value,
+        JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Value);
 }

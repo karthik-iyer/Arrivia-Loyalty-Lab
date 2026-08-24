@@ -14,4 +14,13 @@ public static class Errors
 
     public static Error OfferNotEligible { get; } =
         Error.Of("OFFER_NOT_ELIGIBLE", "The offer is excluded by partner or tier rules.");
+
+    public static Error QuoteNotFound { get; } =
+        Error.Of("QUOTE_NOT_FOUND", "The quote was not found.");
+
+    public static Error QuoteExpired { get; } =
+        Error.Of("QUOTE_EXPIRED", "The quote has expired; re-quote required.");
+
+    public static Error RateChanged { get; } =
+        Error.Of("RATE_CHANGED", "The supplier rate moved beyond tolerance.");
 }
