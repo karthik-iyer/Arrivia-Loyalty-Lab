@@ -1,25 +1,27 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-016** remaining pricing suite. F5 stays stretch.
+Stop here and resume from **T-020** ledger domain. F5 stays stretch.
 
 ## Where we are
 
 | Item | Status |
 |---|---|
 | T-001 … T-007 | Done — Phase 0 green |
-| T-010 … T-015 | Done — rules, pipeline, traces, quotes, use cases, HTTP |
-| Next | **T-016** pricing test suite (precedence, floor, rounding-once, effective dating, two-partner divergence) |
+| T-010 … T-016 | Done — Phase 1 pricing complete |
+| Next | **T-020** ledger domain: four account types, balanced `LedgerTransaction` |
 
 ## Verify
 
-- `GET /api/offers?stayDate=2026-03-15` with `X-Partner-Code: SUMMIT` lists Coral Bay; anonymous JSON has no `netRate` and no `memberPrice`.
-- Maya (`X-Member-Id` = seed Maya) search/quote of Coral Bay is **120.75** / max credits **4830**.
-- NIMBUS cannot see or quote OCEANIC (`OFFER_NOT_ELIGIBLE` / 422). Cross-partner explain is `QUOTE_NOT_FOUND` / 404.
+- Specific Gold markup beats a louder partner-wide markup; Standard still takes the wide rule.
+- Stacked SUMMIT discounts clamp to **120.75**; without the floor they round to **118.69**.
+- Tier adjustment keeps **124.936** until the single rounding stage produces **124.94**.
+- `MARCH-BEACH` after its exclusive end prices at **124.94** with no clamp.
+- Same Alpine offer: SUMMIT Maya **219.45**, NIMBUS Chen **238.36**; neither JSON contains `netRate`.
 
 ## First actions next session
 
-1. **T-016** extra pricing suite, then Phase 2 ledger (**T-020**).
-2. Do not start Angular until Phase 4.
+1. **T-020** ledger domain (four accounts, balanced factory, entry types).
+2. Then T-021–T-026 (persistence, idempotency, operations, reports, HTTP, property tests).
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

@@ -17,13 +17,14 @@ internal static class PricingExamples
         PartnerId partner,
         TravelOffer offer,
         TierCode? tier,
-        IReadOnlyList<PricingRule> rules) =>
+        IReadOnlyList<PricingRule> rules,
+        DateTimeOffset? asOf = null) =>
         new(
             PricingContext.ForOffer(partner, offer, tier, Stay),
             offer,
             new HashSet<SupplierId> { offer.SupplierId },
             rules,
-            AsOf);
+            asOf ?? AsOf);
 
     public static TravelOffer OceanicBeachOffer() =>
         TravelOffer.Create(

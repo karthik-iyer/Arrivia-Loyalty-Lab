@@ -77,6 +77,30 @@ public sealed class PricingEndpointTests : IClassFixture<LoyaltyLabApiFactory>
     }
 
     [Fact]
+    public async Task Two_partners_price_the_same_alpine_offer_differently()
+    {
+        using var client = _factory.CreateClient();
+        var alpine = SeedIds.Offer(9).Value;
+
+        using var summitRequest = Quote("SUMMIT", SeedIds.Maya.Value, alpine);
+        using var nimbusRequest = Quote("NIMBUS", SeedIds.Chen.Value, alpine);
+        var summit = await client.SendAsync(summitRequest);
+        var nimbus = await client.SendAsync(nimbusRequest);
+        var summitJson = await summit.Content.ReadAsStringAsync();
+        var nimbusJson = await nimbus.Content.ReadAsStringAsync();
+        var summitPrice = JsonDocument.Parse(summitJson).RootElement.GetProperty("memberPrice").GetProperty("amount").GetDecimal();
+        var nimbusPrice = JsonDocument.Parse(nimbusJson).RootElement.GetProperty("memberPrice").GetProperty("amount").GetDecimal();
+
+        summit.StatusCode.Should().Be(HttpStatusCode.OK);
+        nimbus.StatusCode.Should().Be(HttpStatusCode.OK);
+        summitPrice.Should().Be(219.45m);
+        nimbusPrice.Should().Be(238.36m);
+        summitPrice.Should().NotBe(nimbusPrice);
+        ContainsNetRate(summitJson).Should().BeFalse();
+        ContainsNetRate(nimbusJson).Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Quote_of_oceanic_for_nimbus_is_not_eligible()
     {
         using var client = _factory.CreateClient();
