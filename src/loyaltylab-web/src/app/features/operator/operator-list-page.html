@@ -1,0 +1,56 @@
+<main class="operator">
+  <p><a routerLink="/offers">Back to offers</a></p>
+  <h1>Sagas</h1>
+
+  @if (store.status() === 'loading') {
+    <p>Loading sagas…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">
+      @if (err.errorCode === 'ROLE_NOT_PERMITTED') {
+        Switch to Operator · Summit to diagnose bookings.
+      } @else {
+        {{ err.message }}
+      }
+    </p>
+  }
+
+  @if (store.status() === 'ready') {
+    <label>
+      Status
+      <select [value]="store.filter()" (change)="onFilter($event)">
+        @for (filter of filters; track filter) {
+          <option [value]="filter">{{ filterLabel(filter) }}</option>
+        }
+      </select>
+    </label>
+
+    @if (store.visible().length === 0) {
+      <p>No sagas match this filter.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>Status</th>
+            <th>Saga</th>
+            <th>Booking</th>
+            <th>Started</th>
+            <th>Last heartbeat</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (saga of store.visible(); track saga.id) {
+            <tr [class]="rowClass(saga.status)">
+              <td>{{ saga.status }}</td>
+              <td><a [routerLink]="['/operator/sagas', saga.id]">{{ saga.id }}</a></td>
+              <td>{{ saga.bookingId }}</td>
+              <td>{{ saga.startedAt }}</td>
+              <td>{{ saga.lastHeartbeatAt }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</main>

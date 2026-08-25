@@ -57,5 +57,6 @@ describe('DemoSwitcher', () => {
     expect(fixture.nativeElement.querySelector('.brand')?.textContent).toContain('Nimbus Club');
     expect(fixture.nativeElement.textContent).toContain('Offers');
     expect(fixture.nativeElement.textContent).toContain('Wallet');
+    expect(fixture.nativeElement.textContent).toContain('Operator');
   });
 });

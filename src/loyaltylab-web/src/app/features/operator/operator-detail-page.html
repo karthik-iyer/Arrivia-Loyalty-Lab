@@ -1,0 +1,50 @@
+<main class="operator">
+  <p><a routerLink="/operator/sagas">Back to sagas</a></p>
+  <h1>Saga</h1>
+
+  @if (store.status() === 'loading') {
+    <p>Loading saga…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.detail(); as detail) {
+    <p class="status" [class.status--review]="store.needsReview()">{{ detail.status }}</p>
+    <p>Booking {{ detail.bookingId }}</p>
+    <p>Started {{ detail.startedAt }}</p>
+    <p>Last heartbeat {{ detail.lastHeartbeatAt }}</p>
+    @if (detail.completedAt) {
+      <p>Completed {{ detail.completedAt }}</p>
+    }
+
+    @if (store.needsReview()) {
+      <p class="review" role="status">
+        Requires manual review. The failing step is highlighted.
+        Reference {{ detail.id }}.
+      </p>
+    }
+
+    <h2>Steps</h2>
+    <ll-saga-timeline
+      [steps]="detail.steps"
+      [verbose]="true"
+      [highlightFailures]="store.needsReview()"
+    />
+
+    <h2>Poisoned outbox</h2>
+    @if (detail.poison.length === 0) {
+      <p>None for this correlation id.</p>
+    } @else {
+      <ul>
+        @for (message of detail.poison; track message.id) {
+          <li>
+            {{ message.type }} · {{ message.attempts }} attempts · {{ message.lastError }}
+            <span class="corr">{{ message.correlationId }}</span>
+          </li>
+        }
+      </ul>
+    }
+  }
+</main>

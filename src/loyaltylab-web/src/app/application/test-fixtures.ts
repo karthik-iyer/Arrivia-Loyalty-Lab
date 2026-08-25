@@ -2,6 +2,8 @@ import type {
   BookingView,
   OfferSummary,
   PriceExplanationView,
+  SagaListItemView,
+  SagaOperatorView,
   WalletBalanceView,
   WalletStatementView,
 } from '../domain';
@@ -138,6 +140,70 @@ export const compensatedBooking: BookingView = {
       { ...succeeded('ConfirmBooking'), status: 'Pending' },
     ],
   },
+};
+
+export const confirmedSagaItem: SagaListItemView = {
+  id: 's-ok',
+  bookingId: 'b-ok',
+  status: 'Confirmed',
+  startedAt: '2026-03-15T12:00:00+00:00',
+  lastHeartbeatAt: '2026-03-15T12:00:02+00:00',
+};
+
+export const reviewSagaItem: SagaListItemView = {
+  id: 's-review',
+  bookingId: 'b-review',
+  status: 'RequiresManualReview',
+  startedAt: '2026-03-15T11:00:00+00:00',
+  lastHeartbeatAt: '2026-03-15T11:08:00+00:00',
+};
+
+export const reviewNeededSaga: SagaOperatorView = {
+  id: reviewSagaItem.id,
+  bookingId: reviewSagaItem.bookingId,
+  status: 'RequiresManualReview',
+  startedAt: reviewSagaItem.startedAt,
+  lastHeartbeatAt: reviewSagaItem.lastHeartbeatAt,
+  completedAt: '2026-03-15T11:08:00+00:00',
+  steps: [
+    succeeded('ValidateQuote'),
+    {
+      kind: 'ReserveInventory',
+      status: 'CompensationFailed',
+      attempts: 3,
+      externalReference: 'OCE-88213',
+      error: 'SUPPLIER_TIMEOUT',
+      durationMs: 410,
+      compensation: {
+        status: 'Failed',
+        attempts: 3,
+        externalReference: null,
+        errorCode: 'COMPENSATION_EXHAUSTED',
+      },
+    },
+    {
+      kind: 'AuthorizePayment',
+      status: 'Failed',
+      attempts: 1,
+      externalReference: null,
+      error: 'PAYMENT_DECLINED',
+      durationMs: 20,
+      compensation: null,
+    },
+    { ...succeeded('BurnCredits'), status: 'Pending' },
+    { ...succeeded('CapturePayment'), status: 'Pending' },
+    { ...succeeded('ConfirmBooking'), status: 'Pending' },
+  ],
+  poison: [
+    {
+      id: 'p-1',
+      type: 'AdvanceSaga',
+      correlationId: 'corr-review',
+      attempts: 8,
+      lastError: 'TIMEOUT',
+      poisonedAt: '2026-03-15T11:08:00+00:00',
+    },
+  ],
 };
 
 export const confirmedBooking: BookingView = {

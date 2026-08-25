@@ -20,6 +20,8 @@ const labels: Record<SagaStepKind, string> = {
 export class SagaTimeline {
   readonly steps = input.required<readonly SagaStepView[]>();
   readonly live = input(false);
+  readonly verbose = input(false);
+  readonly highlightFailures = input(false);
 
   label(kind: SagaStepKind): string {
     return labels[kind];
@@ -44,5 +46,13 @@ export class SagaTimeline {
       default:
         return '·';
     }
+  }
+
+  isFailing(step: SagaStepView): boolean {
+    return step.status === 'Failed' || step.status === 'CompensationFailed';
+  }
+
+  showAttempts(step: SagaStepView): boolean {
+    return this.verbose() || step.attempts > 1;
   }
 }

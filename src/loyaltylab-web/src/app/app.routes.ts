@@ -19,4 +19,14 @@ export const routes: Routes = [
     path: 'wallet',
     loadComponent: () => import('./features/wallet/wallet-page').then((m) => m.WalletPage),
   },
+  {
+    path: 'operator/sagas',
+    loadComponent: () =>
+      import('./features/operator/operator-list-page').then((m) => m.OperatorListPage),
+  },
+  {
+    path: 'operator/sagas/:id',
+    loadComponent: () =>
+      import('./features/operator/operator-detail-page').then((m) => m.OperatorDetailPage),
+  },
 ];

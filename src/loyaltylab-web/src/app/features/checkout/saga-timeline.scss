@@ -50,6 +50,17 @@
   background: #ffe4e6;
 }
 
+.step--review {
+  outline: 2px solid #be123c;
+  outline-offset: -2px;
+}
+
+.err {
+  grid-column: 2 / -1;
+  color: #9f1239;
+  font-size: 0.85rem;
+}
+
 .step--inprogress {
   border-left-color: var(--ll-color-accent);
 }

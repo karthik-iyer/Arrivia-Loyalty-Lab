@@ -1,0 +1,35 @@
+.operator {
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+a {
+  color: var(--ll-color-accent);
+}
+
+h1 {
+  color: var(--ll-color-primary);
+}
+
+.status {
+  font-weight: 700;
+}
+
+.status--review,
+.review {
+  color: #9f1239;
+}
+
+.corr {
+  display: block;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  opacity: 0.75;
+}
+
+.error {
+  color: #9f1239;
+}
