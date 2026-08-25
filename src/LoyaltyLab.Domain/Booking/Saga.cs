@@ -189,6 +189,9 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     public static string DeriveIdempotencyKey(SagaInstanceId sagaId, SagaStepKind kind) =>
         $"{sagaId.Value:D}:{kind}";
 
+    public static string DeriveCompensationKey(SagaInstanceId sagaId, SagaStepKind kind) =>
+        $"{sagaId.Value:D}:{kind}:compensate";
+
     public static SagaInstance Start(
         PartnerId partnerId,
         BookingId bookingId,

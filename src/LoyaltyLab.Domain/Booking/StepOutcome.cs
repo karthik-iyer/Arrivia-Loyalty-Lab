@@ -24,3 +24,12 @@ public sealed record StepOutcome(StepResult Result, string? ExternalReference, E
     public static StepOutcome Unknown() =>
         new(StepResult.Unknown, ExternalReference: null, Error: null);
 }
+
+public sealed record CompensationOutcome(bool Succeeded, Error? Error, string? ExternalReference)
+{
+    public static CompensationOutcome Ok(string? externalReference = null) =>
+        new(true, Error: null, externalReference);
+
+    public static CompensationOutcome Fail(Error error, string? externalReference = null) =>
+        new(false, error, externalReference);
+}

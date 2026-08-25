@@ -110,6 +110,13 @@ public interface ISagaRepository
     Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken);
 }
 
+public interface IBookingRepository
+{
+    Task AddAsync(Domain.Booking.Booking booking, CancellationToken cancellationToken);
+
+    Task<Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken);
+}
+
 public interface IUnitOfWork
 {
     Task SaveChangesAsync(CancellationToken cancellationToken);

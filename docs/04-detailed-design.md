@@ -532,7 +532,13 @@ public enum StepResult { Succeeded, Failed, Unknown }
 
 Every step supplies all three behaviours. A step that cannot resolve its own ambiguity has no business making a remote call, so `ResolveUnknownAsync` is required rather than optional — the interface makes the obligation impossible to overlook.
 
-Idempotency keys are **derived, not random**: `{sagaId}:{stepKind}`. Deriving them means a retry after a crash reproduces the same key without needing to have persisted it first, which closes the window where a key is generated but lost before use.
+`SagaContext` carries the saga, quote, offer, partner, member, tender, stay date, and margin floor. Remote steps resolve `Unknown` by querying the far side. Local steps look up the prior effect (ledger key or re-validate) and only re-execute when it never landed.
+
+Idempotency keys are **derived, not random**: `{sagaId}:{stepKind}` for execute, `{sagaId}:{stepKind}:compensate` for compensation. Deriving them means a retry after a crash reproduces the same key without needing to have persisted it first, which closes the window where a key is generated but lost before use.
+
+```csharp
+public sealed record CompensationOutcome(bool Succeeded, Error? Error, string? ExternalReference);
+```
 
 ### 4.2 Orchestrator
 

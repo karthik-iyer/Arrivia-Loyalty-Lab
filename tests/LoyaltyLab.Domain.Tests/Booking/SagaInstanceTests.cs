@@ -41,6 +41,8 @@ public sealed class SagaInstanceTests
         second.Should().Be(first);
         SagaInstance.DeriveIdempotencyKey(id, SagaStepKind.CapturePayment)
             .Should().NotBe(first);
+        SagaInstance.DeriveCompensationKey(id, SagaStepKind.AuthorizePayment)
+            .Should().Be("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee:AuthorizePayment:compensate");
     }
 
     [Fact]

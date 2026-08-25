@@ -1,4 +1,5 @@
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Idempotency;
@@ -178,6 +179,113 @@ internal sealed class FakeBookingTenders : IBookingTenderQuery
     {
         _ = asOf;
         return Task.FromResult(Tenders);
+    }
+}
+
+internal sealed class FakeBookings : IBookingRepository
+{
+    private readonly List<LoyaltyLab.Domain.Booking.Booking> _bookings = [];
+
+    public IReadOnlyList<LoyaltyLab.Domain.Booking.Booking> Items => _bookings;
+
+    public Task AddAsync(LoyaltyLab.Domain.Booking.Booking booking, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(booking);
+        _bookings.Add(booking);
+        return Task.CompletedTask;
+    }
+
+    public Task<LoyaltyLab.Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken) =>
+        Task.FromResult(_bookings.SingleOrDefault(booking => booking.Id == id));
+}
+
+internal sealed class FakeSupplier : ISupplierClient
+{
+    public Result<Money> NetRate { get; set; } = Result<Money>.Failure(Errors.OfferNotFound);
+
+    public StepOutcome Reserve { get; set; } = StepOutcome.Succeeded("res-1");
+
+    public StepOutcome Release { get; set; } = StepOutcome.Succeeded("res-1");
+
+    public StepOutcome Query { get; set; } = StepOutcome.Succeeded("res-1");
+
+    public string? LastReleased { get; private set; }
+
+    public Task<Result<Money>> GetCurrentNetRateAsync(OfferId offerId, CancellationToken cancellationToken)
+    {
+        _ = offerId;
+        return Task.FromResult(NetRate);
+    }
+
+    public Task<StepOutcome> ReserveAsync(ReservationRequest request, CancellationToken cancellationToken)
+    {
+        _ = request;
+        return Task.FromResult(Reserve);
+    }
+
+    public Task<StepOutcome> ReleaseAsync(string reference, CancellationToken cancellationToken)
+    {
+        LastReleased = reference;
+        return Task.FromResult(Release);
+    }
+
+    public Task<StepOutcome> QueryReservationAsync(string idempotencyKey, CancellationToken cancellationToken)
+    {
+        _ = idempotencyKey;
+        return Task.FromResult(Query);
+    }
+}
+
+internal sealed class FakePayments : IPaymentGateway
+{
+    public StepOutcome Authorize { get; set; } = StepOutcome.Succeeded("pay-1");
+
+    public StepOutcome Capture { get; set; } = StepOutcome.Succeeded("pay-1");
+
+    public StepOutcome Void { get; set; } = StepOutcome.Succeeded("pay-1");
+
+    public StepOutcome Refund { get; set; } = StepOutcome.Succeeded("pay-1");
+
+    public StepOutcome Query { get; set; } = StepOutcome.Succeeded("pay-1");
+
+    public string? LastAuthorizeKey { get; private set; }
+
+    public string? LastQueryKey { get; private set; }
+
+    public string? LastVoidId { get; private set; }
+
+    public string? LastCaptureId { get; private set; }
+
+    public string? LastRefundId { get; private set; }
+
+    public Task<StepOutcome> AuthorizeAsync(PaymentAuthorizeRequest request, CancellationToken cancellationToken)
+    {
+        LastAuthorizeKey = request.IdempotencyKey;
+        return Task.FromResult(Authorize);
+    }
+
+    public Task<StepOutcome> CaptureAsync(PaymentReferenceRequest request, CancellationToken cancellationToken)
+    {
+        LastCaptureId = request.PaymentId;
+        return Task.FromResult(Capture);
+    }
+
+    public Task<StepOutcome> VoidAsync(PaymentReferenceRequest request, CancellationToken cancellationToken)
+    {
+        LastVoidId = request.PaymentId;
+        return Task.FromResult(Void);
+    }
+
+    public Task<StepOutcome> RefundAsync(PaymentReferenceRequest request, CancellationToken cancellationToken)
+    {
+        LastRefundId = request.PaymentId;
+        return Task.FromResult(Refund);
+    }
+
+    public Task<StepOutcome> QueryByKeyAsync(string idempotencyKey, CancellationToken cancellationToken)
+    {
+        LastQueryKey = idempotencyKey;
+        return Task.FromResult(Query);
     }
 }
 
