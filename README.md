@@ -2,7 +2,7 @@
 
 A reference implementation of the hardest problems in **white-label travel loyalty**: multi-tenant member pricing, a trustworthy rewards-currency ledger, a booking process that stays consistent when systems fail, an AI concierge that cannot recommend something the member can't actually book, and a nudge engine that knows when to stay quiet.
 
-> **Status:** design phase. The `docs/` folder is complete and is the source of truth; code lands task by task per [`docs/07-task-breakdown.md`](docs/07-task-breakdown.md).
+> **Status:** F1–F4 are implemented (pricing, ledger, booking saga, Angular, concierge + MCP). F5 Opportunity engine is stretch and not started.
 
 ## Why this exists
 
@@ -54,7 +54,79 @@ The `docs/` folder is the design record, written before the code. Read in order:
 
 ## Getting started
 
-Setup instructions land with the first implementation task (T-080). The short version, once code exists: `scripts/run-all.ps1` starts the API, the payment simulator, and the web app. No cloud account, no API key, no Docker.
+No cloud account, API key, or Docker. SQLite and seeding happen when the API starts. Development mode pins the demo clock at **15 March 2026 12:00 UTC** so March beach inventory and the worked-example prices stay stable.
+
+### Prerequisites (bare machine)
+
+| Tool | Version | Check |
+|---|---|---|
+| [.NET 10 SDK](https://dotnet.microsoft.com/download) | 10.x | `dotnet --version` |
+| [Node.js](https://nodejs.org) | 22 LTS (20.19+ also works) | `node --version` |
+| npm | comes with Node | `npm --version` |
+
+Git is only needed to clone. Windows PowerShell 5.1 or PowerShell 7 can run the start script.
+
+### One script
+
+From the repository root:
+
+```powershell
+powershell -File scripts/run-all.ps1
+```
+
+That opens three windows (payment simulator, API, Angular), waits until each is healthy, and prints the URLs. Browse to [http://127.0.0.1:4200/](http://127.0.0.1:4200/). The demo switcher defaults to **Maya · Summit Gold**.
+
+### Three terminals
+
+Use this when you want logs in the current shell instead of extra windows. Run them in this order so checkout can reach the simulator.
+
+**1 — Payment simulator** (`:5190`)
+
+```powershell
+dotnet run --project src/LoyaltyLab.PaymentSim --launch-profile http
+```
+
+**2 — API** (`:5180`)
+
+```powershell
+dotnet run --project src/LoyaltyLab.Api --launch-profile http
+```
+
+**3 — Angular** (`:4200`)
+
+```powershell
+Set-Location src/loyaltylab-web
+npm install
+npx ng serve --host 127.0.0.1 --port 4200
+```
+
+`--launch-profile http` sets `ASPNETCORE_ENVIRONMENT=Development` (demo clock, fault-injection switch). Do not pass `--no-launch-profile` unless you also export that environment variable.
+
+### Tests
+
+```powershell
+dotnet test LoyaltyLab.sln
+Set-Location src/loyaltylab-web
+npx ng test --watch=false
+npm run lint:boundaries
+```
+
+If `dotnet test` fails because `LoyaltyLab.Api.dll` is locked, stop the running API (or pass `-p:UseArtifactsOutput=true`).
+
+### Troubleshooting
+
+| Symptom | Likely cause | What to do |
+|---|---|---|
+| `scripts/run-all.ps1` cannot find `dotnet` or `node` | SDK installed, terminal not restarted | Close and reopen the terminal, then confirm `dotnet --version` / `node --version`. |
+| Port 5180, 5190, or 4200 already in use | Leftover process from a previous run | Stop that window, or `netstat -ano` and look for `:5180` / `:5190` / `:4200`. The script reuses a port if something is already listening. |
+| Web loads, Offers fail, or concierge says **Not Found** | API not running, or an old API started before those endpoints existed | Restart `LoyaltyLab.Api` from current `main`. Confirm `http://localhost:5180/health`. |
+| Checkout hangs or payment steps fail | PaymentSim is down | Start terminal 1 first. Confirm `http://localhost:5190/health`. |
+| March beach search returns nothing | API not in Development (clock is "now") | Use `--launch-profile http` or set `ASPNETCORE_ENVIRONMENT=Development`. |
+| `PARTNER_NOT_RESOLVED` from curl | Missing tenant header | Browser demo switcher sets `X-Partner-Code` / `X-Member-Id`. For curl: `-H "X-Partner-Code: SUMMIT" -H "X-Member-Id: a11ce001-0002-7000-8000-000000000001"`. |
+| `dotnet test` / build: file locked | Running API holds the output DLL | Stop the API, or test with `-p:UseArtifactsOutput=true`. |
+| SQLite `database is locked` | Two API processes on the same `loyaltylab.db` | Run a single API. Tests use their own temp databases. |
+
+The numbered reviewer walkthrough lives in [problem statement §7](docs/01-problem-statement.md#7-success-criteria-for-the-proof-of-concept).
 
 ## A note on scope
 
