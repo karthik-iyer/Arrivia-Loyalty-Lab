@@ -102,6 +102,24 @@ public sealed class SimulatedSupplierClientTests
     }
 
     [Fact]
+    public async Task FailOnRelease_leaves_the_hold_in_place()
+    {
+        var offer = Offer();
+        var faults = new SupplierFaultHooks();
+        var client = new SimulatedSupplierClient(new FakeOffers(offer), faults, new FixedClock(AsOf));
+        var reserved = await client.ReserveAsync(Request(offer.Id), CancellationToken.None);
+        faults.FailOnRelease = true;
+
+        var released = await client.ReleaseAsync(reserved.ExternalReference!, CancellationToken.None);
+        var queried = await client.QueryReservationAsync("saga-1:ReserveInventory", CancellationToken.None);
+
+        reserved.Result.Should().Be(StepResult.Succeeded);
+        released.Result.Should().Be(StepResult.Failed);
+        released.Error.Should().Be(Errors.SupplierUnavailable);
+        queried.Result.Should().Be(StepResult.Succeeded);
+    }
+
+    [Fact]
     public async Task Current_net_rate_is_the_offer_rate()
     {
         var offer = Offer();

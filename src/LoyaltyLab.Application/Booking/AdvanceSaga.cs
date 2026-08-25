@@ -68,7 +68,7 @@ public sealed class AdvanceSaga(
 
         while (saga.Status == SagaStatus.Running)
         {
-            var step = byKind[saga.Steps[saga.CurrentStepIndex].Kind];
+            var step = byKind[saga.CurrentKind];
             var status = saga.StepStatus(step.Kind);
             var outcome = status is SagaStepStatus.Unknown or SagaStepStatus.InProgress
                 ? await step.ResolveUnknownAsync(context, cancellationToken)

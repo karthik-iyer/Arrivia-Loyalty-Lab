@@ -10,7 +10,15 @@ public static class FaultInjectionStartup
 {
     public const string ConfigKey = "Features:FaultInjection";
 
+    public const string FailFastConfigKey = "Features:SimulatedCrashFailFast";
+
     public const string ProfileSection = "FaultProfile";
+
+    public static bool CrashFailFast(IConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(configuration);
+        return configuration.GetValue(FailFastConfigKey, true);
+    }
 
     public static bool IsEnabled(IConfiguration configuration)
     {

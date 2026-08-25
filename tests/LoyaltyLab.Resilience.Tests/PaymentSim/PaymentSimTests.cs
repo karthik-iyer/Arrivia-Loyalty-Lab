@@ -191,6 +191,24 @@ public sealed class PaymentSimTests : IClassFixture<PaymentSimFactory>
         payload.GetProperty("status").GetString().Should().Be("Authorized");
     }
 
+    [Fact]
+    public async Task Force_decline_on_capture_leaves_the_authorization_held()
+    {
+        using var client = _factory.CreateClient();
+        var authorized = await AuthorizeAsync(client, "saga-force-capture:AuthorizePayment", 22.00m);
+        var id = authorized.Body.GetProperty("id").GetGuid();
+        using var request = new HttpRequestMessage(HttpMethod.Post, $"/payments/authorizations/{id}/capture");
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", "saga-force-capture:CapturePayment");
+        request.Headers.TryAddWithoutValidation("X-Sim-Force-Decline", "true");
+
+        using var response = await client.SendAsync(request);
+        var listed = await client.GetFromJsonAsync<JsonElement>("/payments");
+        var stored = listed.EnumerateArray().Single(item => item.GetProperty("id").GetGuid() == id);
+
+        response.StatusCode.Should().Be(HttpStatusCode.PaymentRequired);
+        stored.GetProperty("status").GetString().Should().Be("Authorized");
+    }
+
     private static async Task<(HttpStatusCode StatusCode, JsonElement Body)> AuthorizeAsync(
         HttpClient client,
         string key,

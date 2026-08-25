@@ -1,3 +1,4 @@
+using LoyaltyLab.Api.FaultInjection;
 using LoyaltyLab.Application.Booking;
 using Microsoft.AspNetCore.Diagnostics;
 
@@ -18,7 +19,11 @@ internal sealed class UnhandledExceptionHandler : IExceptionHandler
 
         if (exception is SimulatedCrashException crash)
         {
-            Environment.FailFast(crash.Message, crash);
+            var configuration = httpContext.RequestServices.GetService<IConfiguration>();
+            if (configuration is null || FaultInjectionStartup.CrashFailFast(configuration))
+            {
+                Environment.FailFast(crash.Message, crash);
+            }
         }
 
         if (httpContext.Response.HasStarted)

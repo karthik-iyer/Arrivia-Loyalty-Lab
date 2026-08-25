@@ -47,8 +47,17 @@ internal static class PaymentEndpoints
     private static Task<IResult> CaptureAsync(
         Guid id,
         PaymentProcessor payments,
-        HttpContext http) =>
-        Task.FromResult(ToHttp(http, payments.Capture(id, Key(http))));
+        HttpContext http)
+    {
+        if (Flag(http, ForceDeclineHeader))
+        {
+            return Task.FromResult(Results.Json(
+                new { id, status = "Declined", errorCode = "PAYMENT_DECLINED" },
+                statusCode: StatusCodes.Status402PaymentRequired));
+        }
+
+        return Task.FromResult(ToHttp(http, payments.Capture(id, Key(http))));
+    }
 
     private static Task<IResult> VoidAsync(
         Guid id,

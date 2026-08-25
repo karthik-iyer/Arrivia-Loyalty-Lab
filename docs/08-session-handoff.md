@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-039** booking HTTP + operator/admin. F5 stays stretch.
+Stop here and resume from **T-050** Angular 21 scaffold. F5 stays stretch.
 
 ## Where we are
 
@@ -9,39 +9,26 @@ Stop here and resume from **T-039** booking HTTP + operator/admin. F5 stays stre
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
 | T-020 … T-026 | Done — ledger through property-based invariants |
-| T-030 … T-037 | Done — payment, supplier, saga, outbox, recovery |
-| T-038 | Done — `FaultProfile`, `X-Fault-Profile`, production refusal |
-| Next | **T-039** `POST /bookings`, operator sagas, admin workers |
+| T-030 … T-038 | Done — payment, supplier, saga, outbox, recovery, fault injection |
+| T-039 | Done — booking HTTP, operator sagas, admin workers |
+| T-040 | Done — Resilience.Tests against real PaymentSim (decline, capture fail, kill/recover, timeout, exhausted compensation) |
+| Next | **T-050** Angular 21 scaffold, five layer folders, ESLint boundary rules |
 
 ## Verify
 
-- API refuses to start with `Features:FaultInjection=true` in Production (NFR-14).
-- Development with the flag on starts and registers the injector.
-- `X-Fault-Profile` drives supplier hooks; `CrashAfterStep` throws after persist.
+- After a kill and recovery, exactly one authorization exists at PaymentSim (NFR-13).
+- Payment decline releases the reservation; capture failure reverses the burn; timeout resolves via query; exhausted compensation is `RequiresManualReview`.
 
 ## First actions next session
 
-1. **T-039** booking HTTP + operator/admin (FR-B-08).
-2. Then T-040 resilience tests against the real simulator.
+1. **T-050** Angular 21 scaffold, the five layer folders, and ESLint boundary rules (NFR-09).
+2. Then T-051 domain models and HTTP adapters.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 30 of 51 core tasks** (Phases 0–2 complete; Phase 3 through T-038). F5 (T-070–T-076) is stretch and is not started.
-
-| Phase | Status | Left |
-|---|---|---|
-| 0 Foundation | T-001–T-007 done | — |
-| 1 Pricing | T-010–T-016 done | — |
-| 2 Ledger | T-020–T-026 done | — |
-| 3 Booking saga | T-030–T-038 done | **T-039** HTTP + operator/admin, **T-040** kill/recover vs PaymentSim |
-| 4 Angular | not started | T-050–T-057 (8) |
-| 5 Concierge + MCP | not started | T-060–T-066 (7) |
-| 7 Polish | not started | T-080–T-083 (4) |
-| 6 Opportunity (stretch) | do not start until 0–5 are green | T-070–T-076 (7) |
-
-**21 core tasks remain** after this commit. The booking *engine* is in place; T-039 is the first time a client can start a booking over HTTP. Angular is Phase 4 — not per-feature. F5 stays cuttable per `docs/07` §12.
+**Done: 32 of 51 core tasks.** 19 core tasks remain (T-050–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 

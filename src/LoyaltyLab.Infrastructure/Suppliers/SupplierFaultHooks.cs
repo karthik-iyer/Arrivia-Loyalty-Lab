@@ -13,6 +13,8 @@ public sealed class SupplierFaultHooks
 
     public bool DeclineOnReserve { get; set; }
 
+    public bool FailOnRelease { get; set; }
+
     public int AddedLatencyMs { get; set; }
 
     public void Apply(FaultProfile profile)
@@ -20,6 +22,7 @@ public sealed class SupplierFaultHooks
         ArgumentNullException.ThrowIfNull(profile);
         TimeoutOnReserve = profile.SupplierTimeout;
         DeclineOnReserve = profile.SupplierDecline;
+        FailOnRelease = profile.SupplierReleaseFail;
         AddedLatencyMs = Math.Max(0, profile.AddedLatencyMs ?? 0);
     }
 }

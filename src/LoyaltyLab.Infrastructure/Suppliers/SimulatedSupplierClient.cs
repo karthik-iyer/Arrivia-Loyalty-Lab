@@ -168,6 +168,11 @@ public sealed class SimulatedSupplierClient : ISupplierClient
     public async Task<StepOutcome> ReleaseAsync(string reference, CancellationToken cancellationToken)
     {
         await DelayIfRequested(cancellationToken);
+        if (_faults.FailOnRelease)
+        {
+            return StepOutcome.Failed(Errors.SupplierUnavailable);
+        }
+
         if (string.IsNullOrWhiteSpace(reference))
         {
             return StepOutcome.Failed(Errors.SupplierUnavailable);

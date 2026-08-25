@@ -204,6 +204,8 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
 
     public int CurrentStepIndex { get; private set; }
 
+    public SagaStepKind CurrentKind => (SagaStepKind)CurrentStepIndex;
+
     public List<SagaStepRecord> Steps { get; private set; }
 
     public string CorrelationId { get; private set; }
@@ -306,7 +308,7 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     {
         ArgumentNullException.ThrowIfNull(clock);
         EnsureRunning();
-        var current = Steps[CurrentStepIndex];
+        var current = Step(CurrentKind);
         if (current.Status != SagaStepStatus.Succeeded)
         {
             throw new DomainException("A saga can only advance after the current step succeeded.");

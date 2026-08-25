@@ -10,10 +10,12 @@ public sealed record FaultProfile(
     bool PaymentTimeout = false,
     bool PaymentDecline = false,
     SagaStepKind? CrashAfterStep = null,
-    int? AddedLatencyMs = null)
+    int? AddedLatencyMs = null,
+    bool PaymentCaptureDecline = false,
+    bool SupplierReleaseFail = false)
 {
     public FaultProfile()
-        : this(false, false, false, false, null, null)
+        : this(false, false, false, false, null, null, false, false)
     {
     }
 

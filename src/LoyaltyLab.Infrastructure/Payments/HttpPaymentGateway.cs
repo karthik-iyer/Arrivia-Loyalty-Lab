@@ -89,7 +89,7 @@ public sealed class HttpPaymentGateway(HttpClient http, IEnumerable<IFaultInject
                 request.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
             }
 
-            ApplyAuthorizeFaults(request, method, path, profile);
+            ApplyFaultHeaders(request, method, path, profile);
 
             if (body is not null)
             {
@@ -105,26 +105,36 @@ public sealed class HttpPaymentGateway(HttpClient http, IEnumerable<IFaultInject
         }
     }
 
-    private static void ApplyAuthorizeFaults(
+    private static void ApplyFaultHeaders(
         HttpRequestMessage request,
         HttpMethod method,
         string path,
         FaultProfile profile)
     {
-        if (method != HttpMethod.Post
-            || !string.Equals(path, "/payments/authorizations", StringComparison.Ordinal))
+        if (method != HttpMethod.Post)
         {
             return;
         }
 
-        if (profile.PaymentDecline)
+        if (string.Equals(path, "/payments/authorizations", StringComparison.Ordinal))
         {
-            request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceDecline, "true");
+            if (profile.PaymentDecline)
+            {
+                request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceDecline, "true");
+            }
+
+            if (profile.PaymentTimeout)
+            {
+                request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceTimeout, "true");
+            }
+
+            return;
         }
 
-        if (profile.PaymentTimeout)
+        if (profile.PaymentCaptureDecline
+            && path.Contains("/capture", StringComparison.OrdinalIgnoreCase))
         {
-            request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceTimeout, "true");
+            request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceDecline, "true");
         }
     }
 

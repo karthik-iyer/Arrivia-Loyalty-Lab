@@ -74,6 +74,21 @@ public sealed class HttpPaymentGatewayTests
     }
 
     [Fact]
+    public async Task PaymentCaptureDecline_sends_the_force_decline_header_on_capture()
+    {
+        var capture = new CaptureHandler(HttpStatusCode.PaymentRequired, """{"id":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","status":"Declined"}""");
+        var gateway = CreateGateway(capture, faults: new FaultProfile(PaymentCaptureDecline: true));
+
+        var outcome = await gateway.CaptureAsync(
+            new PaymentReferenceRequest("aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee", "saga-1:CapturePayment"),
+            CancellationToken.None);
+
+        outcome.Result.Should().Be(StepResult.Failed);
+        outcome.Error.Should().Be(Errors.PaymentDeclined);
+        capture.Headers.Should().Contain("X-Sim-Force-Decline");
+    }
+
+    [Fact]
     public async Task PaymentTimeout_sends_the_force_timeout_header_and_maps_408_to_unknown()
     {
         var capture = new CaptureHandler(HttpStatusCode.RequestTimeout, body: null);

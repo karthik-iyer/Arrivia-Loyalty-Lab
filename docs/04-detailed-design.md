@@ -675,10 +675,12 @@ public sealed record FaultProfile(
     bool SupplierTimeout = false, bool SupplierDecline = false,
     bool PaymentTimeout = false, bool PaymentDecline = false,
     SagaStepKind? CrashAfterStep = null,
-    int? AddedLatencyMs = null);
+    int? AddedLatencyMs = null,
+    bool PaymentCaptureDecline = false,
+    bool SupplierReleaseFail = false);
 ```
 
-Supplied per request via an `X-Fault-Profile` header, or globally by configuration. `CrashAfterStep` throws a non-catchable marker exception that the host treats as a process abort, which is what makes the recovery path demonstrable rather than merely unit-tested.
+Supplied per request via an `X-Fault-Profile` header, or globally by configuration. `CrashAfterStep` throws a marker exception that the host treats as a process abort (`Environment.FailFast`), which is what makes the recovery path demonstrable rather than merely unit-tested. Automated chaos tests set `Features:SimulatedCrashFailFast` to `false` so the same SQLite database can be opened by a restarted host; PaymentSim still holds the sole authorization. `PaymentCaptureDecline` refuses capture at the simulator without consuming the hold, so compensation can void. `SupplierReleaseFail` exhausts compensation retries and lands in `RequiresManualReview`.
 
 Registration is guarded: the fault injector is only added to the container when `Features:FaultInjection` is enabled, and the API refuses to start if that flag is set in a production environment.
 
@@ -963,10 +965,14 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `PAYMENT_NOT_FOUND` | 404 | Unknown payment, or the hold never landed |
 | `SUPPLIER_UNAVAILABLE` | 503 | Reservation could not be placed |
 | `TEMPORARY_FAILURE` | 503 | Remote blip; the orchestrator retries the same step |
+| `BOOKING_NOT_FOUND` | 404 | Unknown, or belongs to another partner or member |
 | `BOOKING_IN_PROGRESS` | 409 | A saga is already running for this booking |
-| `SAGA_REQUIRES_REVIEW` | 409 | Terminal state needing manual intervention |
-| `IDEMPOTENCY_KEY_REUSED` | 409 | Same key, different payload |
 | `BOOKING_ALREADY_CANCELLED` | 409 | Cancellation replay with a different key |
+| `SAGA_NOT_FOUND` | 404 | Unknown, or belongs to another partner |
+| `SAGA_REQUIRES_REVIEW` | 409 | Terminal state needing manual intervention |
+| `MISSING_IDEMPOTENCY_KEY` | 400 | Mutation required `Idempotency-Key` |
+| `WORKER_NOT_FOUND` | 404 | `/admin/run/{worker}` named an unknown worker |
+| `IDEMPOTENCY_KEY_REUSED` | 409 | Same key, different payload |
 | `NUDGE_EXPIRED` | 410 | Actioned after its lifetime |
 | `LEDGER_UNBALANCED` | 500 | Invariant breach — a defect, never expected |
 
