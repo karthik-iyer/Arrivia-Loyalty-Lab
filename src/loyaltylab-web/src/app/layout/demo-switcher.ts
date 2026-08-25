@@ -1,4 +1,5 @@
 import { Component, inject } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { DEMO_PERSONAS } from '../core/demo-personas';
 import { SessionStore } from '../core/session.store';
@@ -10,6 +11,7 @@ import { SessionStore } from '../core/session.store';
 })
 export class DemoSwitcher {
   private readonly session = inject(SessionStore);
+  private readonly router = inject(Router);
 
   readonly personas = DEMO_PERSONAS;
   readonly identity = this.session.identity;
@@ -31,6 +33,9 @@ export class DemoSwitcher {
     const persona = DEMO_PERSONAS.find((item) => item.id === id);
     if (persona) {
       await this.session.selectPersona(persona);
+      const url = this.router.url;
+      await this.router.navigateByUrl('/', { skipLocationChange: true });
+      await this.router.navigateByUrl(url);
     }
   }
 }

@@ -1,3 +1,4 @@
+import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 
 import { ok, PARTNER_PORT, type PartnerPort, type PartnerThemeView } from '../domain';
@@ -35,7 +36,7 @@ describe('DemoSwitcher', () => {
 
     TestBed.configureTestingModule({
       imports: [DemoSwitcher],
-      providers: [ThemeApplier, { provide: PARTNER_PORT, useValue: fake }],
+      providers: [provideRouter([]), ThemeApplier, { provide: PARTNER_PORT, useValue: fake }],
     });
 
     TestBed.inject(ThemeApplier);

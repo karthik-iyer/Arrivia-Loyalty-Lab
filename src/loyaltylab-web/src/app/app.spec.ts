@@ -1,14 +1,16 @@
+import { provideRouter } from '@angular/router';
 import { TestBed } from '@angular/core/testing';
 
-import { ok, PARTNER_PORT } from './domain';
 import { App } from './app';
 import { ThemeApplier } from './core/theme-applier';
+import { ok, PARTNER_PORT } from './domain';
 
 describe('App', () => {
   beforeEach(async () => {
     await TestBed.configureTestingModule({
       imports: [App],
       providers: [
+        provideRouter([]),
         ThemeApplier,
         {
           provide: PARTNER_PORT,

@@ -1,0 +1,49 @@
+<main class="catalog">
+  <h1>Offers</h1>
+  <p class="stay">Stay {{ store.stayDate() }}</p>
+
+  <div class="filters">
+    <label>
+      Tag
+      <select [value]="store.tag()" (change)="onTag($event)">
+        @for (tag of tags; track tag) {
+          <option [value]="tag">{{ tag === 'all' ? 'All tags' : tag }}</option>
+        }
+      </select>
+    </label>
+    <label>
+      Destination
+      <select [value]="store.destination()" (change)="onDestination($event)">
+        <option value="all">All destinations</option>
+        @for (name of store.destinations(); track name) {
+          <option [value]="name">{{ name }}</option>
+        }
+      </select>
+    </label>
+  </div>
+
+  @if (store.status() === 'loading') {
+    <p>Loading offers…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.status() === 'ready' && store.visible().length === 0) {
+    <p>No offers match these filters.</p>
+  }
+
+  <ul class="grid">
+    @for (offer of store.visible(); track offer.offerId) {
+      <li>
+        <a class="card" [routerLink]="['/offers', offer.offerId]">
+          <h2>{{ offer.propertyName }}</h2>
+          <p>{{ offer.destination }} · {{ offer.starRating }} star</p>
+          <p class="tags">{{ offer.tags.join(', ') }}</p>
+          <p class="price">{{ priceLabel(offer) }}</p>
+        </a>
+      </li>
+    }
+  </ul>
+</main>

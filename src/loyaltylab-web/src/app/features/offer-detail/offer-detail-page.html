@@ -1,0 +1,31 @@
+<main class="detail">
+  <p><a routerLink="/offers">Back to offers</a></p>
+
+  @if (store.status() === 'loading') {
+    <p>Loading offer…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.offer(); as offer) {
+    <h1>{{ offer.propertyName }}</h1>
+    <p>{{ offer.destination }} · {{ offer.starRating }} star · {{ offer.tags.join(', ') }}</p>
+
+    @if (offer.memberPrice === null) {
+      <p class="signed-out">Sign in to see member price and a price explanation.</p>
+    } @else if (store.quote(); as quote) {
+      <p class="price">{{ money(quote.memberPrice) }}</p>
+      <p class="meta">Up to {{ quote.maxCredits }} credits · expires {{ quote.expiresAt }}</p>
+    }
+
+    @defer (on immediate) {
+      @if (store.explanation(); as explanation) {
+        <ll-explanation-panel [explanation]="explanation" />
+      }
+    } @placeholder {
+      <p>Loading price explanation…</p>
+    }
+  }
+</main>

@@ -1,0 +1,67 @@
+.panel {
+  margin-top: 1.5rem;
+  padding: 0.75rem 1rem;
+  border-radius: var(--ll-radius-card);
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+}
+
+summary {
+  cursor: pointer;
+  font-weight: 650;
+  color: var(--ll-color-primary);
+}
+
+.headline {
+  font-size: 1.1rem;
+  font-weight: 650;
+}
+
+.internal {
+  font-size: 0.9rem;
+  color: #57534e;
+}
+
+.stages {
+  list-style: none;
+  padding: 0;
+  margin: 0.75rem 0 0;
+}
+
+.stage {
+  padding: 0.65rem 0.75rem;
+  border-left: 4px solid transparent;
+}
+
+.stage + .stage {
+  border-top: 1px solid #e7e5e4;
+}
+
+.stage--clamped {
+  border-left-color: var(--ll-color-primary);
+  background: color-mix(in srgb, var(--ll-color-primary) 12%, #fff);
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 1fr auto auto;
+  gap: 0.75rem;
+  align-items: baseline;
+}
+
+.delta {
+  color: #57534e;
+  font-variant-numeric: tabular-nums;
+}
+
+.subtotal {
+  font-weight: 650;
+  font-variant-numeric: tabular-nums;
+}
+
+.clamp {
+  margin: 0.4rem 0 0;
+  font-size: 0.9rem;
+  color: var(--ll-color-primary);
+  font-weight: 600;
+}

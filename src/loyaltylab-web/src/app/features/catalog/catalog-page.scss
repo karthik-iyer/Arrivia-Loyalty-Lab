@@ -1,0 +1,65 @@
+.catalog {
+  max-width: 64rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+.stay,
+.tags {
+  color: #57534e;
+  font-size: 0.9rem;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  margin: 1rem 0 1.5rem;
+}
+
+label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.card {
+  display: block;
+  padding: 1rem;
+  border-radius: var(--ll-radius-card);
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+}
+
+.card:focus-visible {
+  outline: 3px solid var(--ll-color-accent);
+  outline-offset: 2px;
+}
+
+.card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--ll-color-primary);
+}
+
+.price {
+  margin: 0.75rem 0 0;
+  font-weight: 650;
+}
+
+.error {
+  color: #9f1239;
+}

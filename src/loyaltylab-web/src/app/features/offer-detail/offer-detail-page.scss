@@ -1,0 +1,31 @@
+.detail {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+a {
+  color: var(--ll-color-accent);
+}
+
+h1 {
+  margin: 0.5rem 0;
+  color: var(--ll-color-primary);
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 1rem 0 0.25rem;
+}
+
+.meta,
+.signed-out {
+  color: #57534e;
+}
+
+.error {
+  color: #9f1239;
+}

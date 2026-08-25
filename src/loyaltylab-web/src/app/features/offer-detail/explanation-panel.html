@@ -1,0 +1,31 @@
+@if (explanation(); as view) {
+  <details class="panel" open>
+    <summary>Why this price</summary>
+    <p class="headline">Member price {{ money(view.memberPrice) }}</p>
+    @if (view.netCost; as net) {
+      <p class="internal">Net cost {{ money(net) }}</p>
+    }
+    @if (view.margin; as margin) {
+      <p class="internal">Margin {{ money(margin) }}</p>
+    }
+    <ol class="stages">
+      @for (stage of view.stages; track stage.order) {
+        <li
+          class="stage"
+          [class.stage--clamped]="stage.wasClamped"
+        >
+          <div class="row">
+            <span class="desc">{{ stageLabel(stage) }}</span>
+            <span class="delta">{{ delta(stage.subtotalBefore, stage.subtotalAfter) }}</span>
+            <span class="subtotal">{{ money(stage.subtotalAfter) }}</span>
+          </div>
+          @if (stage.wasClamped) {
+            <p class="clamp">
+              Clamped: {{ stage.clampReason ?? 'This stage was raised to meet a partner minimum.' }}
+            </p>
+          }
+        </li>
+      }
+    </ol>
+  </details>
+}
