@@ -20,6 +20,7 @@ public sealed class LoyaltyLabApiFactory : WebApplicationFactory<Program>
                 ["DemoClock:UtcNow"] = "2026-03-15T12:00:00+00:00",
                 ["Outbox:Dispatcher:Enabled"] = "false",
                 ["SagaRecovery:Enabled"] = "false",
+                ["Features:FaultInjection"] = "false",
             });
         });
     }

@@ -78,7 +78,7 @@ internal sealed class PaymentProcessor(IOptions<SimulatorOptions> options, ICloc
         }
     }
 
-    public PaymentResult Authorize(PaymentCommand command, string? idempotencyKey)
+    public PaymentResult Authorize(PaymentCommand command, string? idempotencyKey, bool forceDecline = false)
     {
         if (!TryValidate(command, idempotencyKey, out var key, out var error))
         {
@@ -103,7 +103,9 @@ internal sealed class PaymentProcessor(IOptions<SimulatorOptions> options, ICloc
                 Currency = command.Currency.Trim().ToUpperInvariant(),
                 PayloadHash = hash,
                 CreatedAt = clock.UtcNow,
-                Status = CoinFlip(options.Value.DeclineRate) ? PaymentStatus.Declined : PaymentStatus.Authorized,
+                Status = forceDecline || CoinFlip(options.Value.DeclineRate)
+                    ? PaymentStatus.Declined
+                    : PaymentStatus.Authorized,
             };
 
             _byKey[key] = intent;

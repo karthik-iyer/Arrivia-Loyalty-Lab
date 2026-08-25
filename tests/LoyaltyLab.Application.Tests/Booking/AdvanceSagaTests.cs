@@ -1,4 +1,5 @@
 using LoyaltyLab.Application.Booking;
+using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Ledger;
@@ -233,6 +234,27 @@ public sealed class AdvanceSagaTests
         delay.Attempts.Should().Equal(1, 2);
     }
 
+    [Fact]
+    public async Task CrashAfterStep_throws_after_the_step_is_persisted()
+    {
+        var world = Harness.Create();
+        var faults = new FixedFaultInjector(new FaultProfile(CrashAfterStep: SagaStepKind.ValidateQuote));
+
+        var act = async () => await new AdvanceSaga(
+            world.Steps(),
+            world.UnitOfWork,
+            world.Clock,
+            ImmediateSagaDelay.Instance,
+            world.Outbox,
+            [faults]).ExecuteAsync(world.Context, CancellationToken.None);
+
+        var exception = (await act.Should().ThrowAsync<SimulatedCrashException>()).Which;
+        exception.AfterStep.Should().Be(SagaStepKind.ValidateQuote);
+        world.Saga.Step(SagaStepKind.ValidateQuote).Status.Should().Be(SagaStepStatus.Succeeded);
+        world.Saga.Status.Should().Be(SagaStatus.Running);
+        world.UnitOfWork.Saves.Should().BeGreaterThan(0);
+    }
+
     private static AdvanceSaga Orchestrator(
         Harness world,
         List<SagaStepKind> compensationLog,
@@ -273,5 +295,10 @@ public sealed class AdvanceSagaTests
 
         public Task<StepOutcome> ResolveUnknownAsync(SagaContext context, CancellationToken cancellationToken) =>
             inner.ResolveUnknownAsync(context, cancellationToken);
+    }
+
+    private sealed class FixedFaultInjector(FaultProfile profile) : IFaultInjector
+    {
+        public FaultProfile Current { get; } = profile;
     }
 }

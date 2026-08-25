@@ -1,3 +1,4 @@
+using LoyaltyLab.Application.Booking;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace LoyaltyLab.Api.Middleware;
@@ -14,6 +15,11 @@ internal sealed class UnhandledExceptionHandler : IExceptionHandler
     {
         ArgumentNullException.ThrowIfNull(exception);
         cancellationToken.ThrowIfCancellationRequested();
+
+        if (exception is SimulatedCrashException crash)
+        {
+            Environment.FailFast(crash.Message, crash);
+        }
 
         if (httpContext.Response.HasStarted)
         {

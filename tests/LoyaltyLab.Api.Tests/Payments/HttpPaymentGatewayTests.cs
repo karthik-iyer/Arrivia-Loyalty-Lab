@@ -59,12 +59,45 @@ public sealed class HttpPaymentGatewayTests
         outcome.ExternalReference.Should().Be(id.ToString());
     }
 
+    [Fact]
+    public async Task PaymentDecline_sends_the_force_decline_header()
+    {
+        var capture = new CaptureHandler(HttpStatusCode.PaymentRequired, """{"id":"aaaaaaaa-bbbb-cccc-dddd-eeeeeeeeeeee","status":"Declined"}""");
+        var gateway = CreateGateway(capture, faults: new FaultProfile(PaymentDecline: true));
+
+        var outcome = await gateway.AuthorizeAsync(Authorize(), CancellationToken.None);
+
+        outcome.Result.Should().Be(StepResult.Failed);
+        outcome.Error.Should().Be(Errors.PaymentDeclined);
+        capture.Headers.Should().Contain("X-Sim-Force-Decline");
+        capture.Headers.Should().NotContain("X-Sim-Force-Timeout");
+    }
+
+    [Fact]
+    public async Task PaymentTimeout_sends_the_force_timeout_header_and_maps_408_to_unknown()
+    {
+        var capture = new CaptureHandler(HttpStatusCode.RequestTimeout, body: null);
+        var gateway = CreateGateway(capture, faults: new FaultProfile(PaymentTimeout: true));
+
+        var outcome = await gateway.AuthorizeAsync(Authorize(), CancellationToken.None);
+
+        outcome.Result.Should().Be(StepResult.Unknown);
+        outcome.ExternalReference.Should().BeNull();
+        capture.Headers.Should().Contain("X-Sim-Force-Timeout");
+    }
+
     private static IPaymentGateway CreateGateway(
         HttpMessageHandler handler,
         int retryCount = 0,
-        int attemptTimeoutMs = 2_000)
+        int attemptTimeoutMs = 2_000,
+        FaultProfile? faults = null)
     {
         var services = new ServiceCollection();
+        if (faults is not null)
+        {
+            services.AddSingleton<IFaultInjector>(new FixedFaultInjector(faults));
+        }
+
         var builder = services.AddHttpClient<IPaymentGateway, HttpPaymentGateway>(client =>
         {
             client.BaseAddress = new Uri("http://payment.test/");
@@ -106,5 +139,29 @@ public sealed class HttpPaymentGatewayTests
             {
                 Content = new StringContent(json, Encoding.UTF8, "application/json"),
             });
+    }
+
+    private sealed class CaptureHandler(HttpStatusCode status, string? body) : HttpMessageHandler
+    {
+        public List<string> Headers { get; } = [];
+
+        protected override Task<HttpResponseMessage> SendAsync(
+            HttpRequestMessage request,
+            CancellationToken cancellationToken)
+        {
+            Headers.AddRange(request.Headers.Select(header => header.Key));
+            var response = new HttpResponseMessage(status);
+            if (body is not null)
+            {
+                response.Content = new StringContent(body, Encoding.UTF8, "application/json");
+            }
+
+            return Task.FromResult(response);
+        }
+    }
+
+    private sealed class FixedFaultInjector(FaultProfile profile) : IFaultInjector
+    {
+        public FaultProfile Current { get; } = profile;
     }
 }

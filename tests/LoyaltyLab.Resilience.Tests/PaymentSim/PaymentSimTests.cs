@@ -147,6 +147,50 @@ public sealed class PaymentSimTests : IClassFixture<PaymentSimFactory>
         payload.GetProperty("status").GetString().Should().Be("Authorized");
     }
 
+    [Fact]
+    public async Task Force_decline_header_refuses_authorization()
+    {
+        using var client = _factory.CreateClient();
+        const string key = "saga-force-decline:AuthorizePayment";
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/payments/authorizations")
+        {
+            Content = JsonContent.Create(new { amount = 9.00m, currency = "USD", description = "Coral Bay" }),
+        };
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", key);
+        request.Headers.TryAddWithoutValidation("X-Sim-Force-Decline", "true");
+
+        using var response = await client.SendAsync(request);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(Json);
+        var found = await client.GetAsync($"/payments/by-key?key={Uri.EscapeDataString(key)}");
+        var stored = await found.Content.ReadFromJsonAsync<JsonElement>(Json);
+
+        response.StatusCode.Should().Be(HttpStatusCode.PaymentRequired);
+        body.GetProperty("status").GetString().Should().Be("Declined");
+        found.StatusCode.Should().Be(HttpStatusCode.OK);
+        stored.GetProperty("status").GetString().Should().Be("Declined");
+    }
+
+    [Fact]
+    public async Task Force_timeout_header_stores_then_returns_408()
+    {
+        using var client = _factory.CreateClient();
+        const string key = "saga-force-timeout:AuthorizePayment";
+        using var request = new HttpRequestMessage(HttpMethod.Post, "/payments/authorizations")
+        {
+            Content = JsonContent.Create(new { amount = 18.00m, currency = "USD", description = "Coral Bay" }),
+        };
+        request.Headers.TryAddWithoutValidation("Idempotency-Key", key);
+        request.Headers.TryAddWithoutValidation("X-Sim-Force-Timeout", "true");
+
+        using var response = await client.SendAsync(request);
+        var found = await client.GetAsync($"/payments/by-key?key={Uri.EscapeDataString(key)}");
+        var payload = await found.Content.ReadFromJsonAsync<JsonElement>(Json);
+
+        response.StatusCode.Should().Be(HttpStatusCode.RequestTimeout);
+        found.StatusCode.Should().Be(HttpStatusCode.OK);
+        payload.GetProperty("status").GetString().Should().Be("Authorized");
+    }
+
     private static async Task<(HttpStatusCode StatusCode, JsonElement Body)> AuthorizeAsync(
         HttpClient client,
         string key,

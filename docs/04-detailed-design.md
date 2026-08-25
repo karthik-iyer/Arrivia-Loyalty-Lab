@@ -700,11 +700,11 @@ Registration is guarded: the fault injector is only added to the container when 
 | `GET` | `/payments` | Simulator inventory for chaos tests. |
 | `GET` | `/health` | Liveness. |
 
-`Simulator:LatencyMs`, `DeclineRate`, `TimeoutRate`, and `TimeoutHangMs` control faults. A timeout hang is a delay **after** the authorization is stored, so a client that gives up can still query a real hold.
+`Simulator:LatencyMs`, `DeclineRate`, `TimeoutRate`, and `TimeoutHangMs` control faults. A timeout hang is a delay **after** the authorization is stored, so a client that gives up can still query a real hold. Per-request `X-Sim-Force-Decline` and `X-Sim-Force-Timeout` override those rates so `X-Fault-Profile` can target a single authorization (FR-B-09). Force-timeout stores the hold, then returns `408` without hanging.
 
 ### 4.10 Simulated supplier (in-process)
 
-The supplier stays in-process (`SimulatedSupplierClient`) — it is not the process boundary ADR-0006 reserved for payment. `ReservationRequest` is `(OfferId, DateOnly StayDate, string IdempotencyKey)`. Fault hooks (`TimeoutOnReserve`, `DeclineOnReserve`, `AddedLatencyMs`) are set in tests today; T-038 will drive them from `X-Fault-Profile`.
+The supplier stays in-process (`SimulatedSupplierClient`) — it is not the process boundary ADR-0006 reserved for payment. `ReservationRequest` is `(OfferId, DateOnly StayDate, string IdempotencyKey)`. When fault injection is enabled, `X-Fault-Profile` (or the global `FaultProfile` section) drives `TimeoutOnReserve`, `DeclineOnReserve`, and `AddedLatencyMs`. Tests may still set the hooks directly.
 
 `TimeoutOnReserve` stores the hold first, then returns `StepResult.Unknown` with no reference. `QueryReservationAsync` is what resolves that ambiguity (FR-B-04). A real hang is impossible in-process; the store-then-unknown order is the analogue of PaymentSim's hang-after-commit.
 

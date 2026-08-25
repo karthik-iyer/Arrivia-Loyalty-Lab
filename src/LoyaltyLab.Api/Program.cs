@@ -1,4 +1,5 @@
 using LoyaltyLab.Api.Endpoints;
+using LoyaltyLab.Api.FaultInjection;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Api.Workers;
 using LoyaltyLab.Application.Abstractions;
@@ -16,6 +17,8 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
+
+FaultInjectionStartup.EnsureAllowed(builder.Environment, builder.Configuration);
 
 builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddProblemDetails();
@@ -55,6 +58,14 @@ builder.Services.AddScoped<IReadOnlyList<ISagaStep>>(sp =>
 builder.Services.AddSingleton<ISagaDelay>(ExponentialSagaDelay.Instance);
 builder.Services.AddScoped<AdvanceSaga>();
 builder.Services.AddScoped<RecoverStalledSagas>();
+builder.Host.ConfigureServices((context, services) =>
+{
+    if (FaultInjectionStartup.IsEnabled(context.Configuration))
+    {
+        services.AddFaultInjection(context.Configuration);
+    }
+});
+
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
@@ -63,10 +74,16 @@ builder.Services.ConfigureHttpJsonOptions(options =>
 
 var app = builder.Build();
 
+FaultInjectionStartup.EnsureAllowed(app.Environment, app.Configuration);
+
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 app.UseMiddleware<TenantResolutionMiddleware>();
+if (FaultInjectionStartup.IsEnabled(app.Configuration))
+{
+    app.UseMiddleware<FaultInjectionMiddleware>();
+}
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPricingEndpoints();

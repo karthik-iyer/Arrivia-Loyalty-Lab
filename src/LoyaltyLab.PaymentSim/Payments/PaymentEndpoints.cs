@@ -4,6 +4,10 @@ internal static class PaymentEndpoints
 {
     public const string IdempotencyHeader = "Idempotency-Key";
 
+    public const string ForceDeclineHeader = "X-Sim-Force-Decline";
+
+    public const string ForceTimeoutHeader = "X-Sim-Force-Timeout";
+
     public static void MapPaymentEndpoints(this IEndpointRouteBuilder app)
     {
         app.MapPost("/payments/authorizations", AuthorizeAsync);
@@ -21,7 +25,17 @@ internal static class PaymentEndpoints
         CancellationToken cancellationToken)
     {
         await DelayAsync(payments.LatencyMs, cancellationToken);
-        var result = payments.Authorize(new PaymentCommand(body.Amount, body.Currency, body.Description), Key(http));
+        var result = payments.Authorize(
+            new PaymentCommand(body.Amount, body.Currency, body.Description),
+            Key(http),
+            forceDecline: Flag(http, ForceDeclineHeader));
+        if (result.Error == PaymentError.None
+            && Flag(http, ForceTimeoutHeader)
+            && result.Intent!.Status != PaymentStatus.Declined)
+        {
+            return Results.StatusCode(StatusCodes.Status408RequestTimeout);
+        }
+
         if (result.Error == PaymentError.None && payments.ShouldHang(result.IsReplay))
         {
             await DelayAsync(payments.TimeoutHangMs, cancellationToken);
@@ -56,6 +70,13 @@ internal static class PaymentEndpoints
 
     private static string? Key(HttpContext http) =>
         http.Request.Headers[IdempotencyHeader].FirstOrDefault();
+
+    private static bool Flag(HttpContext http, string header)
+    {
+        var value = http.Request.Headers[header].FirstOrDefault();
+        return string.Equals(value, "true", StringComparison.OrdinalIgnoreCase)
+            || value == "1";
+    }
 
     private static async Task DelayAsync(int milliseconds, CancellationToken cancellationToken)
     {

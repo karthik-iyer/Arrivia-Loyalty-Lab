@@ -8,8 +8,17 @@ using Polly.Timeout;
 
 namespace LoyaltyLab.Infrastructure.Payments;
 
-public sealed class HttpPaymentGateway(HttpClient http) : IPaymentGateway
+internal static class PaymentSimFaultHeaders
 {
+    public const string ForceDecline = "X-Sim-Force-Decline";
+
+    public const string ForceTimeout = "X-Sim-Force-Timeout";
+}
+
+public sealed class HttpPaymentGateway(HttpClient http, IEnumerable<IFaultInjector> faults) : IPaymentGateway
+{
+    private readonly IFaultInjector? _faults = faults.FirstOrDefault();
+
     private static readonly JsonSerializerOptions Json = new()
     {
         PropertyNameCaseInsensitive = true,
@@ -67,11 +76,20 @@ public sealed class HttpPaymentGateway(HttpClient http) : IPaymentGateway
     {
         try
         {
+            var profile = _faults?.Current ?? FaultProfile.None;
+            var latency = profile.AddedLatencyMs ?? 0;
+            if (latency > 0)
+            {
+                await Task.Delay(latency, cancellationToken);
+            }
+
             using var request = new HttpRequestMessage(method, path);
             if (!string.IsNullOrWhiteSpace(idempotencyKey))
             {
                 request.Headers.TryAddWithoutValidation("Idempotency-Key", idempotencyKey);
             }
+
+            ApplyAuthorizeFaults(request, method, path, profile);
 
             if (body is not null)
             {
@@ -84,6 +102,29 @@ public sealed class HttpPaymentGateway(HttpClient http) : IPaymentGateway
         catch (Exception exception) when (IsRemoteTimeout(exception, cancellationToken))
         {
             return StepOutcome.Unknown();
+        }
+    }
+
+    private static void ApplyAuthorizeFaults(
+        HttpRequestMessage request,
+        HttpMethod method,
+        string path,
+        FaultProfile profile)
+    {
+        if (method != HttpMethod.Post
+            || !string.Equals(path, "/payments/authorizations", StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        if (profile.PaymentDecline)
+        {
+            request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceDecline, "true");
+        }
+
+        if (profile.PaymentTimeout)
+        {
+            request.Headers.TryAddWithoutValidation(PaymentSimFaultHeaders.ForceTimeout, "true");
         }
     }
 

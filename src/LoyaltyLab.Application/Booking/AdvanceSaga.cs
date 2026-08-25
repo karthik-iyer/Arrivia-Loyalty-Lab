@@ -44,8 +44,11 @@ public sealed class AdvanceSaga(
     IUnitOfWork unitOfWork,
     IClock clock,
     ISagaDelay delay,
-    IOutbox outbox)
+    IOutbox outbox,
+    IEnumerable<IFaultInjector>? faults = null)
 {
+    private readonly IFaultInjector? _faults = faults?.FirstOrDefault();
+
     public async Task<SagaStatus> ExecuteAsync(SagaContext context, CancellationToken cancellationToken)
     {
         ArgumentNullException.ThrowIfNull(context);
@@ -87,6 +90,7 @@ public sealed class AdvanceSaga(
                     }
 
                     await PersistAsync(cancellationToken);
+                    ThrowIfCrashRequested(step.Kind);
                     break;
 
                 case StepResult.Unknown:
@@ -204,6 +208,14 @@ public sealed class AdvanceSaga(
                 $$"""{"sagaId":"{{saga.Id.Value}}","bookingId":"{{saga.BookingId.Value}}"}""",
                 saga.CorrelationId,
                 clock));
+
+    private void ThrowIfCrashRequested(SagaStepKind kind)
+    {
+        if (_faults?.Current.CrashAfterStep == kind)
+        {
+            throw new SimulatedCrashException(kind);
+        }
+    }
 
     private Task PersistAsync(CancellationToken cancellationToken) =>
         unitOfWork.SaveChangesAsync(cancellationToken);
