@@ -1,1 +1,1 @@
-export {};
+export { WalletPage } from './wallet-page';

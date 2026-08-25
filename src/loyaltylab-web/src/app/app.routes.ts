@@ -15,4 +15,8 @@ export const routes: Routes = [
     path: 'checkout/:quoteId',
     loadComponent: () => import('./features/checkout/checkout-page').then((m) => m.CheckoutPage),
   },
+  {
+    path: 'wallet',
+    loadComponent: () => import('./features/wallet/wallet-page').then((m) => m.WalletPage),
+  },
 ];

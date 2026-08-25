@@ -1,4 +1,10 @@
-import type { BookingView, OfferSummary, PriceExplanationView } from '../domain';
+import type {
+  BookingView,
+  OfferSummary,
+  PriceExplanationView,
+  WalletBalanceView,
+  WalletStatementView,
+} from '../domain';
 
 export const coralOffer: OfferSummary = {
   offerId: 'a11ce001-0004-7000-8000-000000000001',
@@ -13,6 +19,50 @@ export const coralOffer: OfferSummary = {
 };
 
 export const anonymousCoral: OfferSummary = { ...coralOffer, memberPrice: null };
+
+export const mayaBalance: WalletBalanceView = {
+  memberId: 'a11ce001-0002-7000-8000-000000000001',
+  credits: 6000,
+  monetaryValue: { amount: 60, currency: 'USD' },
+  burnCap: 40,
+};
+
+/** Burn that a later reversal must link back to (FR-L-12 / US-04). */
+export const originalBurnId = 'a11ce001-0009-7000-8000-000000000002';
+
+export const mayaStatement: WalletStatementView = {
+  memberId: mayaBalance.memberId,
+  balance: 6000,
+  lines: [
+    {
+      id: 'a11ce001-0009-7000-8000-000000000001',
+      type: 'Earn',
+      occurredAt: '2026-03-01T00:00:00+00:00',
+      reason: 'Opening grant',
+      credits: 6000,
+      runningBalance: 6000,
+      reversesTransactionId: null,
+    },
+    {
+      id: originalBurnId,
+      type: 'Burn',
+      occurredAt: '2026-03-15T12:00:00+00:00',
+      reason: 'Booking tender',
+      credits: -4830,
+      runningBalance: 1170,
+      reversesTransactionId: null,
+    },
+    {
+      id: 'a11ce001-0009-7000-8000-000000000003',
+      type: 'Reversal',
+      occurredAt: '2026-03-15T12:04:00+00:00',
+      reason: 'Capture failed',
+      credits: 4830,
+      runningBalance: 6000,
+      reversesTransactionId: originalBurnId,
+    },
+  ],
+};
 
 export const clampedExplanation: PriceExplanationView = {
   stages: [

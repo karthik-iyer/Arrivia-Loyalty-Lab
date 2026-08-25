@@ -1,0 +1,50 @@
+.wallet {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+a {
+  color: var(--ll-color-accent);
+}
+
+h1 {
+  color: var(--ll-color-primary);
+}
+
+.credits {
+  font-size: 1.75rem;
+  font-weight: 700;
+  margin: 0.5rem 0 0.25rem;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 0.75rem;
+  background: #fff;
+  border-radius: var(--ll-radius-card);
+  overflow: hidden;
+}
+
+th,
+td {
+  text-align: left;
+  padding: 0.6rem 0.75rem;
+  border-bottom: 1px solid #e7e5e4;
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+tr:target {
+  background: color-mix(in srgb, var(--ll-color-primary) 12%, #fff);
+}
+
+.error {
+  color: #9f1239;
+}

@@ -4,4 +4,6 @@ export { SearchOffersUseCase } from './search-offers.use-case';
 export { ExplainQuoteUseCase, QuoteOfferUseCase } from './pricing.use-case';
 export { CheckoutStore } from './checkout.store';
 export { GetBalanceUseCase, GetBookingUseCase, StartBookingUseCase } from './booking.use-case';
+export { GetStatementUseCase } from './wallet.use-case';
+export { WalletStore } from './wallet.store';
 export { DEMO_STAY_DATE } from './demo-stay';

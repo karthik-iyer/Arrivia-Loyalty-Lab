@@ -23,6 +23,14 @@ const statementJson = `{
       "runningBalance": 6000
     },
     {
+      "id": "a11ce001-0009-7000-8000-000000000002",
+      "type": "Burn",
+      "occurredAt": "2026-03-15T12:00:00+00:00",
+      "reason": "Booking tender",
+      "credits": -4830,
+      "runningBalance": 1170
+    },
+    {
       "id": "a11ce001-0009-7000-8000-000000000003",
       "type": "Reversal",
       "occurredAt": "2026-03-15T12:04:00+00:00",
@@ -45,10 +53,11 @@ describe('wallet mapper', () => {
 
   it('maps a reversal onto the transaction it reverses', () => {
     const view = toWalletStatementView(JSON.parse(statementJson) as WalletStatementDto);
-    const reversal = view.lines[1];
+    const original = view.lines[1];
+    const reversal = view.lines[2];
 
-    expect(view.lines[0]?.reversesTransactionId).toBeNull();
+    expect(original?.id).toBe('a11ce001-0009-7000-8000-000000000002');
     expect(reversal?.type).toBe('Reversal');
-    expect(reversal?.reversesTransactionId).toBe('a11ce001-0009-7000-8000-000000000002');
+    expect(reversal?.reversesTransactionId).toBe(original?.id);
   });
 });

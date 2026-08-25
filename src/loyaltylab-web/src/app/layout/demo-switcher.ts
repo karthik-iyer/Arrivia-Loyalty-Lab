@@ -1,11 +1,12 @@
 import { Component, inject } from '@angular/core';
-import { Router } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 
 import { DEMO_PERSONAS } from '../core/demo-personas';
 import { SessionStore } from '../core/session.store';
 
 @Component({
   selector: 'll-demo-switcher',
+  imports: [RouterLink],
   templateUrl: './demo-switcher.html',
   styleUrl: './demo-switcher.scss',
 })

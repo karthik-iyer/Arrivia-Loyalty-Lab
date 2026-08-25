@@ -10,6 +10,10 @@
   @if (theme(); as current) {
     <span class="brand">{{ current.displayName }}</span>
   }
+  <nav aria-label="Primary">
+    <a routerLink="/offers">Offers</a>
+    <a routerLink="/wallet">Wallet</a>
+  </nav>
   @if (correlationId(); as corr) {
     <span class="corr" title="Last request correlation id">{{ corr }}</span>
   }

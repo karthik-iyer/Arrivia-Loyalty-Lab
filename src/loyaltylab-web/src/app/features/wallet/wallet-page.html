@@ -1,0 +1,53 @@
+<main class="wallet">
+  <p><a routerLink="/offers">Back to offers</a></p>
+  <h1>Wallet</h1>
+
+  @if (store.status() === 'loading') {
+    <p>Loading wallet…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.balance(); as balance) {
+    <p class="credits">{{ balance.credits }} credits</p>
+    <p>{{ money(balance.monetaryValue) }} · burn cap {{ balance.burnCap }}%</p>
+  }
+
+  @if (store.statement(); as statement) {
+    <h2>Statement</h2>
+    @if (statement.lines.length === 0) {
+      <p>No transactions yet.</p>
+    } @else {
+      <table>
+        <thead>
+          <tr>
+            <th>When</th>
+            <th>Type</th>
+            <th>Reason</th>
+            <th>Credits</th>
+            <th>Balance</th>
+            <th>Reversal</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (line of statement.lines; track line.id) {
+            <tr [attr.id]="rowId(line)">
+              <td>{{ occurredOn(line.occurredAt) }}</td>
+              <td>{{ line.type }}</td>
+              <td>{{ line.reason }}</td>
+              <td class="num">{{ signedCredits(line) }}</td>
+              <td class="num">{{ line.runningBalance }}</td>
+              <td>
+                @if (originalHref(line); as href) {
+                  <a [href]="href">Reverses original</a>
+                }
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  }
+</main>

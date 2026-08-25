@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-055** wallet: balance and statement with reversal links. F5 stays stretch.
+Stop here and resume from **T-056** operator view: saga list and step timeline, review-needed first. F5 stays stretch.
 
 ## Where we are
 
@@ -17,25 +17,25 @@ Stop here and resume from **T-055** wallet: balance and statement with reversal 
 | T-052 | Done — session, tenant/correlation interceptors, theming, demo switcher |
 | T-053 | Done — catalog, offer detail, price explanation panel |
 | T-054 | Done — checkout tender slider, idempotency key, saga timeline |
-| Next | **T-055** wallet: balance and statement with reversal links |
+| T-055 | Done — wallet balance, statement, reversal links to original |
+| Next | **T-056** operator sagas: list (review-needed first) and step timeline |
 
 ## Verify
 
-- Checkout slider cannot exceed `maxCredits`.
-- A compensated saga renders “Nothing was charged. Your credits are unchanged.”
-- One idempotency key is reused across retries of the same attempt.
-- Development enables `Features:FaultInjection` so the demo decline checkbox can send `X-Fault-Profile`.
+- Wallet shows credits, monetary equivalent, burn cap, reason, and running balance.
+- A reversal row links to `#txn-{originalId}` and the original row has that id.
+- Component tests use a fake `WALLET_PORT`, not HTTP mocks.
 
 ## First actions next session
 
-1. **T-055** Wallet: balance and statement with reversal links.
-2. Then T-056 operator sagas.
+1. **T-056** Operator view: saga list and step timeline, review-needed first (US-12).
+2. Then T-057 frontend tests wrap-up.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 37 of 51 core tasks.** 14 core tasks remain (T-055–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 38 of 51 core tasks.** 13 core tasks remain (T-056–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 
