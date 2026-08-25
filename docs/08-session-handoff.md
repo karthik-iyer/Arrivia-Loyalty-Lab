@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-065** Concierge UI with the collapsible audit disclosure. F5 stays stretch.
+Stop here and resume from **T-066** grounding and prompt-injection tests. F5 stays stretch.
 
 ## Where we are
 
@@ -18,24 +18,25 @@ Stop here and resume from **T-065** Concierge UI with the collapsible audit disc
 | T-062 | Done — narrator port, template default, invented prices fall back |
 | T-063 | Done — `POST /concierge/recommend` wires parser, quotes, pipeline, narrator |
 | T-064 | Done — MCP tools over Recommend, ExplainQuote, GetBalance |
-| Next | **T-065** Concierge UI with the collapsible audit disclosure |
+| T-065 | Done — Concierge UI with collapsible audit disclosure |
+| Next | **T-066** Grounding and prompt-injection tests |
 
 ## Verify
 
-- `GET`/`POST` `/mcp` lists `get_travel_recommendations`, `explain_offer_price`, `get_credit_balance`.
-- Tool JSON matches REST for the same partner, member, and input (quote ids may differ on recommend because each call issues fresh quotes).
-- Types under `Api/Mcp` do not reference Domain or Application and contain no `if`/`switch`.
+- `/concierge` searches from a text box and lists live quotes with Offer and Checkout links.
+- Audit is a collapsed `<details>` ("Why these results") listing considered/returned counts, exclusions with reasons, and ranking weights.
+- Template narrative still renders when `narrationApplied` is false; no error chrome.
 
 ## First actions next session
 
-1. **T-065** Angular concierge UI with collapsible audit (FR-C-05).
-2. Then T-066 grounding / prompt-injection tests.
+1. **T-066** Grounding and prompt-injection tests (FR-C-09, G9).
+2. Then polish T-080–T-083.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 45 of 51 core tasks.** 6 core tasks remain (T-065–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 46 of 51 core tasks.** 5 core tasks remain (T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 

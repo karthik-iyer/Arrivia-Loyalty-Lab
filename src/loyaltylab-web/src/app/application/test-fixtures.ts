@@ -1,5 +1,6 @@
 import type {
   BookingView,
+  ConciergeView,
   OfferSummary,
   PriceExplanationView,
   SagaListItemView,
@@ -64,6 +65,41 @@ export const mayaStatement: WalletStatementView = {
       reversesTransactionId: originalBurnId,
     },
   ],
+};
+
+export const coralConcierge: ConciergeView = {
+  narrative: 'Coral Bay Resort fits your dates, and credits cover most of it.',
+  narrationApplied: false,
+  recommendations: [
+    {
+      offerId: coralOffer.offerId,
+      propertyName: coralOffer.propertyName,
+      quoteId: 'q-coral',
+      memberPrice: { amount: 120.75, currency: 'USD' },
+      creditsCover: 4830,
+      score: 0.82,
+      reasons: ['Strong value for money', 'Credits cover 40%', 'Matches: beach'],
+    },
+  ],
+  audit: {
+    candidatesConsidered: 24,
+    candidatesReturned: 1,
+    interpretedTerms: ['beach', 'March', 'Montego Bay'],
+    exclusions: [
+      {
+        offerId: 'a11ce001-0004-7000-8000-000000000003',
+        reason: 'UnaffordableWithCredits',
+        detail: 'Requires 10416 credits, available 6000.',
+      },
+    ],
+    weights: {
+      valueForMoney: 0.4,
+      creditCoverage: 0.25,
+      tagMatch: 0.2,
+      starRating: 0.15,
+    },
+    narrationApplied: false,
+  },
 };
 
 export const clampedExplanation: PriceExplanationView = {

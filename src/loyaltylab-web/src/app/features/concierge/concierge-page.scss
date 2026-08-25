@@ -1,0 +1,118 @@
+.concierge {
+  max-width: 56rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+a {
+  color: var(--ll-color-accent);
+}
+
+h1 {
+  color: var(--ll-color-primary);
+}
+
+.lede,
+.meta {
+  color: #57534e;
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+  margin: 1rem 0 1.5rem;
+}
+
+label {
+  display: grid;
+  gap: 0.35rem;
+  font-weight: 600;
+}
+
+textarea,
+button {
+  font: inherit;
+}
+
+textarea {
+  width: 100%;
+  padding: 0.65rem 0.75rem;
+  border: 1px solid #d6d3d1;
+  border-radius: 8px;
+  resize: vertical;
+}
+
+button {
+  justify-self: start;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--ll-color-primary);
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+button:focus-visible,
+textarea:focus-visible,
+.results:focus-visible,
+a:focus-visible {
+  outline: 3px solid var(--ll-color-accent);
+  outline-offset: 2px;
+}
+
+.results:focus {
+  outline: none;
+}
+
+.narrative {
+  font-size: 1.15rem;
+  font-weight: 650;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(16rem, 1fr));
+  gap: 1rem;
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+}
+
+.card {
+  padding: 1rem;
+  border-radius: var(--ll-radius-card);
+  background: #fff;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 12%);
+}
+
+.card h2 {
+  margin: 0 0 0.35rem;
+  font-size: 1.1rem;
+  color: var(--ll-color-primary);
+}
+
+.price {
+  margin: 0;
+  font-weight: 650;
+}
+
+.reasons {
+  margin: 0.5rem 0 0;
+  padding-left: 1.2rem;
+  color: #57534e;
+  font-size: 0.9rem;
+}
+
+.actions {
+  display: flex;
+  gap: 0.75rem;
+  margin: 0.85rem 0 0;
+  font-weight: 600;
+}
+
+.error {
+  color: #9f1239;
+}

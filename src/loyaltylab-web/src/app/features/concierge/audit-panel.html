@@ -1,0 +1,31 @@
+@if (audit(); as view) {
+  <details class="panel">
+    <summary>Why these results</summary>
+    <p class="counts">
+      Considered {{ view.candidatesConsidered }} candidates, returned {{ view.candidatesReturned }}.
+    </p>
+    @if (view.interpretedTerms.length > 0) {
+      <p>Understood: {{ view.interpretedTerms.join(', ') }}</p>
+    }
+    <h3>Ranking weights</h3>
+    <ul class="weights">
+      <li>Value for money {{ percent(view.weights.valueForMoney) }}</li>
+      <li>Credit coverage {{ percent(view.weights.creditCoverage) }}</li>
+      <li>Tag match {{ percent(view.weights.tagMatch) }}</li>
+      <li>Star rating {{ percent(view.weights.starRating) }}</li>
+    </ul>
+    <h3>Excluded</h3>
+    @if (view.exclusions.length === 0) {
+      <p>Nothing was excluded.</p>
+    } @else {
+      <ul class="exclusions">
+        @for (exclusion of view.exclusions; track exclusion.offerId + exclusion.reason) {
+          <li>
+            <strong>{{ reasonLabel(exclusion.reason) }}.</strong>
+            {{ exclusion.detail }}
+          </li>
+        }
+      </ul>
+    }
+  </details>
+}

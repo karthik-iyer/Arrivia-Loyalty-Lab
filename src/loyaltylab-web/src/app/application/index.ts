@@ -6,6 +6,8 @@ export { CheckoutStore } from './checkout.store';
 export { GetBalanceUseCase, GetBookingUseCase, StartBookingUseCase } from './booking.use-case';
 export { GetStatementUseCase } from './wallet.use-case';
 export { WalletStore } from './wallet.store';
+export { RecommendUseCase } from './concierge.use-case';
+export { ConciergeStore } from './concierge.store';
 export { ListSagasUseCase, GetSagaUseCase } from './operator.use-case';
 export { OperatorListStore } from './operator-list.store';
 export { OperatorDetailStore } from './operator-detail.store';

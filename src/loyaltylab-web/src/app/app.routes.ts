@@ -20,6 +20,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/wallet/wallet-page').then((m) => m.WalletPage),
   },
   {
+    path: 'concierge',
+    loadComponent: () =>
+      import('./features/concierge/concierge-page').then((m) => m.ConciergePage),
+  },
+  {
     path: 'operator/sagas',
     loadComponent: () =>
       import('./features/operator/operator-list-page').then((m) => m.OperatorListPage),

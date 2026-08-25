@@ -1,0 +1,61 @@
+<main class="concierge">
+  <p><a routerLink="/offers">Back to offers</a></p>
+  <h1>Concierge</h1>
+  <p class="lede">Describe a stay. Recommendations are live quotes you can check out.</p>
+
+  <form (submit)="onSubmit($event)">
+    <label>
+      What are you looking for?
+      <textarea
+        name="text"
+        rows="3"
+        [value]="store.query()"
+        (input)="onInput($event)"
+      ></textarea>
+    </label>
+    <button type="submit">Find stays</button>
+  </form>
+
+  @if (store.status() === 'loading') {
+    <p>Finding stays…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  <section #results class="results" tabindex="-1" aria-live="polite">
+    @if (store.result(); as view) {
+      <p class="narrative">{{ view.narrative }}</p>
+
+      @if (view.recommendations.length === 0) {
+        <p>No stays to book from this search.</p>
+      } @else {
+        <ul class="grid">
+          @for (item of view.recommendations; track item.quoteId) {
+            <li class="card">
+              <h2>{{ item.propertyName }}</h2>
+              <p class="price">{{ money(item.memberPrice) }}</p>
+              <p class="meta">{{ item.creditsCover }} credits · {{ scoreLabel(item) }}</p>
+              <ul class="reasons">
+                @for (reason of item.reasons; track reason) {
+                  <li>{{ reason }}</li>
+                }
+              </ul>
+              <p class="actions">
+                <a [routerLink]="['/offers', item.offerId]">Offer</a>
+                <a [routerLink]="['/checkout', item.quoteId]">Checkout</a>
+              </p>
+            </li>
+          }
+        </ul>
+      }
+
+      @defer (on immediate) {
+        <ll-audit-panel [audit]="view.audit" />
+      } @placeholder {
+        <p>Loading audit…</p>
+      }
+    }
+  </section>
+</main>

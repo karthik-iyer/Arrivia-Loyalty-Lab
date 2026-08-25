@@ -56,6 +56,7 @@ describe('DemoSwitcher', () => {
     expect(document.documentElement.style.getPropertyValue('--ll-color-surface')).toBe('#F0FDFA');
     expect(fixture.nativeElement.querySelector('.brand')?.textContent).toContain('Nimbus Club');
     expect(fixture.nativeElement.textContent).toContain('Offers');
+    expect(fixture.nativeElement.textContent).toContain('Concierge');
     expect(fixture.nativeElement.textContent).toContain('Wallet');
     expect(fixture.nativeElement.textContent).toContain('Operator');
   });
