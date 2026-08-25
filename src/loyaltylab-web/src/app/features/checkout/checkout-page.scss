@@ -1,0 +1,63 @@
+.checkout {
+  max-width: 44rem;
+  margin: 0 auto;
+  padding: 1.5rem;
+  font: 1rem/1.5 system-ui, sans-serif;
+  color: #1c1917;
+}
+
+a {
+  color: var(--ll-color-accent);
+}
+
+h1 {
+  color: var(--ll-color-primary);
+}
+
+.price {
+  font-size: 1.75rem;
+  font-weight: 700;
+}
+
+.slider,
+.fault {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin: 1rem 0;
+}
+
+.fault {
+  flex-direction: row;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+input[type='range'] {
+  width: 100%;
+}
+
+button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--ll-color-primary);
+  color: #fff;
+  cursor: pointer;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.error,
+.review {
+  color: #9f1239;
+}
+
+.ok {
+  font-weight: 650;
+  color: #15803d;
+}

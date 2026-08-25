@@ -76,3 +76,7 @@ export interface CreateBookingRequest {
   readonly credits: number;
   readonly stayDate?: string;
 }
+
+export interface CreateBookingOptions {
+  readonly forcePaymentDecline?: boolean;
+}

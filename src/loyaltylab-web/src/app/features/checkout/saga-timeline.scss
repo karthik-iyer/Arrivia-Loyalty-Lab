@@ -1,0 +1,55 @@
+.timeline {
+  list-style: none;
+  padding: 0;
+  margin: 1rem 0 0;
+  font: 0.95rem/1.4 system-ui, sans-serif;
+}
+
+.step {
+  display: grid;
+  grid-template-columns: 1.5rem 1fr auto;
+  gap: 0.35rem 0.75rem;
+  padding: 0.5rem 0.6rem;
+  border-left: 4px solid transparent;
+}
+
+.step + .step {
+  border-top: 1px solid #e7e5e4;
+}
+
+.mark {
+  font-weight: 700;
+}
+
+.kind {
+  font-weight: 650;
+}
+
+.status,
+.ref,
+.attempts,
+.dur,
+.comp {
+  grid-column: 2 / -1;
+  color: #57534e;
+  font-size: 0.85rem;
+}
+
+.step--succeeded {
+  border-left-color: #15803d;
+}
+
+.step--compensated {
+  border-left-color: #a16207;
+  background: #fef9c3;
+}
+
+.step--compensationfailed,
+.step--failed {
+  border-left-color: #be123c;
+  background: #ffe4e6;
+}
+
+.step--inprogress {
+  border-left-color: var(--ll-color-accent);
+}

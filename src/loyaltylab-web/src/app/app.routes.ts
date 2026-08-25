@@ -11,4 +11,8 @@ export const routes: Routes = [
     loadComponent: () =>
       import('./features/offer-detail/offer-detail-page').then((m) => m.OfferDetailPage),
   },
+  {
+    path: 'checkout/:quoteId',
+    loadComponent: () => import('./features/checkout/checkout-page').then((m) => m.CheckoutPage),
+  },
 ];

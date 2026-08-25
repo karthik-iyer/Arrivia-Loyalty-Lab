@@ -1,6 +1,6 @@
 import { InjectionToken } from '@angular/core';
 
-import type { BookingView, CreateBookingRequest } from './booking';
+import type { BookingView, CreateBookingOptions, CreateBookingRequest } from './booking';
 import type { OfferSummary } from './catalog';
 import type { ConciergeRequest, ConciergeView } from './concierge';
 import type { NudgeView } from './inbox';
@@ -25,7 +25,11 @@ export interface PricingPort {
 }
 
 export interface BookingPort {
-  create(request: CreateBookingRequest, idempotencyKey: string): Promise<Result<BookingView>>;
+  create(
+    request: CreateBookingRequest,
+    idempotencyKey: string,
+    options?: CreateBookingOptions,
+  ): Promise<Result<BookingView>>;
   get(bookingId: string): Promise<Result<BookingView>>;
   cancel(bookingId: string, idempotencyKey: string): Promise<Result<BookingView>>;
 }

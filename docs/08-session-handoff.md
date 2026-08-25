@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-054** checkout: tender slider, idempotency key, saga timeline with compensation. F5 stays stretch.
+Stop here and resume from **T-055** wallet: balance and statement with reversal links. F5 stays stretch.
 
 ## Where we are
 
@@ -16,24 +16,26 @@ Stop here and resume from **T-054** checkout: tender slider, idempotency key, sa
 | T-051 | Done — domain models, port tokens, HTTP adapters, `provideDataLayer()` |
 | T-052 | Done — session, tenant/correlation interceptors, theming, demo switcher |
 | T-053 | Done — catalog, offer detail, price explanation panel |
-| Next | **T-054** checkout: tender slider, idempotency key, saga timeline |
+| T-054 | Done — checkout tender slider, idempotency key, saga timeline |
+| Next | **T-055** wallet: balance and statement with reversal links |
 
 ## Verify
 
-- Catalog and offer detail use fake ports in component tests (no HTTP mocks).
-- A clamped explanation stage renders with `.stage--clamped` and the clamp reason.
-- `ng serve` proxies `/api` to `http://localhost:5180`.
+- Checkout slider cannot exceed `maxCredits`.
+- A compensated saga renders “Nothing was charged. Your credits are unchanged.”
+- One idempotency key is reused across retries of the same attempt.
+- Development enables `Features:FaultInjection` so the demo decline checkbox can send `X-Fault-Profile`.
 
 ## First actions next session
 
-1. **T-054** Checkout: tender slider bounded by `maxCredits`, one idempotency key, saga timeline with compensation rendering.
-2. Then T-055 wallet.
+1. **T-055** Wallet: balance and statement with reversal links.
+2. Then T-056 operator sagas.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 36 of 51 core tasks.** 15 core tasks remain (T-054–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 37 of 51 core tasks.** 14 core tasks remain (T-055–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 

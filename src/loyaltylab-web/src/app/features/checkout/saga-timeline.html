@@ -1,0 +1,21 @@
+<ol class="timeline" [attr.aria-live]="live() ? 'polite' : null">
+  @for (step of steps(); track step.kind) {
+    <li [class]="'step step--' + step.status.toLowerCase()">
+      <span class="mark" aria-hidden="true">{{ mark(step) }}</span>
+      <span class="kind">{{ label(step.kind) }}</span>
+      <span class="status">{{ step.status }}</span>
+      @if (step.externalReference) {
+        <span class="ref">{{ step.externalReference }}</span>
+      }
+      @if (step.attempts > 1) {
+        <span class="attempts">{{ step.attempts }} attempts</span>
+      }
+      @if (hasDuration(step)) {
+        <span class="dur">{{ step.durationMs }} ms</span>
+      }
+      @if (step.compensation; as compensation) {
+        <span class="comp">Compensation {{ compensation.status }}</span>
+      }
+    </li>
+  }
+</ol>

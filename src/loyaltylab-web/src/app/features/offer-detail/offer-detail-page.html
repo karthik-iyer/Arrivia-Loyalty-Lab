@@ -18,6 +18,7 @@
     } @else if (store.quote(); as quote) {
       <p class="price">{{ money(quote.memberPrice) }}</p>
       <p class="meta">Up to {{ quote.maxCredits }} credits · expires {{ quote.expiresAt }}</p>
+      <p><a [routerLink]="['/checkout', quote.quoteId]">Continue to checkout</a></p>
     }
 
     @defer (on immediate) {

@@ -15,6 +15,7 @@ export type {
   BookingView,
   CompensationStatus,
   CompensationView,
+  CreateBookingOptions,
   CreateBookingRequest,
   DriftView,
   RateDriftKind,

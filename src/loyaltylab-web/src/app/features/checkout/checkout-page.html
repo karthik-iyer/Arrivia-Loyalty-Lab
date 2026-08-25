@@ -1,0 +1,77 @@
+<main class="checkout">
+  <p><a routerLink="/offers">Back to offers</a></p>
+  <h1>Checkout</h1>
+
+  @if (store.status() === 'loading') {
+    <p>Loading quote…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.memberPrice(); as price) {
+    <p class="price">{{ money(price) }}</p>
+
+    <label class="slider">
+      Credits
+      <input
+        type="range"
+        min="0"
+        [max]="store.maxCredits()"
+        step="1"
+        [value]="store.credits()"
+        [disabled]="store.isSettling()"
+        [attr.aria-valuetext]="creditValueText()"
+        (input)="onSlider($event)"
+      />
+      <span>{{ store.credits() }} of {{ store.maxCredits() }} credits</span>
+    </label>
+
+    @if (store.cash(); as cash) {
+      <p>Cash due {{ money(cash) }}</p>
+    }
+
+    <label class="fault">
+      <input
+        type="checkbox"
+        [checked]="store.forceDecline()"
+        [disabled]="store.isSettling()"
+        (change)="onForceDecline($event)"
+      />
+      Demonstrate payment decline
+    </label>
+
+    <p>
+      <button type="button" [disabled]="store.isSettling()" (click)="store.submit()">
+        @if (store.status() === 'failed') {
+          Retry
+        } @else {
+          Book
+        }
+      </button>
+    </p>
+  }
+
+  @if (store.steps().length) {
+    <h2>Booking progress</h2>
+    <ll-saga-timeline [steps]="store.steps()" [live]="store.isSettling()" />
+  }
+
+  @if (store.outcome() === 'confirmed') {
+    <p class="ok" role="status">Booking confirmed.</p>
+  }
+
+  @if (store.outcome() === 'unwound') {
+    <p class="ok" role="status">Nothing was charged. Your credits are unchanged.</p>
+  }
+
+  @if (store.outcome() === 'needs-review') {
+    <p class="review" role="status">
+      This booking needs follow-up.
+      @if (store.booking(); as booking) {
+        Reference {{ booking.saga.id }}.
+      }
+    </p>
+  }
+</main>
