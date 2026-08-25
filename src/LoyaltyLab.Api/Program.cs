@@ -58,6 +58,12 @@ builder.Services.AddScoped<IReadOnlyList<ISagaStep>>(sp =>
 builder.Services.AddSingleton<ISagaDelay>(ExponentialSagaDelay.Instance);
 builder.Services.AddScoped<AdvanceSaga>();
 builder.Services.AddScoped<RecoverStalledSagas>();
+builder.Services.AddScoped<StartBookingSaga>();
+builder.Services.AddScoped<GetBooking>();
+builder.Services.AddScoped<CancelBooking>();
+builder.Services.AddScoped<GetSagaInstance>();
+builder.Services.AddScoped<ListSagas>();
+builder.Services.AddScoped<RunAdminWorker>();
 builder.Host.ConfigureServices((context, services) =>
 {
     if (FaultInjectionStartup.IsEnabled(context.Configuration))
@@ -88,6 +94,7 @@ if (FaultInjectionStartup.IsEnabled(app.Configuration))
 app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPricingEndpoints();
 app.MapWalletEndpoints();
+app.MapBookingEndpoints();
 
 app.MapGet("/api/partners/current/theme", async (
     ITenantContextAccessor tenant,

@@ -21,7 +21,7 @@ public sealed class ConfirmBookingStep(
         var credits = EarnCreditsFor(context);
         if (credits <= 0)
         {
-            return StepOutcome.Succeeded(booking.Id.ToString());
+            return StepOutcome.Succeeded();
         }
 
         var posted = await earn.ExecuteAsync(

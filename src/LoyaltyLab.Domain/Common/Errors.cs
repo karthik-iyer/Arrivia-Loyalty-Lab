@@ -63,6 +63,21 @@ public static class Errors
     public static Error BookingInProgress { get; } =
         Error.Of("BOOKING_IN_PROGRESS", "A saga is already running for this booking.");
 
+    public static Error BookingNotFound { get; } =
+        Error.Of("BOOKING_NOT_FOUND", "The booking was not found.");
+
+    public static Error BookingAlreadyCancelled { get; } =
+        Error.Of("BOOKING_ALREADY_CANCELLED", "This booking has already been cancelled.");
+
     public static Error SagaRequiresReview { get; } =
         Error.Of("SAGA_REQUIRES_REVIEW", "The saga is in a terminal state that needs manual intervention.");
+
+    public static Error SagaNotFound { get; } =
+        Error.Of("SAGA_NOT_FOUND", "The saga was not found.");
+
+    public static Error MissingIdempotencyKey { get; } =
+        Error.Of("MISSING_IDEMPOTENCY_KEY", "This mutation requires an Idempotency-Key.");
+
+    public static Error WorkerNotFound { get; } =
+        Error.Of("WORKER_NOT_FOUND", "That on-demand worker is not registered.");
 }

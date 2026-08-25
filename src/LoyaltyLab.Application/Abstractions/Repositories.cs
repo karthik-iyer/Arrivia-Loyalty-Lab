@@ -114,6 +114,11 @@ public interface ISagaRepository
     /// detection and then sets tenant context per row (FR-B-11).
     /// </summary>
     Task<IReadOnlyList<SagaInstance>> ListActiveAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Tenant-scoped instances for the operator list (FR-B-08).
+    /// </summary>
+    Task<IReadOnlyList<SagaInstance>> ListAsync(CancellationToken cancellationToken);
 }
 
 public interface IBookingRepository
@@ -121,6 +126,23 @@ public interface IBookingRepository
     Task AddAsync(Domain.Booking.Booking booking, CancellationToken cancellationToken);
 
     Task<Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken);
+
+    Task<Domain.Booking.Booking?> FindByQuoteIdAsync(QuoteId quoteId, CancellationToken cancellationToken);
+}
+
+public interface IPoisonMessageQuery
+{
+    Task<IReadOnlyList<PoisonMessage>> ListByCorrelationIdAsync(
+        string correlationId,
+        CancellationToken cancellationToken);
+}
+
+/// <summary>
+/// On-demand outbox drain so T-039 can expose dispatch without waiting for the worker.
+/// </summary>
+public interface IOutboxDispatch
+{
+    Task<int> DispatchAsync(CancellationToken cancellationToken);
 }
 
 public interface IOutbox

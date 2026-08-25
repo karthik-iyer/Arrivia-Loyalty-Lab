@@ -124,6 +124,12 @@ internal sealed class FakeSagas : ISagaRepository
     public Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken) =>
         Task.FromResult(Items.SingleOrDefault(saga => saga.BookingId == bookingId));
 
+    public Task<IReadOnlyList<SagaInstance>> ListAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<SagaInstance>>(
+            [.. Items
+                .OrderByDescending(saga => saga.Status == SagaStatus.RequiresManualReview)
+                .ThenByDescending(saga => saga.StartedAt)]);
+
     public Task<IReadOnlyList<SagaInstance>> ListActiveAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<SagaInstance>>(
             [.. Items.Where(saga => saga.Status is SagaStatus.Running or SagaStatus.Compensating)]);
@@ -208,6 +214,28 @@ internal sealed class FakeBookingTenders : IBookingTenderQuery
     }
 }
 
+internal sealed class FakePoison : IPoisonMessageQuery
+{
+    public List<PoisonMessage> Items { get; } = [];
+
+    public Task<IReadOnlyList<PoisonMessage>> ListByCorrelationIdAsync(
+        string correlationId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<PoisonMessage>>(
+            [.. Items.Where(message => message.CorrelationId == correlationId)]);
+}
+
+internal sealed class FakeOutboxDispatch : IOutboxDispatch
+{
+    public int Processed { get; set; }
+
+    public Task<int> DispatchAsync(CancellationToken cancellationToken)
+    {
+        _ = cancellationToken;
+        return Task.FromResult(Processed);
+    }
+}
+
 internal sealed class FakeOutbox : IOutbox
 {
     public List<OutboxMessage> Messages { get; } = [];
@@ -234,6 +262,11 @@ internal sealed class FakeBookings : IBookingRepository
 
     public Task<LoyaltyLab.Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken) =>
         Task.FromResult(_bookings.SingleOrDefault(booking => booking.Id == id));
+
+    public Task<LoyaltyLab.Domain.Booking.Booking?> FindByQuoteIdAsync(
+        QuoteId quoteId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult(_bookings.SingleOrDefault(booking => booking.QuoteId == quoteId));
 }
 
 internal sealed class FakeSupplier : ISupplierClient

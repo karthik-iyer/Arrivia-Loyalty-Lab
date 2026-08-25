@@ -39,9 +39,11 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<ISagaRepository, SagaRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IPoisonMessageQuery, PoisonMessageQuery>();
         services.AddOptions<SagaRecoveryOptions>().BindConfiguration(SagaRecoveryOptions.SectionName);
         services.AddScoped<IOutbox, EfOutbox>();
         services.AddScoped<OutboxDispatcher>();
+        services.AddScoped<IOutboxDispatch>(sp => sp.GetRequiredService<OutboxDispatcher>());
         services.AddOptions<OutboxOptions>().BindConfiguration(OutboxOptions.SectionName);
         foreach (var type in OutboxMessageTypes.All)
         {

@@ -27,7 +27,10 @@ internal static class ProblemResults
             || error == Errors.QuoteNotFound
             || error == Errors.MemberNotFound
             || error == Errors.LedgerTransactionNotFound
-            || error == Errors.PaymentNotFound)
+            || error == Errors.PaymentNotFound
+            || error == Errors.BookingNotFound
+            || error == Errors.SagaNotFound
+            || error == Errors.WorkerNotFound)
         {
             return StatusCodes.Status404NotFound;
         }
@@ -44,12 +47,13 @@ internal static class ProblemResults
             || error == Errors.IdempotencyKeyReused
             || error == Errors.TransactionAlreadyReversed
             || error == Errors.BookingInProgress
-            || error == Errors.SagaRequiresReview)
+            || error == Errors.SagaRequiresReview
+            || error == Errors.BookingAlreadyCancelled)
         {
             return StatusCodes.Status409Conflict;
         }
 
-        if (error == Errors.PartnerNotResolved)
+        if (error == Errors.PartnerNotResolved || error == Errors.MissingIdempotencyKey)
         {
             return StatusCodes.Status400BadRequest;
         }

@@ -48,8 +48,8 @@ public sealed record TenderSplit
 }
 
 /// <summary>
-/// Checkout record the saga confirms or cancels. Rows are persisted so recovery
-/// can finish ConfirmBooking after a crash; HTTP around bookings is T-039.
+/// Checkout record the saga confirms or cancels. Rows are persisted at saga start
+/// so GET /bookings can show the timeline before ConfirmBooking runs.
 /// </summary>
 public sealed class Booking : Entity<BookingId>, ITenantOwned
 {
@@ -125,5 +125,15 @@ public sealed class Booking : Entity<BookingId>, ITenantOwned
         }
 
         Status = BookingStatus.Cancelled;
+    }
+
+    public void Fail()
+    {
+        if (Status is BookingStatus.Confirmed or BookingStatus.Cancelled)
+        {
+            throw new DomainException($"A {Status} booking cannot be marked failed.");
+        }
+
+        Status = BookingStatus.Failed;
     }
 }

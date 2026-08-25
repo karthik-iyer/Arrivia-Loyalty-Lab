@@ -17,9 +17,9 @@ public sealed class OutboxDispatcher(
     MutableTenantContextAccessor tenant,
     IClock clock,
     IEnumerable<IOutboxHandler> handlers,
-    IOptions<OutboxOptions> options)
+    IOptions<OutboxOptions> options) : IOutboxDispatch
 {
-    public async Task DispatchAsync(CancellationToken cancellationToken)
+    public async Task<int> DispatchAsync(CancellationToken cancellationToken)
     {
         var maxAttempts = Math.Max(1, options.Value.MaxAttempts);
         var loaded = await db.OutboxMessages
@@ -34,6 +34,7 @@ public sealed class OutboxDispatcher(
             .GroupBy(handler => handler.MessageType, StringComparer.Ordinal)
             .ToDictionary(group => group.Key, group => group.Last(), StringComparer.Ordinal);
 
+        var processed = 0;
         foreach (var message in pending)
         {
             cancellationToken.ThrowIfCancellationRequested();
@@ -61,7 +62,10 @@ public sealed class OutboxDispatcher(
             }
 
             await db.SaveChangesAsync(cancellationToken);
+            processed++;
         }
+
+        return processed;
     }
 
     private static string Truncate(string error)

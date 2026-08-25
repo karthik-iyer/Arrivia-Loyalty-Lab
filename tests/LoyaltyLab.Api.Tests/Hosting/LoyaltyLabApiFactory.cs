@@ -4,7 +4,7 @@ using Microsoft.Extensions.Configuration;
 
 namespace LoyaltyLab.Api.Tests.Hosting;
 
-public sealed class LoyaltyLabApiFactory : WebApplicationFactory<Program>
+public class LoyaltyLabApiFactory : WebApplicationFactory<Program>
 {
     private readonly string _dbPath = Path.Combine(Path.GetTempPath(), $"loyaltylab-tests-{Guid.NewGuid():N}.db");
 
