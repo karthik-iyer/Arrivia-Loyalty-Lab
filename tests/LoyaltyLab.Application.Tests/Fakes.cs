@@ -19,6 +19,10 @@ internal sealed class FakeTenant : ITenantContextAccessor
     public TenantContext Current { get; set; } = null!;
 
     public bool HasCurrent => Current is not null;
+
+    public void Set(TenantContext context) => Current = context;
+
+    public void Assign(TenantContext context) => Set(context);
 }
 
 internal sealed class FakeUnitOfWork : IUnitOfWork
@@ -101,6 +105,28 @@ internal sealed class FakeQuotes(ITenantContextAccessor tenant) : IQuoteReposito
 
         return Task.FromResult<Quote?>(quote);
     }
+}
+
+internal sealed class FakeSagas : ISagaRepository
+{
+    public List<SagaInstance> Items { get; } = [];
+
+    public Task AddAsync(SagaInstance saga, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(saga);
+        Items.Add(saga);
+        return Task.CompletedTask;
+    }
+
+    public Task<SagaInstance?> GetByIdAsync(SagaInstanceId id, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.SingleOrDefault(saga => saga.Id == id));
+
+    public Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.SingleOrDefault(saga => saga.BookingId == bookingId));
+
+    public Task<IReadOnlyList<SagaInstance>> ListActiveAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<SagaInstance>>(
+            [.. Items.Where(saga => saga.Status is SagaStatus.Running or SagaStatus.Compensating)]);
 }
 
 internal sealed class FakeIdempotencyStore : IIdempotencyStore

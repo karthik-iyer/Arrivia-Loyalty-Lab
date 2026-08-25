@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-037** saga recovery worker. F5 stays stretch.
+Stop here and resume from **T-038** fault injection. F5 stays stretch.
 
 ## Where we are
 
@@ -11,18 +11,18 @@ Stop here and resume from **T-037** saga recovery worker. F5 stays stretch.
 | T-020 … T-026 | Done — ledger through property-based invariants |
 | T-030 … T-035 | Done — payment, supplier, saga domain, steps, orchestrator |
 | T-036 | Done — transactional outbox, dispatcher, retry, poison table |
-| Next | **T-037** recovery worker with heartbeat and stall detection |
+| T-037 | Done — recovery worker, stall detection, resume |
+| Next | **T-038** `FaultProfile`, `X-Fault-Profile`, production refusal |
 
 ## Verify
 
-- Killing the process after commit still delivers the outbox event (FR-B-06).
-- Exhausted retries move to `PoisonMessages` and do not block later messages (FR-B-07).
-- `AdvanceSaga` enqueues `booking.confirmed` / `credits.burned` / `booking.compensated` / `booking.requires-manual-review` in the same `SaveChanges` as the state write.
+- A saga whose heartbeat is older than `StalledAfterSeconds` is resumed and reaches a terminal state (FR-B-11).
+- A fresh heartbeat is left alone.
 
 ## First actions next session
 
-1. **T-037** Recovery worker (FR-B-11).
-2. Then T-038 fault injection.
+1. **T-038** Fault injection (FR-B-09, NFR-14).
+2. Then T-039 booking HTTP + operator/admin.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

@@ -41,6 +41,8 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<SagaInstance> SagaInstances => Set<SagaInstance>();
 
+    public DbSet<Booking> Bookings => Set<Booking>();
+
     public DbSet<OutboxMessage> OutboxMessages => Set<OutboxMessage>();
 
     public DbSet<PoisonMessage> PoisonMessages => Set<PoisonMessage>();
@@ -58,6 +60,7 @@ public sealed class LoyaltyLabDbContext : DbContext
         modelBuilder.Entity<LedgerTransaction>().HasQueryFilter(t => t.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<IdempotencyRecord>().HasQueryFilter(r => r.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<SagaInstance>().HasQueryFilter(s => s.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<Booking>().HasQueryFilter(b => b.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<OutboxMessage>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<PoisonMessage>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
     }

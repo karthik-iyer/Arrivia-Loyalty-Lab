@@ -102,6 +102,8 @@ public sealed class SagaPersistenceTests : IDisposable
         loaded.Step(SagaStepKind.ValidateQuote).Status.Should().Be(SagaStepStatus.InProgress);
         loaded.Step(SagaStepKind.ValidateQuote).IdempotencyKey
             .Should().Be(SagaInstance.DeriveIdempotencyKey(saga.Id, SagaStepKind.ValidateQuote));
+        loaded.Checkout.QuoteId.Should().Be(saga.Checkout.QuoteId);
+        loaded.Checkout.StayDate.Should().Be(saga.Checkout.StayDate);
         loaded.Version.Should().Be(1);
     }
 
@@ -168,7 +170,16 @@ public sealed class SagaPersistenceTests : IDisposable
     }
 
     private static SagaInstance Start(PartnerId partnerId, BookingId bookingId) =>
-        SagaInstance.Start(partnerId, bookingId, "corr-1", new Clock(AsOf));
+        SagaInstance.Start(
+            partnerId,
+            bookingId,
+            new SagaCheckout(
+                QuoteId.New(),
+                new TenderSplit(Money.Of(1.00m, Currency.Usd), 0, Money.Of(0m, Currency.Usd)),
+                new DateOnly(2026, 6, 1),
+                Percent.From(5m)),
+            "corr-1",
+            new Clock(AsOf));
 
     private sealed class Clock(DateTimeOffset utcNow) : IClock
     {

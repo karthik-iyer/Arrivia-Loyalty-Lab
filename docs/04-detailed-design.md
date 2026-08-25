@@ -182,6 +182,7 @@ public sealed class SagaInstance : Entity<SagaInstanceId>
 {
     public PartnerId PartnerId { get; }
     public BookingId BookingId { get; }
+    public SagaCheckout Checkout { get; }     // quote, tender, stay, floor — needed to resume (FR-B-11)
     public SagaStatus Status { get; }
     public int CurrentStepIndex { get; }
     public IReadOnlyList<SagaStepRecord> Steps { get; }
@@ -655,7 +656,7 @@ After `MaxAttempts` a message **moves** to `PoisonMessages` (insert poison, dele
 
 ### 4.5 Recovery worker (FR-B-11)
 
-Finds sagas whose `Status` is `Running` or `Compensating` and whose `LastHeartbeatAt` is older than `StalledAfterSeconds`, then resumes each one. Because state is persisted before every call and keys are derived, resumption cannot duplicate an external effect.
+Finds sagas whose `Status` is `Running` or `Compensating` and whose `LastHeartbeatAt` is older than the partner's `StalledAfterSeconds`, then resumes each one via `AdvanceSaga`. Checkout facts (`QuoteId`, tender, stay date, floor) are persisted on the instance so `SagaContext` can be rebuilt after a crash. Because state is persisted before every call and keys are derived, resumption cannot duplicate an external effect.
 
 This is also how the crash test works: kill the process mid-saga, restart, assert the saga reaches a terminal state with exactly one payment authorization at the simulator (NFR-13).
 

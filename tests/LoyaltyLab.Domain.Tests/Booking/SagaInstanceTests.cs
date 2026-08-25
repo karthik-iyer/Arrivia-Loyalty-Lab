@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Common;
+using LoyaltyLab.Domain.Tenancy;
 
 namespace LoyaltyLab.Domain.Tests.Booking;
 
@@ -122,8 +123,44 @@ public sealed class SagaInstanceTests
         saga.StepStatus(SagaStepKind.ValidateQuote).Should().Be(SagaStepStatus.CompensationFailed);
     }
 
+    [Fact]
+    public void IsStalled_when_heartbeat_is_older_than_the_partner_threshold()
+    {
+        var saga = Start();
+        var clock = new Clock(AsOf.AddSeconds(60));
+
+        saga.IsStalled(new SagaPolicy(10, 3, 5, 60), clock).Should().BeTrue();
+        saga.IsStalled(new SagaPolicy(10, 3, 5, 61), clock).Should().BeFalse();
+    }
+
+    [Fact]
+    public void Terminal_sagas_are_not_stalled()
+    {
+        var saga = Start();
+        var clock = new Clock(AsOf);
+        saga.MarkInProgress(SagaStepKind.ValidateQuote, clock);
+        saga.MarkSucceeded(SagaStepKind.ValidateQuote, null, clock);
+        saga.Advance(clock);
+        saga.MarkFailed(SagaStepKind.ReserveInventory, Errors.SupplierUnavailable, clock);
+        saga.BeginCompensation(clock);
+        saga.MarkStepCompensated(
+            SagaStepKind.ValidateQuote,
+            new CompensationRecord(CompensationStatus.Succeeded, null, null, 1, AsOf),
+            clock);
+        saga.CompleteCompensation(clock);
+
+        saga.IsStalled(new SagaPolicy(10, 3, 5, 1), new Clock(AsOf.AddHours(1))).Should().BeFalse();
+    }
+
     private static SagaInstance Start(SagaInstanceId? id = null) =>
-        SagaInstance.Start(PartnerId.New(), BookingId.New(), "corr-1", new Clock(AsOf), id);
+        SagaInstance.Start(PartnerId.New(), BookingId.New(), Checkout(), "corr-1", new Clock(AsOf), id);
+
+    private static SagaCheckout Checkout() =>
+        new(
+            QuoteId.New(),
+            new TenderSplit(Money.Of(1.00m, Currency.Usd), 0, Money.Of(0m, Currency.Usd)),
+            new DateOnly(2026, 6, 1),
+            Percent.From(5m));
 
     private sealed class Clock(DateTimeOffset utcNow) : IClock
     {

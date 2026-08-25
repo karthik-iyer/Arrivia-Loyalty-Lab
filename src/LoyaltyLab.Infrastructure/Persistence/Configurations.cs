@@ -90,6 +90,25 @@ internal sealed class QuoteConfiguration : IEntityTypeConfiguration<LoyaltyLab.D
     }
 }
 
+internal sealed class BookingConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Booking.Booking>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Booking.Booking> builder)
+    {
+        builder.ToTable("Bookings");
+        builder.HasKey(b => b.Id);
+        builder.Property(b => b.Id).HasConversion(id => id.Value, v => new BookingId(v));
+        builder.Property(b => b.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(b => b.MemberId).HasConversion(id => id.Value, v => new MemberId(v));
+        builder.Property(b => b.QuoteId).HasConversion(id => id.Value, v => new QuoteId(v));
+        builder.Property(b => b.Tender)
+            .HasConversion(PersistenceJson.JsonConverter<LoyaltyLab.Domain.Booking.TenderSplit>());
+        builder.Property(b => b.Status).HasConversion<string>().HasMaxLength(32);
+        builder.Property(b => b.Drift)
+            .HasConversion(PersistenceJson.NullableJsonConverter<LoyaltyLab.Domain.Pricing.RateDriftOutcome>());
+        builder.Property(b => b.SupplierReference).HasMaxLength(128);
+    }
+}
+
 internal sealed class PricingRuleConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Pricing.PricingRule>
 {
     public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Pricing.PricingRule> builder)
@@ -239,6 +258,9 @@ internal sealed class SagaInstanceConfiguration : IEntityTypeConfiguration<Loyal
         builder.Property(s => s.CorrelationId).HasMaxLength(128).IsRequired();
         builder.Property(s => s.Version).IsConcurrencyToken();
         builder.Ignore(s => s.CompletedSteps);
+        builder.Property(s => s.Checkout)
+            .HasConversion(PersistenceJson.JsonConverter<LoyaltyLab.Domain.Booking.SagaCheckout>())
+            .IsRequired();
         builder.HasIndex(s => s.BookingId).IsUnique();
         builder.HasIndex(s => new { s.Status, s.LastHeartbeatAt });
         builder.OwnsMany(

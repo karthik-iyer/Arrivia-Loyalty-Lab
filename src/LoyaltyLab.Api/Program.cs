@@ -2,6 +2,7 @@ using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Api.Workers;
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Application.Booking;
 using LoyaltyLab.Application.Idempotency;
 using LoyaltyLab.Application.Loyalty;
 using LoyaltyLab.Application.Pricing;
@@ -20,6 +21,7 @@ builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddLoyaltyLabInfrastructure();
 builder.Services.AddHostedService<OutboxDispatcherWorker>();
+builder.Services.AddHostedService<SagaRecoveryWorker>();
 builder.Services.AddSingleton<IClock>(sp => CreateClock(sp.GetRequiredService<IConfiguration>()));
 builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();
@@ -35,6 +37,24 @@ builder.Services.AddScoped<GetStatement>();
 builder.Services.AddScoped<GetLiabilityReport>();
 builder.Services.AddScoped<ReconcileLedger>();
 builder.Services.AddScoped<ExpireDueCredits>();
+builder.Services.AddScoped<ValidateQuoteStep>();
+builder.Services.AddScoped<ReserveInventoryStep>();
+builder.Services.AddScoped<AuthorizePaymentStep>();
+builder.Services.AddScoped<BurnCreditsStep>();
+builder.Services.AddScoped<CapturePaymentStep>();
+builder.Services.AddScoped<ConfirmBookingStep>();
+builder.Services.AddScoped<IReadOnlyList<ISagaStep>>(sp =>
+[
+    sp.GetRequiredService<ValidateQuoteStep>(),
+    sp.GetRequiredService<ReserveInventoryStep>(),
+    sp.GetRequiredService<AuthorizePaymentStep>(),
+    sp.GetRequiredService<BurnCreditsStep>(),
+    sp.GetRequiredService<CapturePaymentStep>(),
+    sp.GetRequiredService<ConfirmBookingStep>(),
+]);
+builder.Services.AddSingleton<ISagaDelay>(ExponentialSagaDelay.Instance);
+builder.Services.AddScoped<AdvanceSaga>();
+builder.Services.AddScoped<RecoverStalledSagas>();
 builder.Services.ConfigureHttpJsonOptions(options =>
 {
     options.SerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;

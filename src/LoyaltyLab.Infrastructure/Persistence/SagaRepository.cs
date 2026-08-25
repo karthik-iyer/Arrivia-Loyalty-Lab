@@ -19,4 +19,13 @@ public sealed class SagaRepository(LoyaltyLabDbContext db) : ISagaRepository
 
     public Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken) =>
         db.SagaInstances.FirstOrDefaultAsync(saga => saga.BookingId == bookingId, cancellationToken);
+
+    public async Task<IReadOnlyList<SagaInstance>> ListActiveAsync(CancellationToken cancellationToken)
+    {
+        var rows = await db.SagaInstances
+            .IgnoreQueryFilters()
+            .Where(saga => saga.Status == SagaStatus.Running || saga.Status == SagaStatus.Compensating)
+            .ToListAsync(cancellationToken);
+        return rows;
+    }
 }

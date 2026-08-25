@@ -413,11 +413,16 @@ internal sealed class Harness
                 AsOf));
         var clock = new MutableFakeClock(AsOf);
         var quote = Quote.Create(member, offer, state, partner.QuotePolicy, clock);
-        var saga = SagaInstance.Start(partner.Id, BookingId.New(), "corr-1", clock);
         var tender = new TenderSplit(
             Money.Of(72.45m, Currency.Usd),
             4830,
             Money.Of(48.30m, Currency.Usd));
+        var saga = SagaInstance.Start(
+            partner.Id,
+            BookingId.New(),
+            new SagaCheckout(quote.Id, tender, Stay, Percent.From(5m)),
+            "corr-1",
+            clock);
         var tenant = new FakeTenant { Current = TenantContext.ForMember(member) };
         var ledger = new FakeLedger();
         var unitOfWork = new FakeUnitOfWork();

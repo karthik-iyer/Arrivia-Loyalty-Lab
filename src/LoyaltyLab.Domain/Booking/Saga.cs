@@ -149,6 +149,15 @@ public sealed class SagaStepRecord
 }
 
 /// <summary>
+/// Checkout facts required to rebuild <c>SagaContext</c> after a crash (FR-B-11).
+/// </summary>
+public sealed record SagaCheckout(
+    QuoteId QuoteId,
+    TenderSplit Tender,
+    DateOnly StayDate,
+    Percent FloorAboveNet);
+
+/// <summary>
 /// Persisted booking saga. One instance per <see cref="BookingId"/>; <see cref="Version"/>
 /// serializes concurrent writers (FR-B-12).
 /// </summary>
@@ -159,6 +168,7 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     private SagaInstance()
     {
         CorrelationId = null!;
+        Checkout = null!;
         Steps = [];
     }
 
@@ -166,6 +176,7 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
         SagaInstanceId id,
         PartnerId partnerId,
         BookingId bookingId,
+        SagaCheckout checkout,
         string correlationId,
         DateTimeOffset startedAt,
         List<SagaStepRecord> steps)
@@ -173,6 +184,7 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     {
         PartnerId = partnerId;
         BookingId = bookingId;
+        Checkout = checkout;
         Status = SagaStatus.Running;
         CurrentStepIndex = 0;
         Steps = steps;
@@ -185,6 +197,8 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     public PartnerId PartnerId { get; private set; }
 
     public BookingId BookingId { get; private set; }
+
+    public SagaCheckout Checkout { get; private set; }
 
     public SagaStatus Status { get; private set; }
 
@@ -214,11 +228,14 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
     public static SagaInstance Start(
         PartnerId partnerId,
         BookingId bookingId,
+        SagaCheckout checkout,
         string correlationId,
         IClock clock,
         SagaInstanceId? id = null)
     {
         ArgumentNullException.ThrowIfNull(clock);
+        ArgumentNullException.ThrowIfNull(checkout);
+        ArgumentNullException.ThrowIfNull(checkout.Tender);
         if (string.IsNullOrWhiteSpace(correlationId))
         {
             throw new DomainException("A saga requires a correlation id.");
@@ -231,7 +248,19 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
             .Select(kind => new SagaStepRecord(kind, DeriveIdempotencyKey(sagaId, kind)))
             .ToList();
 
-        return new SagaInstance(sagaId, partnerId, bookingId, correlationId.Trim(), now, steps);
+        return new SagaInstance(sagaId, partnerId, bookingId, checkout, correlationId.Trim(), now, steps);
+    }
+
+    public bool IsStalled(SagaPolicy policy, IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(policy);
+        ArgumentNullException.ThrowIfNull(clock);
+        if (Status is not (SagaStatus.Running or SagaStatus.Compensating))
+        {
+            return false;
+        }
+
+        return clock.UtcNow - LastHeartbeatAt >= TimeSpan.FromSeconds(policy.StalledAfterSeconds);
     }
 
     public SagaStepRecord Step(SagaStepKind kind) =>

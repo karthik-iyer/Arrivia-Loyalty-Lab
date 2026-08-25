@@ -10,4 +10,6 @@ public interface ITenantContextAccessor
     TenantContext Current { get; }
 
     bool HasCurrent { get; }
+
+    void Assign(TenantContext context);
 }

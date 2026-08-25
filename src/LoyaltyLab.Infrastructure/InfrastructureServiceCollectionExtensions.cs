@@ -38,6 +38,8 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<ISagaRepository, SagaRepository>();
+        services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddOptions<SagaRecoveryOptions>().BindConfiguration(SagaRecoveryOptions.SectionName);
         services.AddScoped<IOutbox, EfOutbox>();
         services.AddScoped<OutboxDispatcher>();
         services.AddOptions<OutboxOptions>().BindConfiguration(OutboxOptions.SectionName);

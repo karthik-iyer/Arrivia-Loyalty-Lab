@@ -108,6 +108,12 @@ public interface ISagaRepository
     Task<SagaInstance?> GetByIdAsync(SagaInstanceId id, CancellationToken cancellationToken);
 
     Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Running and compensating instances across tenants. Recovery applies stall
+    /// detection and then sets tenant context per row (FR-B-11).
+    /// </summary>
+    Task<IReadOnlyList<SagaInstance>> ListActiveAsync(CancellationToken cancellationToken);
 }
 
 public interface IBookingRepository

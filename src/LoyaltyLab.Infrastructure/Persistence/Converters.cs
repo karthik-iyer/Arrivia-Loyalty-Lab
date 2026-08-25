@@ -19,6 +19,7 @@ internal static class PersistenceJson
             new MoneyJsonConverter(),
             new PricingRuleIdJsonConverter(),
             new OfferIdJsonConverter(),
+            new QuoteIdJsonConverter(),
             new SupplierIdJsonConverter(),
             new ErrorJsonConverter(),
         },
@@ -147,6 +148,21 @@ internal sealed class PricingRuleIdJsonConverter : JsonConverter<LoyaltyLab.Doma
     public override void Write(
         Utf8JsonWriter writer,
         LoyaltyLab.Domain.Common.PricingRuleId value,
+        JsonSerializerOptions options) =>
+        writer.WriteStringValue(value.Value);
+}
+
+internal sealed class QuoteIdJsonConverter : JsonConverter<LoyaltyLab.Domain.Common.QuoteId>
+{
+    public override LoyaltyLab.Domain.Common.QuoteId Read(
+        ref Utf8JsonReader reader,
+        Type typeToConvert,
+        JsonSerializerOptions options) =>
+        new(reader.GetGuid());
+
+    public override void Write(
+        Utf8JsonWriter writer,
+        LoyaltyLab.Domain.Common.QuoteId value,
         JsonSerializerOptions options) =>
         writer.WriteStringValue(value.Value);
 }

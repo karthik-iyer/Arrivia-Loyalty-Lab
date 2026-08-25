@@ -18,5 +18,7 @@ public sealed class MutableTenantContextAccessor : ITenantContextAccessor
 
     public void Set(TenantContext context) => _current = context;
 
+    public void Assign(TenantContext context) => Set(context);
+
     public void Clear() => _current = null;
 }

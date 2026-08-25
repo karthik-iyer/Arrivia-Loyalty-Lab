@@ -1,5 +1,6 @@
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Pricing;
+using LoyaltyLab.Domain.Tenancy;
 
 namespace LoyaltyLab.Domain.Booking;
 
@@ -47,10 +48,10 @@ public sealed record TenderSplit
 }
 
 /// <summary>
-/// Checkout record the saga confirms or cancels. Persistence of the table is T-039;
-/// the aggregate is required so ConfirmBooking has something to compensate.
+/// Checkout record the saga confirms or cancels. Rows are persisted so recovery
+/// can finish ConfirmBooking after a crash; HTTP around bookings is T-039.
 /// </summary>
-public sealed class Booking : Entity<BookingId>
+public sealed class Booking : Entity<BookingId>, ITenantOwned
 {
     private Booking()
     {
