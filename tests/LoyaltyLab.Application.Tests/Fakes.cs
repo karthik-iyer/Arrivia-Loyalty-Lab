@@ -89,6 +89,8 @@ internal sealed class FakeQuotes(ITenantContextAccessor tenant) : IQuoteReposito
 {
     private readonly List<Quote> _quotes = [];
 
+    public IReadOnlyList<Quote> Items => _quotes;
+
     public Task AddAsync(Quote quote, CancellationToken cancellationToken)
     {
         _quotes.Add(quote);

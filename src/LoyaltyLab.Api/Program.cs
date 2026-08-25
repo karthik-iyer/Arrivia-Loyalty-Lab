@@ -31,6 +31,7 @@ builder.Services.AddSingleton<IOfferNarrator, NullOfferNarrator>();
 builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();
 builder.Services.AddScoped<ExplainQuote>();
+builder.Services.AddScoped<Recommend>();
 builder.Services.AddScoped<ClaimIdempotency>();
 builder.Services.AddScoped<EarnCredits>();
 builder.Services.AddScoped<BurnCredits>();
@@ -97,6 +98,7 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
 app.MapPricingEndpoints();
 app.MapWalletEndpoints();
 app.MapBookingEndpoints();
+app.MapConciergeEndpoints();
 
 app.MapGet("/api/partners/current/theme", async (
     ITenantContextAccessor tenant,

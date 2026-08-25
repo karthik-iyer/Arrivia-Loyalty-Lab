@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-063** `POST /concierge/recommend`. F5 stays stretch.
+Stop here and resume from **T-064** MCP server with three tools. F5 stays stretch.
 
 ## Where we are
 
@@ -16,24 +16,26 @@ Stop here and resume from **T-063** `POST /concierge/recommend`. F5 stays stretc
 | T-060 | Done — concierge parser, pipeline, affordability, weighted ranking |
 | T-061 | Done — RecommendationAudit; every exclusion has a reason |
 | T-062 | Done — narrator port, template default, invented prices fall back |
-| Next | **T-063** `POST /concierge/recommend` |
+| T-063 | Done — `POST /concierge/recommend` wires parser, quotes, pipeline, narrator |
+| Next | **T-064** MCP server with three tools over the same use cases |
 
 ## Verify
 
-- `NullOfferNarrator` returns the template; `NarrationApplied` is false.
-- Prose that invents a price or property is rejected; the template is returned instead.
-- A grounded rephrase is kept and `NarrationApplied` is true.
+- Maya `POST /api/concierge/recommend` with "beach in Montego Bay in March" returns Coral Bay at $120.75 and a real `quoteId` that `GET /quotes/{id}/explain` honours.
+- `narrationApplied` is false with `NullOfferNarrator`; raw JSON contains no `netRate`.
+- Nimbus records Coral Bay as `SupplierNotPermitted` and does not recommend it.
+- Anonymous recommend is `MEMBER_NOT_FOUND`.
 
 ## First actions next session
 
-1. **T-063** `POST /concierge/recommend` — wire parser, quotes, pipeline, narrator. Integration test.
-2. Then T-064 MCP tools.
+1. **T-064** MCP server: `get_travel_recommendations`, `explain_offer_price`, `get_credit_balance`. Architecture test: `Api/Mcp` must not reference Domain or hold business logic. Tool and REST results agree for identical input.
+2. Then T-065 Angular concierge UI.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 43 of 51 core tasks.** 8 core tasks remain (T-063–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 44 of 51 core tasks.** 7 core tasks remain (T-064–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 
