@@ -80,6 +80,13 @@ public static class CandidatePipeline
         }
 
         var ranked = RecommendationRanker.Rank(kept, criteria, weights);
-        return new RecommendationSet(ranked, exclusions, request.InterpretedTerms, weights);
+        var audit = new RecommendationAudit(
+            request.Catalog.Count,
+            ranked.Count,
+            exclusions,
+            request.InterpretedTerms,
+            weights,
+            NarrationApplied: false);
+        return new RecommendationSet(ranked, audit);
     }
 }

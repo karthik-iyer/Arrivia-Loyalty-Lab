@@ -21,11 +21,23 @@ public sealed record RankedRecommendation(
     decimal Score,
     IReadOnlyList<string> Reasons);
 
-public sealed record RecommendationSet(
-    IReadOnlyList<RankedRecommendation> Recommendations,
+/// <summary>
+/// Why the concierge kept or dropped each candidate (FR-C-05). NarrationApplied is false until a narrator runs.
+/// </summary>
+public sealed record RecommendationAudit(
+    int CandidatesConsidered,
+    int CandidatesReturned,
     IReadOnlyList<ExclusionRecord> Exclusions,
     IReadOnlyList<string> InterpretedTerms,
-    RankingWeights Weights);
+    RankingWeights Weights,
+    bool NarrationApplied);
+
+public sealed record RecommendationSet(
+    IReadOnlyList<RankedRecommendation> Recommendations,
+    RecommendationAudit Audit)
+{
+    public IReadOnlyList<ExclusionRecord> Exclusions => Audit.Exclusions;
+}
 
 public sealed record RecommendationRequest(
     RecommendationCriteria Criteria,

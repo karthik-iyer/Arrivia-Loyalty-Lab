@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-061** `RecommendationAudit` with exclusion reasons. F5 stays stretch.
+Stop here and resume from **T-062** narrator boundary (`IOfferNarrator`, template fallback). F5 stays stretch.
 
 ## Where we are
 
@@ -14,25 +14,25 @@ Stop here and resume from **T-061** `RecommendationAudit` with exclusion reasons
 | T-040 | Done — Resilience.Tests against real PaymentSim |
 | T-050 … T-057 | Done — Angular Phase 4 |
 | T-060 | Done — concierge parser, pipeline, affordability, weighted ranking |
-| Next | **T-061** `RecommendationAudit` with exclusions and reasons |
+| T-061 | Done — RecommendationAudit; every exclusion has a reason |
+| Next | **T-062** `IOfferNarrator`, `NullOfferNarrator`, fact validator, template fallback |
 
 ## Verify
 
-- Parser maps "beach in March" to `OfferTag.Beach` and 15 Mar of the calendar year.
-- Unrecognised text is an unconstrained search, not an error.
-- Partner-excluded suppliers and over-budget / over-credit offers are dropped with a reason.
-- Ranking is identical across repeated runs and catalog shuffle.
+- `CandidatesConsidered == returned + exclusions`.
+- Every exclusion has a defined reason and a non-empty detail.
+- `NarrationApplied` is false until a narrator runs.
 
 ## First actions next session
 
-1. **T-061** `RecommendationAudit`: every excluded candidate has a reason (FR-C-05).
-2. Then T-062 narrator boundary.
+1. **T-062** Narrator: templated sentence by default; invented prices rejected (FR-C-06, FR-C-07).
+2. Then T-063 `POST /concierge/recommend`.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 41 of 51 core tasks.** 10 core tasks remain (T-061–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 42 of 51 core tasks.** 9 core tasks remain (T-062–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 
