@@ -59,7 +59,7 @@ internal static class ProblemResults
             return StatusCodes.Status402PaymentRequired;
         }
 
-        if (error == Errors.SupplierUnavailable)
+        if (error == Errors.SupplierUnavailable || error == Errors.TemporaryFailure)
         {
             return StatusCodes.Status503ServiceUnavailable;
         }

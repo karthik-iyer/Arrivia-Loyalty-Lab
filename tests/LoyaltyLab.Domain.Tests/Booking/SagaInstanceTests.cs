@@ -77,6 +77,51 @@ public sealed class SagaInstanceTests
         saga.CurrentStepIndex.Should().Be(SagaInstance.StepCount - 1);
     }
 
+    [Fact]
+    public void Compensation_marks_completed_steps_then_terminates_compensated()
+    {
+        var saga = Start();
+        var clock = new Clock(AsOf);
+        saga.MarkInProgress(SagaStepKind.ValidateQuote, clock);
+        saga.MarkSucceeded(SagaStepKind.ValidateQuote, null, clock);
+        saga.Advance(clock);
+        saga.MarkInProgress(SagaStepKind.ReserveInventory, clock);
+        saga.MarkFailed(SagaStepKind.ReserveInventory, Errors.SupplierUnavailable, clock);
+
+        saga.BeginCompensation(clock);
+        saga.MarkStepCompensated(
+            SagaStepKind.ValidateQuote,
+            new CompensationRecord(CompensationStatus.Succeeded, null, null, 1, AsOf),
+            clock);
+        saga.CompleteCompensation(clock);
+
+        saga.Status.Should().Be(SagaStatus.Compensated);
+        saga.StepStatus(SagaStepKind.ValidateQuote).Should().Be(SagaStepStatus.Compensated);
+        saga.StepStatus(SagaStepKind.ReserveInventory).Should().Be(SagaStepStatus.Failed);
+        saga.CompletedAt.Should().Be(AsOf);
+    }
+
+    [Fact]
+    public void Exhausted_compensation_requires_manual_review()
+    {
+        var saga = Start();
+        var clock = new Clock(AsOf);
+        saga.MarkInProgress(SagaStepKind.ValidateQuote, clock);
+        saga.MarkSucceeded(SagaStepKind.ValidateQuote, null, clock);
+        saga.Advance(clock);
+        saga.MarkInProgress(SagaStepKind.ReserveInventory, clock);
+        saga.MarkFailed(SagaStepKind.ReserveInventory, Errors.SupplierUnavailable, clock);
+
+        saga.BeginCompensation(clock);
+        saga.RequireManualReview(
+            SagaStepKind.ValidateQuote,
+            new CompensationRecord(CompensationStatus.Failed, null, Errors.SupplierUnavailable, 5, AsOf),
+            clock);
+
+        saga.Status.Should().Be(SagaStatus.RequiresManualReview);
+        saga.StepStatus(SagaStepKind.ValidateQuote).Should().Be(SagaStepStatus.CompensationFailed);
+    }
+
     private static SagaInstance Start(SagaInstanceId? id = null) =>
         SagaInstance.Start(PartnerId.New(), BookingId.New(), "corr-1", new Clock(AsOf), id);
 

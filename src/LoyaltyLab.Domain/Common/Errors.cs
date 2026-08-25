@@ -57,6 +57,9 @@ public static class Errors
     public static Error SupplierUnavailable { get; } =
         Error.Of("SUPPLIER_UNAVAILABLE", "The reservation could not be placed.");
 
+    public static Error TemporaryFailure { get; } =
+        Error.Of("TEMPORARY_FAILURE", "The remote system is temporarily unavailable.");
+
     public static Error BookingInProgress { get; } =
         Error.Of("BOOKING_IN_PROGRESS", "A saga is already running for this booking.");
 

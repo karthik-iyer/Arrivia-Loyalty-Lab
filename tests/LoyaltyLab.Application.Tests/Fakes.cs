@@ -211,6 +211,16 @@ internal sealed class FakeSupplier : ISupplierClient
 
     public string? LastReleased { get; private set; }
 
+    public Action? OnReserve { get; set; }
+
+    public Func<int, StepOutcome>? ReserveOnCall { get; set; }
+
+    public Func<int, StepOutcome>? ReleaseOnCall { get; set; }
+
+    public int ReserveCalls { get; private set; }
+
+    public int ReleaseCalls { get; private set; }
+
     public Task<Result<Money>> GetCurrentNetRateAsync(OfferId offerId, CancellationToken cancellationToken)
     {
         _ = offerId;
@@ -220,13 +230,16 @@ internal sealed class FakeSupplier : ISupplierClient
     public Task<StepOutcome> ReserveAsync(ReservationRequest request, CancellationToken cancellationToken)
     {
         _ = request;
-        return Task.FromResult(Reserve);
+        OnReserve?.Invoke();
+        ReserveCalls++;
+        return Task.FromResult(ReserveOnCall?.Invoke(ReserveCalls) ?? Reserve);
     }
 
     public Task<StepOutcome> ReleaseAsync(string reference, CancellationToken cancellationToken)
     {
         LastReleased = reference;
-        return Task.FromResult(Release);
+        ReleaseCalls++;
+        return Task.FromResult(ReleaseOnCall?.Invoke(ReleaseCalls) ?? Release);
     }
 
     public Task<StepOutcome> QueryReservationAsync(string idempotencyKey, CancellationToken cancellationToken)

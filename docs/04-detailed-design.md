@@ -583,6 +583,8 @@ public async Task<SagaStatus> AdvanceAsync(SagaInstanceId id, CancellationToken 
 
 The `Unknown` branch is the one worth reading twice: it returns without deciding. Guessing at that point is what produces double charges, so the saga deliberately parks and lets a resolution pass query the far side.
 
+The sketch marks `InProgress` before the Unknown check, which would skip `ResolveUnknownAsync` on resume. `AdvanceSaga` therefore resolves `Unknown` or crash-resume `InProgress` without a new attempt, persists `InProgress` immediately before `ExecuteAsync` (FR-B-02), and retries a **transient** execute (`TEMPORARY_FAILURE`) on the same step with backoff up to `MaxStepAttempts`. Catalog business failures (`PAYMENT_DECLINED`, `SUPPLIER_UNAVAILABLE`, `INSUFFICIENT_CREDITS`, and the rest) compensate immediately. Compensation failures are always retried with backoff (FR-B-05), independent of that classification.
+
 ### 4.3 Compensation
 
 Compensations run in reverse order of completion (FR-B-05):
@@ -945,6 +947,7 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `PAYMENT_DECLINED` | 402 | Authorization or capture refused |
 | `PAYMENT_NOT_FOUND` | 404 | Unknown payment, or the hold never landed |
 | `SUPPLIER_UNAVAILABLE` | 503 | Reservation could not be placed |
+| `TEMPORARY_FAILURE` | 503 | Remote blip; the orchestrator retries the same step |
 | `BOOKING_IN_PROGRESS` | 409 | A saga is already running for this booking |
 | `SAGA_REQUIRES_REVIEW` | 409 | Terminal state needing manual intervention |
 | `IDEMPOTENCY_KEY_REUSED` | 409 | Same key, different payload |

@@ -127,6 +127,25 @@ public sealed class SagaStepRecord
         LastError = error;
         CompletedAt = clock.UtcNow;
     }
+
+    internal void RecordCompensated(CompensationRecord record, IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        ArgumentNullException.ThrowIfNull(clock);
+        Status = SagaStepStatus.Compensated;
+        Compensation = record;
+        CompletedAt = clock.UtcNow;
+    }
+
+    internal void RecordCompensationFailed(CompensationRecord record, IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(record);
+        ArgumentNullException.ThrowIfNull(clock);
+        Status = SagaStepStatus.CompensationFailed;
+        Compensation = record;
+        LastError = record.LastError;
+        CompletedAt = clock.UtcNow;
+    }
 }
 
 /// <summary>
@@ -277,11 +296,59 @@ public sealed class SagaInstance : Entity<SagaInstanceId>, ITenantOwned
         Touch(clock);
     }
 
+    public void BeginCompensation(IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+        if (Status == SagaStatus.Compensating)
+        {
+            Touch(clock);
+            return;
+        }
+
+        EnsureRunning();
+        Status = SagaStatus.Compensating;
+        Touch(clock);
+    }
+
+    public void MarkStepCompensated(SagaStepKind kind, CompensationRecord record, IClock clock)
+    {
+        EnsureCompensating();
+        Step(kind).RecordCompensated(record, clock);
+        Touch(clock);
+    }
+
+    public void CompleteCompensation(IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+        EnsureCompensating();
+        Status = SagaStatus.Compensated;
+        CompletedAt = clock.UtcNow;
+        Touch(clock);
+    }
+
+    public void RequireManualReview(SagaStepKind kind, CompensationRecord record, IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+        EnsureCompensating();
+        Step(kind).RecordCompensationFailed(record, clock);
+        Status = SagaStatus.RequiresManualReview;
+        CompletedAt = clock.UtcNow;
+        Touch(clock);
+    }
+
     private void EnsureRunning()
     {
         if (Status != SagaStatus.Running)
         {
             throw new DomainException($"Saga {Id} is {Status} and cannot accept a running-step mutation.");
+        }
+    }
+
+    private void EnsureCompensating()
+    {
+        if (Status != SagaStatus.Compensating)
+        {
+            throw new DomainException($"Saga {Id} is {Status} and cannot accept a compensation mutation.");
         }
     }
 
