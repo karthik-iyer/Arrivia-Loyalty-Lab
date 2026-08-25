@@ -1,6 +1,7 @@
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Ledger;
+using LoyaltyLab.Domain.Opportunity;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 using LoyaltyLab.Infrastructure.Time;
@@ -31,6 +32,9 @@ public static class SeedIds
 
     public static OfferId Offer(int index) =>
         new(Guid.Parse($"a11ce001-0004-7000-8000-{index:D12}"));
+
+    public static BusyPeriodId BusyPeriod(int index) =>
+        new(Guid.Parse($"a11ce001-000a-7000-8000-{index:D12}"));
 
     public static PricingRuleId Rule(int index) =>
         new(Guid.Parse($"a11ce001-0005-7000-8000-{index:D12}"));
@@ -88,6 +92,23 @@ public static class DemoSeed
                 .AnyAsync(transaction => transaction.IdempotencyKey == "seed-earn-maya", cancellationToken))
         {
             SeedOpeningLedger(db);
+        }
+
+        if (!await db.BusyPeriods.IgnoreQueryFilters().AnyAsync(cancellationToken))
+        {
+            db.BusyPeriods.AddRange(
+                BusyPeriod.Create(
+                    SeedIds.Summit,
+                    SeedIds.Maya,
+                    new DateOnly(2026, 1, 1),
+                    new DateOnly(2026, 3, 29),
+                    SeedIds.BusyPeriod(1)),
+                BusyPeriod.Create(
+                    SeedIds.Summit,
+                    SeedIds.Maya,
+                    new DateOnly(2026, 4, 12),
+                    new DateOnly(2026, 5, 1),
+                    SeedIds.BusyPeriod(2)));
         }
 
         await db.SaveChangesAsync(cancellationToken);

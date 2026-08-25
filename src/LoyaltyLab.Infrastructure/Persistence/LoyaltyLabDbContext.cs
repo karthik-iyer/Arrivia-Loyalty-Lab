@@ -3,6 +3,7 @@ using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Ledger;
+using LoyaltyLab.Domain.Opportunity;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -47,6 +48,12 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<PoisonMessage> PoisonMessages => Set<PoisonMessage>();
 
+    public DbSet<BusyPeriod> BusyPeriods => Set<BusyPeriod>();
+
+    public DbSet<Nudge> Nudges => Set<Nudge>();
+
+    public DbSet<PriceWatch> PriceWatches => Set<PriceWatch>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyLabDbContext).Assembly);
@@ -63,5 +70,8 @@ public sealed class LoyaltyLabDbContext : DbContext
         modelBuilder.Entity<Booking>().HasQueryFilter(b => b.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<OutboxMessage>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<PoisonMessage>().HasQueryFilter(m => m.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<BusyPeriod>().HasQueryFilter(p => p.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<Nudge>().HasQueryFilter(n => n.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<PriceWatch>().HasQueryFilter(w => w.PartnerId == _tenant.Current.PartnerId);
     }
 }

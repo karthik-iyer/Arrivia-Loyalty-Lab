@@ -916,7 +916,7 @@ public interface IIdempotencyStore       { }
 | `PoisonMessages` | Exhausted outbox messages |
 | `LedgerAccounts` · `LedgerTransactions` · `LedgerEntries` | Transactions unique on `(PartnerId, IdempotencyKey)`; entries indexed on `(AccountId, OccurredAt)` |
 | `IdempotencyRecords` | Unique on `(PartnerId, Operation, Key)` |
-| `BusyPeriods` · `PriceWatches` · `Nudges` · `NudgeSignals` | F5; nudges indexed on `(PartnerId, MemberId, CreatedAt)` |
+| `BusyPeriods` · `PriceWatches` · `Nudges` | F5; nudge signals persist as JSON on the nudge (same pattern as quote traces); nudges indexed on `(PartnerId, MemberId, CreatedAt)` |
 
 ### 8.2 Tenant isolation (FR-X-02)
 

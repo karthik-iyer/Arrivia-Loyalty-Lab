@@ -315,3 +315,51 @@ internal sealed class PoisonMessageConfiguration : IEntityTypeConfiguration<Loya
         builder.HasIndex(m => m.CorrelationId);
     }
 }
+
+internal sealed class BusyPeriodConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Opportunity.BusyPeriod>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Opportunity.BusyPeriod> builder)
+    {
+        builder.ToTable("BusyPeriods");
+        builder.HasKey(p => p.Id);
+        builder.Property(p => p.Id).HasConversion(id => id.Value, v => new BusyPeriodId(v));
+        builder.Property(p => p.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(p => p.MemberId).HasConversion(id => id.Value, v => new MemberId(v));
+        builder.HasIndex(p => new { p.PartnerId, p.MemberId, p.Start });
+    }
+}
+
+internal sealed class NudgeConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Opportunity.Nudge>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Opportunity.Nudge> builder)
+    {
+        builder.ToTable("Nudges");
+        builder.HasKey(n => n.Id);
+        builder.Property(n => n.Id).HasConversion(id => id.Value, v => new NudgeId(v));
+        builder.Property(n => n.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(n => n.MemberId).HasConversion(id => id.Value, v => new MemberId(v));
+        builder.Property(n => n.OfferId).HasConversion(
+            id => id.HasValue ? id.Value.Value : (Guid?)null,
+            v => v.HasValue ? new OfferId(v.Value) : null);
+        builder.Property(n => n.Status).HasConversion<string>().HasMaxLength(32);
+        builder.Property(n => n.SuppressedBecause).HasConversion<string>().HasMaxLength(32);
+        builder.Property(n => n.Signals)
+            .HasConversion(PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Opportunity.OpportunitySignal>>());
+        builder.HasIndex(n => new { n.PartnerId, n.MemberId, n.CreatedAt });
+    }
+}
+
+internal sealed class PriceWatchConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Opportunity.PriceWatch>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Opportunity.PriceWatch> builder)
+    {
+        builder.ToTable("PriceWatches");
+        builder.HasKey(w => w.Id);
+        builder.Property(w => w.Id).HasConversion(id => id.Value, v => new PriceWatchId(v));
+        builder.Property(w => w.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(w => w.OfferId).HasConversion(id => id.Value, v => new OfferId(v));
+        builder.Property(w => w.BaselineNetRate).HasConversion(new MoneyConverter());
+        builder.HasIndex(w => new { w.PartnerId, w.OfferId }).IsUnique();
+        builder.HasIndex(w => w.LastCheckedAt);
+    }
+}

@@ -447,6 +447,107 @@ namespace LoyaltyLab.Infrastructure.Persistence.Migrations
                     b.ToTable("Quotes", (string)null);
                 });
 
+            modelBuilder.Entity("LoyaltyLab.Domain.Opportunity.BusyPeriod", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("End")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("Start")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartnerId", "MemberId", "Start");
+
+                    b.ToTable("BusyPeriods", (string)null);
+                });
+
+            modelBuilder.Entity("LoyaltyLab.Domain.Opportunity.Nudge", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MemberId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid?>("OfferId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Score")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Signals")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("SuppressedBecause")
+                        .HasMaxLength(32)
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("WindowEnd")
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateOnly>("WindowStart")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PartnerId", "MemberId", "CreatedAt");
+
+                    b.ToTable("Nudges", (string)null);
+                });
+
+            modelBuilder.Entity("LoyaltyLab.Domain.Opportunity.PriceWatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("BaselineNetRate")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<DateTimeOffset>("LastCheckedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("OfferId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("PartnerId")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("LastCheckedAt");
+
+                    b.HasIndex("PartnerId", "OfferId")
+                        .IsUnique();
+
+                    b.ToTable("PriceWatches", (string)null);
+                });
+
             modelBuilder.Entity("LoyaltyLab.Domain.Tenancy.Member", b =>
                 {
                     b.Property<Guid>("Id")

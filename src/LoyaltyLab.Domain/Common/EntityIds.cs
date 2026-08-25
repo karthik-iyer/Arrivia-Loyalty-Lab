@@ -85,3 +85,17 @@ public readonly record struct NudgeId(Guid Value)
 
     public override string ToString() => Value.ToString();
 }
+
+public readonly record struct BusyPeriodId(Guid Value)
+{
+    public static BusyPeriodId New() => new(EntityIds.NewValue());
+
+    public override string ToString() => Value.ToString();
+}
+
+public readonly record struct PriceWatchId(Guid Value)
+{
+    public static PriceWatchId New() => new(EntityIds.NewValue());
+
+    public override string ToString() => Value.ToString();
+}

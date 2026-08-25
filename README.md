@@ -2,7 +2,7 @@
 
 A reference implementation of the hardest problems in **white-label travel loyalty**: multi-tenant member pricing, a trustworthy rewards-currency ledger, a booking process that stays consistent when systems fail, an AI concierge that cannot recommend something the member can't actually book, and a nudge engine that knows when to stay quiet.
 
-> **Status:** F1–F4 are implemented (pricing, ledger, booking saga, Angular, concierge + MCP). F5 Opportunity engine is stretch and not started.
+> **Status:** F1–F4 are implemented. F5 Opportunity engine is in progress. Remaining polish is T-081–T-083 after F5.
 
 ## Why this exists
 

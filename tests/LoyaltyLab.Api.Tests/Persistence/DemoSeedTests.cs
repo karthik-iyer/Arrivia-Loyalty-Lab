@@ -39,6 +39,7 @@ public sealed class DemoSeedTests : IDisposable
         (await db.PartnerSuppliers.IgnoreQueryFilters().CountAsync()).Should().Be(5);
         (await db.PricingRules.IgnoreQueryFilters().CountAsync()).Should().Be(8);
         (await db.LedgerTransactions.IgnoreQueryFilters().CountAsync()).Should().Be(3);
+        (await db.BusyPeriods.IgnoreQueryFilters().CountAsync()).Should().Be(2);
     }
 
     [Fact]
