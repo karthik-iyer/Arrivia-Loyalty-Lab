@@ -35,6 +35,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IPricingRuleRepository, PricingRuleRepository>();
         services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
+        services.AddScoped<ISagaRepository, SagaRepository>();
         services.AddScoped<IBookingTenderQuery, BookingTenderQuery>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<SupplierReservationStore>();

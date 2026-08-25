@@ -225,3 +225,40 @@ internal sealed class IdempotencyRecordConfiguration : IEntityTypeConfiguration<
         builder.Property(r => r.PayloadHash).HasMaxLength(64).IsRequired();
     }
 }
+
+internal sealed class SagaInstanceConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Booking.SagaInstance>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Booking.SagaInstance> builder)
+    {
+        builder.ToTable("SagaInstances");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.Id).HasConversion(id => id.Value, v => new SagaInstanceId(v));
+        builder.Property(s => s.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(s => s.BookingId).HasConversion(id => id.Value, v => new BookingId(v));
+        builder.Property(s => s.Status).HasConversion<string>().HasMaxLength(32);
+        builder.Property(s => s.CorrelationId).HasMaxLength(128).IsRequired();
+        builder.Property(s => s.Version).IsConcurrencyToken();
+        builder.Ignore(s => s.CompletedSteps);
+        builder.HasIndex(s => s.BookingId).IsUnique();
+        builder.HasIndex(s => new { s.Status, s.LastHeartbeatAt });
+        builder.OwnsMany(
+            s => s.Steps,
+            steps =>
+            {
+                steps.ToTable("SagaSteps");
+                steps.WithOwner().HasForeignKey("SagaInstanceId");
+                steps.Property<SagaInstanceId>("SagaInstanceId")
+                    .HasConversion(id => id.Value, v => new SagaInstanceId(v));
+                steps.Property(step => step.Kind).HasConversion<string>().HasMaxLength(32);
+                steps.HasKey("SagaInstanceId", nameof(LoyaltyLab.Domain.Booking.SagaStepRecord.Kind));
+                steps.Property(step => step.Status).HasConversion<string>().HasMaxLength(32);
+                steps.Property(step => step.IdempotencyKey).HasMaxLength(128).IsRequired();
+                steps.Property(step => step.ExternalReference).HasMaxLength(128);
+                steps.Property(step => step.LastError)
+                    .HasConversion(PersistenceJson.NullableJsonConverter<Error>());
+                steps.Property(step => step.Compensation)
+                    .HasConversion(
+                        PersistenceJson.NullableJsonConverter<LoyaltyLab.Domain.Booking.CompensationRecord>());
+            });
+    }
+}

@@ -56,4 +56,10 @@ public static class Errors
 
     public static Error SupplierUnavailable { get; } =
         Error.Of("SUPPLIER_UNAVAILABLE", "The reservation could not be placed.");
+
+    public static Error BookingInProgress { get; } =
+        Error.Of("BOOKING_IN_PROGRESS", "A saga is already running for this booking.");
+
+    public static Error SagaRequiresReview { get; } =
+        Error.Of("SAGA_REQUIRES_REVIEW", "The saga is in a terminal state that needs manual intervention.");
 }

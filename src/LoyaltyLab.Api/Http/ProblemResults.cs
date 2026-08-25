@@ -42,7 +42,9 @@ internal static class ProblemResults
         if (error == Errors.QuoteExpired
             || error == Errors.RateChanged
             || error == Errors.IdempotencyKeyReused
-            || error == Errors.TransactionAlreadyReversed)
+            || error == Errors.TransactionAlreadyReversed
+            || error == Errors.BookingInProgress
+            || error == Errors.SagaRequiresReview)
         {
             return StatusCodes.Status409Conflict;
         }

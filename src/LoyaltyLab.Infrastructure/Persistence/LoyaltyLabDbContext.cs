@@ -1,4 +1,5 @@
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Ledger;
@@ -38,6 +39,8 @@ public sealed class LoyaltyLabDbContext : DbContext
 
     public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
 
+    public DbSet<SagaInstance> SagaInstances => Set<SagaInstance>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(LoyaltyLabDbContext).Assembly);
@@ -50,5 +53,6 @@ public sealed class LoyaltyLabDbContext : DbContext
         modelBuilder.Entity<LedgerAccount>().HasQueryFilter(a => a.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<LedgerTransaction>().HasQueryFilter(t => t.PartnerId == _tenant.Current.PartnerId);
         modelBuilder.Entity<IdempotencyRecord>().HasQueryFilter(r => r.PartnerId == _tenant.Current.PartnerId);
+        modelBuilder.Entity<SagaInstance>().HasQueryFilter(s => s.PartnerId == _tenant.Current.PartnerId);
     }
 }

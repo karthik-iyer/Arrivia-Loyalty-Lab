@@ -1,3 +1,4 @@
+using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Idempotency;
@@ -98,6 +99,15 @@ public interface IIdempotencyStore
     /// The database unique index is the source of truth under concurrent first-saves (FR-L-05).
     /// </summary>
     Task<bool> SaveAsync(IdempotencyRecord record, CancellationToken cancellationToken);
+}
+
+public interface ISagaRepository
+{
+    Task AddAsync(SagaInstance saga, CancellationToken cancellationToken);
+
+    Task<SagaInstance?> GetByIdAsync(SagaInstanceId id, CancellationToken cancellationToken);
+
+    Task<SagaInstance?> GetByBookingIdAsync(BookingId bookingId, CancellationToken cancellationToken);
 }
 
 public interface IUnitOfWork

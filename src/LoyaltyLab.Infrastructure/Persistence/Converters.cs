@@ -20,6 +20,7 @@ internal static class PersistenceJson
             new PricingRuleIdJsonConverter(),
             new OfferIdJsonConverter(),
             new SupplierIdJsonConverter(),
+            new ErrorJsonConverter(),
         },
     };
 
@@ -27,6 +28,12 @@ internal static class PersistenceJson
         new(
             v => JsonSerializer.Serialize(v, Options),
             v => JsonSerializer.Deserialize<T>(v, Options)!);
+
+    public static ValueConverter<T?, string?> NullableJsonConverter<T>()
+        where T : class =>
+        new(
+            v => v == null ? null : JsonSerializer.Serialize(v, Options),
+            v => string.IsNullOrEmpty(v) ? null : JsonSerializer.Deserialize<T>(v, Options));
 }
 
 internal sealed class PercentJsonConverter : JsonConverter<Percent>
@@ -179,5 +186,57 @@ internal sealed class PercentConverter : ValueConverter<Percent, decimal>
     public PercentConverter()
         : base(v => v.Value, v => Percent.From(v))
     {
+    }
+}
+
+internal sealed class ErrorJsonConverter : JsonConverter<Error>
+{
+    public override Error Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+    {
+        if (reader.TokenType != JsonTokenType.StartObject)
+        {
+            throw new JsonException("Error must be a JSON object.");
+        }
+
+        string? code = null;
+        string? message = null;
+
+        while (reader.Read() && reader.TokenType != JsonTokenType.EndObject)
+        {
+            if (reader.TokenType != JsonTokenType.PropertyName)
+            {
+                continue;
+            }
+
+            var name = reader.GetString();
+            reader.Read();
+            if (string.Equals(name, "code", StringComparison.OrdinalIgnoreCase))
+            {
+                code = reader.GetString();
+            }
+            else if (string.Equals(name, "message", StringComparison.OrdinalIgnoreCase))
+            {
+                message = reader.GetString();
+            }
+            else
+            {
+                reader.Skip();
+            }
+        }
+
+        if (string.IsNullOrWhiteSpace(code) || string.IsNullOrWhiteSpace(message))
+        {
+            throw new JsonException("Error requires code and message.");
+        }
+
+        return Error.Of(code, message);
+    }
+
+    public override void Write(Utf8JsonWriter writer, Error value, JsonSerializerOptions options)
+    {
+        writer.WriteStartObject();
+        writer.WriteString("code", value.Code);
+        writer.WriteString("message", value.Message);
+        writer.WriteEndObject();
     }
 }

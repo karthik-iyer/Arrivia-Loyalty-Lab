@@ -1,6 +1,6 @@
 # Session handoff — 24 Aug 2026
 
-Stop here and resume from **T-033** saga domain. F5 stays stretch.
+Stop here and resume from **T-034** saga steps. F5 stays stretch.
 
 ## Where we are
 
@@ -9,18 +9,18 @@ Stop here and resume from **T-033** saga domain. F5 stays stretch.
 | T-001 … T-007 | Done — Phase 0 green |
 | T-010 … T-016 | Done — Phase 1 pricing complete |
 | T-020 … T-026 | Done — ledger through property-based invariants |
-| T-030 … T-032 | Done — payment simulator, HTTP gateway, simulated supplier |
-| Next | **T-033** saga domain: `SagaInstance`, steps, unique BookingId, version |
+| T-030 … T-033 | Done — payment, supplier, saga domain persistence |
+| Next | **T-034** six `ISagaStep` implementations (execute, compensate, resolve-unknown) |
 
 ## Verify
 
-- Forced supplier timeout on reserve produces `StepResult.Unknown`; `QueryReservationAsync` returns `Succeeded` with the stored reference.
-- A supplier decline is `Failed` / `SUPPLIER_UNAVAILABLE`, not `Unknown`.
+- Two sagas for one `BookingId` cannot be inserted (unique index).
+- Idempotency keys are `{sagaId}:{stepKind}` and match without persisting first.
 
 ## First actions next session
 
-1. **T-033** Saga domain persistence (`SagaInstance`, `SagaStepRecord`, unique BookingId, version).
-2. Then T-034 six `ISagaStep` implementations.
+1. **T-034** Six `ISagaStep` implementations, each with execute, compensate, and resolve-unknown.
+2. Then T-035 orchestrator (advance, retry, reverse compensation).
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
