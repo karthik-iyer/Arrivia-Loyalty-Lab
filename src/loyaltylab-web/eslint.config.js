@@ -67,8 +67,8 @@ module.exports = defineConfig([
     files: ['src/app/domain/**/*.ts'],
     rules: {
       'no-restricted-imports': layerBoundary(
-        String.raw`^@angular(/|$)|^rxjs(/|$)`,
-        'domain/ is plain TypeScript: no Angular and no RxJS (NFR-09).',
+        String.raw`^@angular/(?!core$)|^rxjs(/|$)`,
+        'domain/ may import InjectionToken from @angular/core only — no RxJS, HttpClient, or other Angular packages (NFR-09).',
       ),
     },
   },

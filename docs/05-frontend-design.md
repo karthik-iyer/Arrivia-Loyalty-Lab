@@ -36,7 +36,7 @@ flowchart TD
 
 | Layer | May import | Must not import |
 |---|---|---|
-| `domain/` | nothing but TypeScript | Angular, RxJS, HttpClient |
+| `domain/` | TypeScript, and `@angular/core` `InjectionToken` for port tokens only | RxJS, HttpClient, other `@angular/*` packages |
 | `application/` | `domain/` | `data/`, `features/`, HttpClient |
 | `data/` | `domain/` | `application/`, `features/` |
 | `features/` | `application/`, `domain/`, `shared/` | `data/`, HttpClient |
@@ -50,14 +50,14 @@ This is enforced, not merely intended, by an ESLint boundary rule mirroring the 
 // eslint.config.js — no-restricted-imports, abridged
 { "target": "src/app/features/**", "disallow": ["**/data/**", "@angular/common/http"] },
 { "target": "src/app/application/**", "disallow": ["**/data/**", "**/features/**"] },
-{ "target": "src/app/domain/**", "disallow": ["@angular/**", "rxjs"] }
+{ "target": "src/app/domain/**", "disallow": ["@angular/(?!core$)", "rxjs"] }
 ```
 
 ---
 
 ## 2. Domain layer
 
-Plain TypeScript: models, discriminated unions, and injection tokens describing what the application needs. No decorators, no framework.
+Plain TypeScript: models, discriminated unions, and injection tokens describing what the application needs. No decorators and no `inject()`. Port tokens use `InjectionToken` from `@angular/core` so application code can depend on ports without importing `data/` or `core/`.
 
 ```ts
 export interface Money { readonly amount: number; readonly currency: string; }
@@ -230,8 +230,8 @@ export class HttpBookingAdapter implements BookingPort {
 | **Tenant header** | An interceptor attaches `X-Partner-Code` and `X-Member-Id` from the session signal to every request. No call site sets them. |
 | **Correlation** | Generates and attaches a request id, and surfaces it in error toasts so a user-reported problem is traceable to a server log (FR-X-08). |
 | **Session** | A signal holding the current partner, member, and role. The demo switcher writes to it; interceptors and theming read from it. |
-| **Error mapping** | `ProblemDetailsMapper` converts RFC 7807 responses into a typed `AppError` carrying the `errorCode` from the [error catalog](04-detailed-design.md#9-error-catalog). |
-| **Port bindings** | One `provideDataLayer()` function binds every port to its HTTP adapter — the frontend's composition root, mirroring `Program.cs`. |
+| **Error mapping** | `ProblemDetailsMapper` in `data/mappers` converts RFC 7807 responses into a typed `AppError` carrying the `errorCode` from the [error catalog](04-detailed-design.md#9-error-catalog). Core interceptors reuse it so a toast can surface the correlation id (FR-X-08). |
+| **Port bindings** | One `provideDataLayer()` function in `core/` binds every port to its HTTP adapter — the frontend's composition root, mirroring `Program.cs`. |
 
 ---
 

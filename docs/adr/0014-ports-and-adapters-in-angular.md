@@ -10,7 +10,7 @@ A backend built on clean architecture with a frontend built that way is a half-f
 
 ## Decision
 
-Apply the same dependency rule in the browser. `domain/` holds models and port tokens; `application/` holds use cases and stores; `data/` holds HTTP adapters implementing the ports; `core/` binds them once via `provideDataLayer()`. Components inject stores and nothing else.
+Apply the same dependency rule in the browser. `domain/` holds models and port tokens (`InjectionToken` from `@angular/core` is the only Angular import there — no HTTP, no RxJS); `application/` holds use cases and stores; `data/` holds HTTP adapters implementing the ports; `core/` binds them once via `provideDataLayer()`. Components inject stores and nothing else.
 
 ## Alternatives considered
 
