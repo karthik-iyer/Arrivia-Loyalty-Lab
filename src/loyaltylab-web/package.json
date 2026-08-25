@@ -8,7 +8,7 @@
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
     "lint": "ng lint",
-    "lint:boundaries": "node tools/assert-feature-data-boundary.cjs"
+    "lint:boundaries": "node tools/assert-feature-data-boundary.cjs && node tools/assert-no-http-in-feature-tests.cjs"
   },
   "private": true,
   "packageManager": "npm@11.11.0",

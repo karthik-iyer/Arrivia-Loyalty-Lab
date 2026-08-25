@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-057** frontend tests wrap-up (stores, mappers, fake ports; no HTTP mocks).
+**Next work:** **T-060** concierge criteria parser, candidate pipeline, affordability filter, weighted ranking.
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-056 (Angular through operator sagas). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.
+**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.

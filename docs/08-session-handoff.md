@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-057** frontend tests wrap-up. F5 stays stretch.
+Stop here and resume from **T-060** concierge criteria parser and ranking pipeline. F5 stays stretch.
 
 ## Where we are
 
@@ -19,25 +19,25 @@ Stop here and resume from **T-057** frontend tests wrap-up. F5 stays stretch.
 | T-054 | Done — checkout tender slider, idempotency key, saga timeline |
 | T-055 | Done — wallet balance, statement, reversal links to original |
 | T-056 | Done — operator saga list (review-needed first) and step timeline |
-| Next | **T-057** frontend tests wrap-up: stores, mappers, fake ports (no HTTP mocks) |
+| T-057 | Done — frontend tests wrap-up; no HTTP mocks in component tests |
+| Next | **T-060** concierge: criteria parser, pipeline, affordability, ranking |
 
 ## Verify
 
-- Operator list sorts `RequiresManualReview` first.
-- Detail shows step status, attempts, duration, error, compensation, and poison.
-- The failing step is highlighted when the saga needs review.
-- Component tests use a fake `OPERATOR_PORT`, not HTTP mocks.
+- `npm test` in `src/loyaltylab-web` is green (40 tests).
+- `npm run lint:boundaries` rejects `features/` → `data/` and HTTP mocks in `features/**/*.spec.ts`.
+- Component tests bind fake ports only.
 
 ## First actions next session
 
-1. **T-057** Frontend tests wrap-up (NFR-09): no HTTP mock in component tests.
-2. Then Phase 5 — T-060 concierge domain.
+1. **T-060** Criteria parser, candidate pipeline, affordability filter, weighted ranking.
+2. Then T-061 recommendation audit.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 39 of 51 core tasks.** 12 core tasks remain (T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 40 of 51 core tasks.** 11 core tasks remain (T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 
