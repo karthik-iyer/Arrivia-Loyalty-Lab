@@ -1,0 +1,16 @@
+<div class="demo-bar">
+  <label>
+    Demo identity
+    <select [value]="identity().id" (change)="onSelect($event)">
+      @for (persona of personas; track persona.id) {
+        <option [value]="persona.id">{{ persona.label }}</option>
+      }
+    </select>
+  </label>
+  @if (theme(); as current) {
+    <span class="brand">{{ current.displayName }}</span>
+  }
+  @if (correlationId(); as corr) {
+    <span class="corr" title="Last request correlation id">{{ corr }}</span>
+  }
+</div>

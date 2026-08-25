@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-051** domain models, port tokens, HTTP adapters, and `provideDataLayer()`. F5 stays stretch.
+Stop here and resume from **T-053** catalog and offer detail with the price explanation panel. F5 stays stretch.
 
 ## Where we are
 
@@ -13,22 +13,26 @@ Stop here and resume from **T-051** domain models, port tokens, HTTP adapters, a
 | T-039 | Done — booking HTTP, operator sagas, admin workers |
 | T-040 | Done — Resilience.Tests against real PaymentSim |
 | T-050 | Done — Angular 21 scaffold, layer folders, ESLint boundaries |
-| Next | **T-051** domain models and port tokens, HTTP adapters, mappers, `provideDataLayer()` |
+| T-051 | Done — domain models, port tokens, HTTP adapters, `provideDataLayer()` |
+| T-052 | Done — session, tenant/correlation interceptors, theming, demo switcher |
+| Next | **T-053** catalog and offer detail with the price explanation panel |
 
 ## Verify
 
-- `npm run lint:boundaries` in `src/loyaltylab-web` fails lint when `features/` imports `data/` (NFR-09).
+- Mapper specs map captured payloads; anonymous catalog JSON has no `netRate`.
+- Switching demo identity to Nimbus writes `--ll-color-primary` to `#0F766E` without reload.
+- `npm test`, `npm run lint`, and `npm run lint:boundaries` in `src/loyaltylab-web`.
 
 ## First actions next session
 
-1. **T-051** Domain models and port tokens, HTTP adapters, mappers, `provideDataLayer()`.
-2. Then T-052 core interceptors, session, theming.
+1. **T-053** Catalog and offer detail with the price explanation panel (clamped stage visually distinct).
+2. Then T-054 checkout (tender slider, idempotency key, saga timeline).
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 
 ## Progress vs remaining
 
-**Done: 33 of 51 core tasks.** 18 core tasks remain (T-051–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
+**Done: 35 of 51 core tasks.** 16 core tasks remain (T-053–T-057, T-060–T-066, T-080–T-083). F5 (T-070–T-076) stays stretch.
 
 ## Scope we already agreed
 

@@ -1,1 +1,1 @@
-export {};
+export { DemoSwitcher } from './demo-switcher';
