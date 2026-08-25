@@ -1,5 +1,7 @@
 using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.FaultInjection;
+using LoyaltyLab.Api.Http;
+using LoyaltyLab.Api.Mcp;
 using LoyaltyLab.Api.Middleware;
 using LoyaltyLab.Api.Workers;
 using LoyaltyLab.Application.Abstractions;
@@ -32,6 +34,8 @@ builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();
 builder.Services.AddScoped<ExplainQuote>();
 builder.Services.AddScoped<Recommend>();
+builder.Services.AddScoped<TenantBinder>();
+builder.Services.AddScoped<IMcpUseCases, McpUseCases>();
 builder.Services.AddScoped<ClaimIdempotency>();
 builder.Services.AddScoped<EarnCredits>();
 builder.Services.AddScoped<BurnCredits>();
@@ -67,6 +71,10 @@ builder.Services.AddScoped<CancelBooking>();
 builder.Services.AddScoped<GetSagaInstance>();
 builder.Services.AddScoped<ListSagas>();
 builder.Services.AddScoped<RunAdminWorker>();
+builder.Services.AddMcpServer()
+    .WithHttpTransport()
+    .WithTools<ConciergeTools>();
+
 builder.Host.ConfigureServices((context, services) =>
 {
     if (FaultInjectionStartup.IsEnabled(context.Configuration))
@@ -99,6 +107,7 @@ app.MapPricingEndpoints();
 app.MapWalletEndpoints();
 app.MapBookingEndpoints();
 app.MapConciergeEndpoints();
+app.MapMcp("/mcp");
 
 app.MapGet("/api/partners/current/theme", async (
     ITenantContextAccessor tenant,
