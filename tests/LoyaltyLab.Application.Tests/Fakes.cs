@@ -182,6 +182,17 @@ internal sealed class FakeBookingTenders : IBookingTenderQuery
     }
 }
 
+internal sealed class FakeOutbox : IOutbox
+{
+    public List<OutboxMessage> Messages { get; } = [];
+
+    public void Enqueue(OutboxMessage message)
+    {
+        ArgumentNullException.ThrowIfNull(message);
+        Messages.Add(message);
+    }
+}
+
 internal sealed class FakeBookings : IBookingRepository
 {
     private readonly List<LoyaltyLab.Domain.Booking.Booking> _bookings = [];

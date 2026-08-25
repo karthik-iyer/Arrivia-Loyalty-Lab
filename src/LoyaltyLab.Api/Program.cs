@@ -1,5 +1,6 @@
 using LoyaltyLab.Api.Endpoints;
 using LoyaltyLab.Api.Middleware;
+using LoyaltyLab.Api.Workers;
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Application.Idempotency;
 using LoyaltyLab.Application.Loyalty;
@@ -18,6 +19,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddProblemDetails();
 builder.Services.AddLoyaltyLabInfrastructure();
+builder.Services.AddHostedService<OutboxDispatcherWorker>();
 builder.Services.AddSingleton<IClock>(sp => CreateClock(sp.GetRequiredService<IConfiguration>()));
 builder.Services.AddScoped<SearchOffers>();
 builder.Services.AddScoped<QuoteOffer>();

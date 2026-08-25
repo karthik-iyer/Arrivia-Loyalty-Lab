@@ -1,7 +1,9 @@
 using LoyaltyLab.Application.Abstractions;
+using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Infrastructure.Payments;
 using LoyaltyLab.Infrastructure.Persistence;
+using LoyaltyLab.Infrastructure.Persistence.Outbox;
 using LoyaltyLab.Infrastructure.Suppliers;
 using LoyaltyLab.Infrastructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
@@ -36,6 +38,14 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<ILedgerRepository, LedgerRepository>();
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<ISagaRepository, SagaRepository>();
+        services.AddScoped<IOutbox, EfOutbox>();
+        services.AddScoped<OutboxDispatcher>();
+        services.AddOptions<OutboxOptions>().BindConfiguration(OutboxOptions.SectionName);
+        foreach (var type in OutboxMessageTypes.All)
+        {
+            services.AddSingleton<IOutboxHandler>(new NoOpOutboxHandler(type));
+        }
+
         services.AddScoped<IBookingTenderQuery, BookingTenderQuery>();
         services.AddScoped<IUnitOfWork, UnitOfWork>();
         services.AddSingleton<SupplierReservationStore>();

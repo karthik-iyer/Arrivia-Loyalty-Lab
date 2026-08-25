@@ -18,6 +18,9 @@ public sealed class AdvanceSagaTests
         status.Should().Be(SagaStatus.Confirmed);
         world.Saga.Steps.Should().OnlyContain(step => step.Status == SagaStepStatus.Succeeded);
         world.Bookings.Items.Should().ContainSingle(booking => booking.Status == BookingStatus.Confirmed);
+        world.Outbox.Messages.Select(message => message.Type).Should().Equal(
+            OutboxMessageTypes.CreditsBurned,
+            OutboxMessageTypes.BookingConfirmed);
     }
 
     [Fact]
@@ -35,6 +38,7 @@ public sealed class AdvanceSagaTests
         log.Should().Equal(SagaStepKind.ValidateQuote);
         world.Payments.LastVoidId.Should().BeNull();
         world.Supplier.LastReleased.Should().BeNull();
+        world.Outbox.Messages.Should().ContainSingle(message => message.Type == OutboxMessageTypes.BookingCompensated);
     }
 
     [Fact]
@@ -157,6 +161,8 @@ public sealed class AdvanceSagaTests
         status.Should().Be(SagaStatus.RequiresManualReview);
         world.Saga.Step(SagaStepKind.ReserveInventory).Status.Should().Be(SagaStepStatus.CompensationFailed);
         world.Saga.Step(SagaStepKind.ValidateQuote).Status.Should().Be(SagaStepStatus.Succeeded);
+        world.Outbox.Messages.Should()
+            .ContainSingle(message => message.Type == OutboxMessageTypes.BookingRequiresManualReview);
     }
 
     [Fact]
@@ -235,7 +241,8 @@ public sealed class AdvanceSagaTests
             [.. world.Steps().Select(step => new TracingStep(step, compensationLog))],
             world.UnitOfWork,
             world.Clock,
-            delay ?? ImmediateSagaDelay.Instance);
+            delay ?? ImmediateSagaDelay.Instance,
+            world.Outbox);
 
     private sealed class RecordingSagaDelay : ISagaDelay
     {

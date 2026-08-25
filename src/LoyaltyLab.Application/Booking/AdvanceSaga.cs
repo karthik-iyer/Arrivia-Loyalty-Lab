@@ -43,7 +43,8 @@ public sealed class AdvanceSaga(
     IReadOnlyList<ISagaStep> steps,
     IUnitOfWork unitOfWork,
     IClock clock,
-    ISagaDelay delay)
+    ISagaDelay delay,
+    IOutbox outbox)
 {
     public async Task<SagaStatus> ExecuteAsync(SagaContext context, CancellationToken cancellationToken)
     {
@@ -75,6 +76,16 @@ public sealed class AdvanceSaga(
                 case StepResult.Succeeded:
                     saga.MarkSucceeded(step.Kind, outcome.ExternalReference, clock);
                     saga.Advance(clock);
+                    if (step.Kind == SagaStepKind.BurnCredits)
+                    {
+                        Enqueue(OutboxMessageTypes.CreditsBurned, saga);
+                    }
+
+                    if (saga.Status == SagaStatus.Confirmed)
+                    {
+                        Enqueue(OutboxMessageTypes.BookingConfirmed, saga);
+                    }
+
                     await PersistAsync(cancellationToken);
                     break;
 
@@ -173,15 +184,26 @@ public sealed class AdvanceSaga(
                         policy.MaxCompensationAttempts,
                         clock.UtcNow),
                     clock);
+                Enqueue(OutboxMessageTypes.BookingRequiresManualReview, saga);
                 await PersistAsync(cancellationToken);
                 return saga.Status;
             }
         }
 
         saga.CompleteCompensation(clock);
+        Enqueue(OutboxMessageTypes.BookingCompensated, saga);
         await PersistAsync(cancellationToken);
         return saga.Status;
     }
+
+    private void Enqueue(string type, SagaInstance saga) =>
+        outbox.Enqueue(
+            OutboxMessage.Create(
+                saga.PartnerId,
+                type,
+                $$"""{"sagaId":"{{saga.Id.Value}}","bookingId":"{{saga.BookingId.Value}}"}""",
+                saga.CorrelationId,
+                clock));
 
     private Task PersistAsync(CancellationToken cancellationToken) =>
         unitOfWork.SaveChangesAsync(cancellationToken);

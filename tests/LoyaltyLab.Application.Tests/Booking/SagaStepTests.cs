@@ -303,6 +303,7 @@ internal sealed class Harness
         FakeBookings bookings,
         FakeLedger ledger,
         FakeUnitOfWork unitOfWork,
+        FakeOutbox outbox,
         EarnCredits earn,
         BurnCredits burn,
         ReverseLedger reverse)
@@ -316,6 +317,7 @@ internal sealed class Harness
         Bookings = bookings;
         Ledger = ledger;
         UnitOfWork = unitOfWork;
+        Outbox = outbox;
         Earn = earn;
         Burn = burn;
         Reverse = reverse;
@@ -345,6 +347,8 @@ internal sealed class Harness
 
     public FakeUnitOfWork UnitOfWork { get; }
 
+    public FakeOutbox Outbox { get; }
+
     public ISagaStep[] Steps() =>
     [
         new ValidateQuoteStep(Supplier, Clock),
@@ -356,7 +360,7 @@ internal sealed class Harness
     ];
 
     public AdvanceSaga Orchestrator() =>
-        new(Steps(), UnitOfWork, Clock, ImmediateSagaDelay.Instance);
+        new(Steps(), UnitOfWork, Clock, ImmediateSagaDelay.Instance, Outbox);
 
     public void Seed(SagaStepKind kind, string? reference)
     {
@@ -438,6 +442,19 @@ internal sealed class Harness
             FloorAboveNet = Percent.From(5m),
         };
 
-        return new Harness(context, saga, quote, clock, supplier, payments, bookings, ledger, unitOfWork, earn, burn, reverse);
+        return new Harness(
+            context,
+            saga,
+            quote,
+            clock,
+            supplier,
+            payments,
+            bookings,
+            ledger,
+            unitOfWork,
+            new FakeOutbox(),
+            earn,
+            burn,
+            reverse);
     }
 }

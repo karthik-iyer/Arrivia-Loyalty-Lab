@@ -262,3 +262,34 @@ internal sealed class SagaInstanceConfiguration : IEntityTypeConfiguration<Loyal
             });
     }
 }
+
+internal sealed class OutboxMessageConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Booking.OutboxMessage>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Booking.OutboxMessage> builder)
+    {
+        builder.ToTable("OutboxMessages");
+        builder.HasKey(m => m.Id);
+        builder.Property(m => m.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(m => m.Type).HasMaxLength(64).IsRequired();
+        builder.Property(m => m.Payload).IsRequired();
+        builder.Property(m => m.CorrelationId).HasMaxLength(128).IsRequired();
+        builder.Property(m => m.LastError).HasMaxLength(2000);
+        builder.Ignore(m => m.IsDispatched);
+        builder.HasIndex(m => new { m.DispatchedAt, m.OccurredAt });
+    }
+}
+
+internal sealed class PoisonMessageConfiguration : IEntityTypeConfiguration<LoyaltyLab.Domain.Booking.PoisonMessage>
+{
+    public void Configure(EntityTypeBuilder<LoyaltyLab.Domain.Booking.PoisonMessage> builder)
+    {
+        builder.ToTable("PoisonMessages");
+        builder.HasKey(m => m.Id);
+        builder.Property(m => m.PartnerId).HasConversion(id => id.Value, v => new PartnerId(v));
+        builder.Property(m => m.Type).HasMaxLength(64).IsRequired();
+        builder.Property(m => m.Payload).IsRequired();
+        builder.Property(m => m.CorrelationId).HasMaxLength(128).IsRequired();
+        builder.Property(m => m.LastError).HasMaxLength(2000).IsRequired();
+        builder.HasIndex(m => m.CorrelationId);
+    }
+}

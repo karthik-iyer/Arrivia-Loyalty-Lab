@@ -18,6 +18,7 @@ public sealed class LoyaltyLabApiFactory : WebApplicationFactory<Program>
                 ["ConnectionStrings:LoyaltyLab"] = $"Data Source={_dbPath}",
                 ["DemoClock:Enabled"] = "true",
                 ["DemoClock:UtcNow"] = "2026-03-15T12:00:00+00:00",
+                ["Outbox:Dispatcher:Enabled"] = "false",
             });
         });
     }

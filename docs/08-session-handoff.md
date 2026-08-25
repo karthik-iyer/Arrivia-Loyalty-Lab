@@ -1,6 +1,6 @@
-# Session handoff — 24 Aug 2026
+# Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-036** transactional outbox. F5 stays stretch.
+Stop here and resume from **T-037** saga recovery worker. F5 stays stretch.
 
 ## Where we are
 
@@ -10,18 +10,19 @@ Stop here and resume from **T-036** transactional outbox. F5 stays stretch.
 | T-010 … T-016 | Done — Phase 1 pricing complete |
 | T-020 … T-026 | Done — ledger through property-based invariants |
 | T-030 … T-035 | Done — payment, supplier, saga domain, steps, orchestrator |
-| Next | **T-036** transactional outbox, dispatcher worker, retry, poison table |
+| T-036 | Done — transactional outbox, dispatcher, retry, poison table |
+| Next | **T-037** recovery worker with heartbeat and stall detection |
 
 ## Verify
 
-- Each row of `docs/02-requirements.md` §4.3 has an orchestrator test.
-- Transient execute retries with backoff; catalog business failures compensate immediately.
-- Exhausted compensation terminates `RequiresManualReview`.
+- Killing the process after commit still delivers the outbox event (FR-B-06).
+- Exhausted retries move to `PoisonMessages` and do not block later messages (FR-B-07).
+- `AdvanceSaga` enqueues `booking.confirmed` / `credits.burned` / `booking.compensated` / `booking.requires-manual-review` in the same `SaveChanges` as the state write.
 
 ## First actions next session
 
-1. **T-036** Transactional outbox (FR-B-06, FR-B-07).
-2. Then T-037 recovery worker.
+1. **T-037** Recovery worker (FR-B-11).
+2. Then T-038 fault injection.
 
 Do not start F5 unless Phases 0–5 are complete. Angular is Phase 4 — not per-feature.
 

@@ -633,11 +633,25 @@ public sealed class OutboxMessage
     public int Attempts { get; set; }
     public string? LastError { get; set; }
 }
+
+public sealed class PoisonMessage
+{
+    public Guid Id { get; init; }
+    public Guid OutboxMessageId { get; init; }
+    public PartnerId PartnerId { get; init; }
+    public string Type { get; init; }
+    public string Payload { get; init; }
+    public string CorrelationId { get; init; }
+    public DateTimeOffset OccurredAt { get; init; }
+    public DateTimeOffset PoisonedAt { get; init; }
+    public int Attempts { get; init; }
+    public string LastError { get; init; }
+}
 ```
 
-The message is inserted in the **same database transaction** as the state change it describes, so the two cannot diverge. A hosted dispatcher then polls in `OccurredAt` order, delivers, and marks dispatched. Delivery is at-least-once, so every handler must be idempotent — an explicit constraint, documented at the handler interface.
+The message is inserted in the **same database transaction** as the state change it describes, so the two cannot diverge. A hosted dispatcher then polls undispatched rows in `OccurredAt` order (one attempt per message per cycle), delivers, and marks dispatched. The poll interval is the retry delay. Delivery is at-least-once, so every handler must be idempotent — an explicit constraint, documented at the handler interface. The dispatcher ignores tenant query filters to see every partner’s queue, then sets tenant context from `PartnerId` before invoking the handler.
 
-After `MaxAttempts` a message moves to a poison table rather than blocking the queue behind it, and appears in the operator view.
+After `MaxAttempts` a message **moves** to `PoisonMessages` (insert poison, delete outbox) rather than blocking the queue behind it, and appears in the operator view. Known types: `booking.confirmed`, `credits.burned`, `booking.compensated`, `booking.requires-manual-review`. The outbox does not drive the saga (open question 5).
 
 ### 4.5 Recovery worker (FR-B-11)
 

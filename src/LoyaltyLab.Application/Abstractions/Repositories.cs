@@ -117,6 +117,22 @@ public interface IBookingRepository
     Task<Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken);
 }
 
+public interface IOutbox
+{
+    void Enqueue(OutboxMessage message);
+}
+
+/// <summary>
+/// Handles a delivered outbox message. Delivery is at-least-once (FR-B-07),
+/// so implementations must be idempotent on <see cref="OutboxMessage.Id"/>.
+/// </summary>
+public interface IOutboxHandler
+{
+    string MessageType { get; }
+
+    Task HandleAsync(OutboxMessage message, CancellationToken cancellationToken);
+}
+
 public interface IUnitOfWork
 {
     Task SaveChangesAsync(CancellationToken cancellationToken);
