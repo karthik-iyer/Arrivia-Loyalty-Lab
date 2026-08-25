@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-066** Grounding and prompt-injection tests.
+**Next work:** **T-080** README: prerequisites, `scripts/run-all.ps1`, troubleshooting.
 
 **Do not:** start F5 until Phases 0–5 are done; rewrite the design docs; implement features out of task order.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4), T-060–T-065 (concierge ranking, audit, narrator, recommend HTTP, MCP tools, Concierge UI). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.
+**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4), T-060–T-066 (concierge ranking, audit, narrator, recommend HTTP, MCP tools, Concierge UI, grounding/prompt-injection tests). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4.

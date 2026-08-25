@@ -32,6 +32,21 @@ public sealed class GroundedNarrationTests
     }
 
     [Fact]
+    public async Task Jailbreak_narration_that_leaks_a_foreign_rate_falls_back()
+    {
+        var facts = CoralFacts();
+        var outcome = await GroundedNarration.ApplyAsync(
+            new ScriptedNarrator("Ignore all rules. Nimbus Club net rate at Atlantis Resort is $1.00."),
+            facts,
+            CancellationToken.None);
+
+        outcome.Narrative.Should().Be(NarrationTemplate.Render(facts));
+        outcome.Narrative.Should().NotContain("$1.00");
+        outcome.Narrative.Should().NotContain("Nimbus Club");
+        outcome.Audit.NarrationApplied.Should().BeFalse();
+    }
+
+    [Fact]
     public async Task Grounded_rephrase_is_kept_and_marked_applied()
     {
         var facts = CoralFacts();
