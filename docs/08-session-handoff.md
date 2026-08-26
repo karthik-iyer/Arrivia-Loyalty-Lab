@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-071** window detection and signal scoring. F5 is in scope.
+Stop here and resume from **T-072** fatigue rules with persisted suppressions. F5 is in scope.
 
 ## Where we are
 
@@ -13,26 +13,27 @@ Stop here and resume from **T-071** window detection and signal scoring. F5 is i
 | T-050 … T-057 | Done — Angular Phase 4 |
 | T-060 … T-066 | Done — concierge through grounding / prompt-injection tests |
 | T-070 | Done — TravelWindow, Nudge, BusyPeriod, PriceWatch, persistence |
+| T-071 | Done — window detection, engine-priced scoring, delivered nudges |
 | T-080 | Done — README prerequisites, `scripts/run-all.ps1`, troubleshooting |
-| Next | **T-071** Window detection and deterministic signal scoring |
+| Next | **T-072** Fatigue rules in order, with suppressions persisted |
 
 ## Verify
 
-- A delivered nudge round-trips its signals and a score equal to Σ(Normalized × Weight).
-- A suppressed nudge is persisted with a reason (not dropped).
-- Maya has two seeded busy periods leaving a 14-night gap from 29 Mar 2026.
+- Maya's seeded busy periods yield one 14-night window (29 Mar–12 Apr 2026) at the demo clock.
+- Scoring is Σ(Normalized × Weight) with prices from `OfferPricing.Run` (no quote persisted on scan).
+- Three confirmed Coral Bay stays give Maya destination and tag affinity so the score clears 0.55.
 
 ## First actions next session
 
-1. **T-071** Detect windows from busy periods; score via the normal pricing engine (FR-O-01, FR-O-02, FR-O-04).
-2. Then T-072 fatigue, T-073 price watch, T-074–T-076 inbox and tests.
+1. **T-072** Fatigue: cooldown, cap, duplicate, in that order; persist suppressions (FR-O-06).
+2. Then T-073 price watch, T-074–T-076 inbox and tests.
 3. Then polish T-081–T-083 so the demo walkthrough can include a nudge and a suppression.
 
 Do not rewrite docs 01–07 unless implementation forces a same-commit design update (NFR-11).
 
 ## Progress vs remaining
 
-**Done: 49 of 58 tasks with F5 included.** Remaining: T-071–T-076 (opportunity) then T-081–T-083 (demo and polish).
+**Done: 50 of 58 tasks with F5 included.** Remaining: T-072–T-076 (opportunity) then T-081–T-083 (demo and polish).
 
 ## Scope we already agreed
 

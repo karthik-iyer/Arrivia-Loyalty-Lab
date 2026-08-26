@@ -798,6 +798,8 @@ public IReadOnlyList<TravelWindow> Detect(Member member, IReadOnlyList<BusyPerio
         .ToList();
 ```
 
+Gaps are taken on `[today, today + 180 days)`. Overlapping or adjacent busy periods merge first. A calendar with no busy periods is a single span over that horizon (and then fails `MinLeadDays` when the span starts today). Gaps after the last busy period are not extended into an open-ended future.
+
 ### 6.2 Scoring (FR-O-04)
 
 Each signal normalizes to `0..1`, is weighted, and contributes to a total. Every component is persisted with the nudge so the score can be re-derived later.
@@ -810,11 +812,13 @@ Each signal normalizes to `0..1`, is weighted, and contributes to a total. Every
 | `CreditCoverage` | Share of member price payable with credits | Direct proportion, capped by burn cap |
 | `PriceDrop` | Decrease against the watched baseline | Percentage over threshold, capped at 30% |
 
+Typical stay length is **7 nights** until destination-specific stays exist. Destination affinity saturates at **three confirmed bookings**. Tag affinity is the Jaccard similarity of the offer's tags against the union of tags on those stays. Credit coverage uses the live balance, capped by the pricing engine's `MaxCreditTender` (the burn cap). Price-drop is `0` below the partner threshold and otherwise `min(1, dropFraction / 0.30)`; with no `PriceWatch` row the signal is `0` (watches are T-073).
+
 ```csharp
 score = signals.Sum(s => s.Normalized * s.Weight);   // weights sum to 1.0
 ```
 
-Pricing goes through the normal engine (FR-O-02) — no shortcut estimate — because a nudge quoting a price the checkout would not honour is worse than no nudge at all.
+Pricing goes through the normal engine (FR-O-02) — no shortcut estimate — because a nudge quoting a price the checkout would not honour is worse than no nudge at all. The scan does **not** persist a quote; actioning re-quotes (FR-O-09).
 
 ### 6.3 Fatigue rules (FR-O-06)
 
@@ -877,6 +881,8 @@ public interface IQuoteRepository        { }
 public interface IBookingRepository      { }
 public interface ISagaRepository         { }
 public interface INudgeRepository        { }
+public interface IBusyPeriodRepository   { }
+public interface IPriceWatchRepository   { }
 public interface ISupplierClient         { Task<Result<Money>> GetCurrentNetRateAsync(OfferId id, CancellationToken ct);
                                            Task<StepOutcome> ReserveAsync(ReservationRequest r, CancellationToken ct);
                                            Task<StepOutcome> ReleaseAsync(string reference, CancellationToken ct);
@@ -937,7 +943,7 @@ A forgotten `Where` cannot leak data because the predicate is applied by the pro
 | Members | Maya (SUMMIT, Gold, 6 000 credits) · Ravi (SUMMIT, Standard, 500 credits) · Chen (NIMBUS, 12 000 credits) |
 | Rules | Base markups, Gold −3%, `MARCH-BEACH` −5% (SUMMIT only), margin floor +5%, burn caps |
 | Ledger | Opening `Earn` transactions establishing those balances |
-| F5 data | Busy periods leaving Maya a qualifying window; price-watch baselines set above current rates so a drop is detectable |
+| F5 data | Busy periods leaving Maya a qualifying window; three confirmed Coral Bay stays so affinity can clear the score threshold; price-watch baselines set above current rates so a drop is detectable |
 
 Maya and Ravi differ only by tier, isolating the tier effect. Chen sits on a different partner with the same underlying offers, isolating the partner effect. The two partners also differ in drift policy, so US-10 can be demonstrated both ways.
 

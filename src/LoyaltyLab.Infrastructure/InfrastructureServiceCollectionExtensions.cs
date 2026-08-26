@@ -39,6 +39,9 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IIdempotencyStore, IdempotencyStore>();
         services.AddScoped<ISagaRepository, SagaRepository>();
         services.AddScoped<IBookingRepository, BookingRepository>();
+        services.AddScoped<IBusyPeriodRepository, BusyPeriodRepository>();
+        services.AddScoped<INudgeRepository, NudgeRepository>();
+        services.AddScoped<IPriceWatchRepository, PriceWatchRepository>();
         services.AddScoped<IPoisonMessageQuery, PoisonMessageQuery>();
         services.AddOptions<SagaRecoveryOptions>().BindConfiguration(SagaRecoveryOptions.SectionName);
         services.AddScoped<IOutbox, EfOutbox>();

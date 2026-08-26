@@ -4,6 +4,7 @@ using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Ledger;
+using LoyaltyLab.Domain.Opportunity;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 
@@ -269,6 +270,54 @@ internal sealed class FakeBookings : IBookingRepository
         QuoteId quoteId,
         CancellationToken cancellationToken) =>
         Task.FromResult(_bookings.SingleOrDefault(booking => booking.QuoteId == quoteId));
+
+    public Task<IReadOnlyList<LoyaltyLab.Domain.Booking.Booking>> ListForMemberAsync(
+        MemberId memberId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<LoyaltyLab.Domain.Booking.Booking>>(
+            [.. _bookings.Where(booking => booking.MemberId == memberId)]);
+}
+
+internal sealed class FakeBusyPeriods : IBusyPeriodRepository
+{
+    private readonly List<BusyPeriod> _items = [];
+
+    public void Add(BusyPeriod period) => _items.Add(period);
+
+    public Task<IReadOnlyList<BusyPeriod>> ListForMemberAsync(
+        MemberId memberId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<BusyPeriod>>([.. _items.Where(period => period.MemberId == memberId)]);
+}
+
+internal sealed class FakeNudges : INudgeRepository
+{
+    public List<Nudge> Items { get; } = [];
+
+    public Task AddAsync(Nudge nudge, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(nudge);
+        Items.Add(nudge);
+        return Task.CompletedTask;
+    }
+
+    public Task<IReadOnlyList<Nudge>> ListForMemberAsync(
+        MemberId memberId,
+        CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Nudge>>([.. Items.Where(nudge => nudge.MemberId == memberId)]);
+}
+
+internal sealed class FakePriceWatches : IPriceWatchRepository
+{
+    private readonly List<PriceWatch> _items = [];
+
+    public void Add(PriceWatch watch) => _items.Add(watch);
+
+    public Task<PriceWatch?> FindByOfferAsync(OfferId offerId, CancellationToken cancellationToken) =>
+        Task.FromResult(_items.SingleOrDefault(watch => watch.OfferId == offerId));
+
+    public Task<IReadOnlyList<PriceWatch>> ListAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<PriceWatch>>(_items);
 }
 
 internal sealed class FakeSupplier : ISupplierClient

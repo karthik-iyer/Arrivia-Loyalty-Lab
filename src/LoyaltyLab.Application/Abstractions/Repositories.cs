@@ -3,6 +3,7 @@ using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Idempotency;
 using LoyaltyLab.Domain.Ledger;
+using LoyaltyLab.Domain.Opportunity;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
 
@@ -128,6 +129,29 @@ public interface IBookingRepository
     Task<Domain.Booking.Booking?> GetByIdAsync(BookingId id, CancellationToken cancellationToken);
 
     Task<Domain.Booking.Booking?> FindByQuoteIdAsync(QuoteId quoteId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<Domain.Booking.Booking>> ListForMemberAsync(
+        MemberId memberId,
+        CancellationToken cancellationToken);
+}
+
+public interface IBusyPeriodRepository
+{
+    Task<IReadOnlyList<BusyPeriod>> ListForMemberAsync(MemberId memberId, CancellationToken cancellationToken);
+}
+
+public interface INudgeRepository
+{
+    Task AddAsync(Nudge nudge, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<Nudge>> ListForMemberAsync(MemberId memberId, CancellationToken cancellationToken);
+}
+
+public interface IPriceWatchRepository
+{
+    Task<PriceWatch?> FindByOfferAsync(OfferId offerId, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<PriceWatch>> ListAsync(CancellationToken cancellationToken);
 }
 
 public interface IPoisonMessageQuery

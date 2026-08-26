@@ -1,3 +1,4 @@
+using LoyaltyLab.Domain.Booking;
 using LoyaltyLab.Domain.Catalog;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Ledger;
@@ -32,6 +33,12 @@ public static class SeedIds
 
     public static OfferId Offer(int index) =>
         new(Guid.Parse($"a11ce001-0004-7000-8000-{index:D12}"));
+
+    public static QuoteId Quote(int index) =>
+        new(Guid.Parse($"a11ce001-000b-7000-8000-{index:D12}"));
+
+    public static BookingId Booking(int index) =>
+        new(Guid.Parse($"a11ce001-000c-7000-8000-{index:D12}"));
 
     public static BusyPeriodId BusyPeriod(int index) =>
         new(Guid.Parse($"a11ce001-000a-7000-8000-{index:D12}"));
@@ -111,7 +118,65 @@ public static class DemoSeed
                     SeedIds.BusyPeriod(2)));
         }
 
+        if (!await db.Bookings.IgnoreQueryFilters().AnyAsync(cancellationToken))
+        {
+            SeedMayaStayHistory(db);
+        }
+
         await db.SaveChangesAsync(cancellationToken);
+    }
+
+    private static void SeedMayaStayHistory(LoyaltyLabDbContext db)
+    {
+        var clock = new FixedDemoClock(new DateTimeOffset(2026, 1, 15, 0, 0, 0, TimeSpan.Zero));
+        var maya = Member.Create(SeedIds.Summit, "Maya", TierCode.Gold, id: SeedIds.Maya);
+        var partner = CreateSummit();
+        var coral = CreateOffers()[0];
+        var permitted = (IReadOnlySet<SupplierId>)new HashSet<SupplierId>
+        {
+            SeedIds.Oceanic,
+            SeedIds.Alpine,
+            SeedIds.Metro,
+        };
+        var rules = CreateRules();
+        var pipeline = new PricingPipeline();
+        var stayDates = new[]
+        {
+            new DateOnly(2026, 1, 8),
+            new DateOnly(2026, 1, 22),
+            new DateOnly(2026, 2, 5),
+        };
+
+        for (var i = 0; i < stayDates.Length; i++)
+        {
+            var priced = pipeline.Execute(
+                new PricingRequest(
+                    PricingContext.ForOffer(SeedIds.Summit, coral, TierCode.Gold, stayDates[i]),
+                    coral,
+                    permitted,
+                    rules,
+                    clock.UtcNow));
+            if (priced.IsRejected)
+            {
+                throw new DomainException("Seed stay history must price through the engine.");
+            }
+            var quote = Quote.Create(
+                maya,
+                coral,
+                priced,
+                partner.QuotePolicy,
+                clock,
+                SeedIds.Quote(i + 1));
+            var booking = Booking.Place(
+                SeedIds.Booking(i + 1),
+                SeedIds.Summit,
+                SeedIds.Maya,
+                quote.Id,
+                new TenderSplit(priced.RunningTotal, 0, Money.Zero(Currency.Usd)));
+            booking.Confirm("seed-stay", RateDriftOutcome.Unchanged);
+            db.Quotes.Add(quote);
+            db.Bookings.Add(booking);
+        }
     }
 
     private static void SeedOpeningLedger(LoyaltyLabDbContext db)

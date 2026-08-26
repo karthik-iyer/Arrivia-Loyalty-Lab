@@ -20,4 +20,11 @@ public sealed class BookingRepository(LoyaltyLabDbContext db) : IBookingReposito
 
     public Task<Booking?> FindByQuoteIdAsync(QuoteId quoteId, CancellationToken cancellationToken) =>
         db.Bookings.FirstOrDefaultAsync(booking => booking.QuoteId == quoteId, cancellationToken);
+
+    public async Task<IReadOnlyList<Booking>> ListForMemberAsync(
+        MemberId memberId,
+        CancellationToken cancellationToken) =>
+        await db.Bookings
+            .Where(booking => booking.MemberId == memberId)
+            .ToListAsync(cancellationToken);
 }
