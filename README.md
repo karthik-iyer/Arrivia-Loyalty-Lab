@@ -2,7 +2,7 @@
 
 A reference implementation of the hardest problems in **white-label travel loyalty**: multi-tenant member pricing, a trustworthy rewards-currency ledger, a booking process that stays consistent when systems fail, an AI concierge that cannot recommend something the member can't actually book, and a nudge engine that knows when to stay quiet.
 
-> **Status:** F1–F5 are implemented. Remaining polish is T-082–T-083.
+> **Status:** F1–F5 are implemented. Remaining polish is T-083.
 
 ## Why this exists
 
@@ -26,7 +26,7 @@ Loyalty Lab implements all five as one coherent product rather than five disconn
 | **F2** | **Savings Credits ledger** | Append-only double-entry ledger for the rewards currency: earn, burn, mixed cash-plus-credits payment, expiry, exact reversal on cancellation, and per-partner liability reporting. |
 | **F3** | **Resilient booking saga** | Orchestrates supplier, payment, and ledger across a real process boundary with persisted state, compensations, a transactional outbox, crash recovery, and a fault-injection switch for demonstrating all of it. |
 | **F4** | **Grounded concierge (+ MCP)** | Recommends only offers the member is eligible for and can afford, returns an audit block explaining inclusions and exclusions, and exposes the same capability to AI agents over the Model Context Protocol. |
-| **F5** | **Opportunity engine** *(stretch)* | Detects travel windows, watches prices, scores opportunities from named signals, and — crucially — records why it chose to stay quiet. |
+| **F5** | **Opportunity engine** *(stretch, implemented)* | Detects travel windows, watches prices, scores opportunities from named signals, and — crucially — records why it chose to stay quiet. |
 
 ## Tech stack
 
@@ -34,7 +34,7 @@ Loyalty Lab implements all five as one coherent product rather than five disconn
 - **Resilience:** hand-rolled saga orchestration over a persisted state machine, a transactional outbox, Polly retry policies, and a separate payment simulator process so distributed failure is real rather than mimed
 - **Frontend:** Angular 21 standalone components with signals, layered as Domain / Application / Data / Feature — with ESLint boundary rules enforcing it
 - **Tests:** xUnit unit, property-based, integration, and chaos tests, plus **architecture tests** that fail the build if a layer dependency rule is violated
-- **AI:** deterministic recommender core with an optional LLM narration layer, so the demo runs with no API key
+- **AI:** deterministic recommender core with a template narrator (`IOfferNarrator` is the LLM seam), so the demo runs with no API key
 
 ## Documentation
 
@@ -106,7 +106,7 @@ npx ng serve --host 127.0.0.1 --port 4200
 ### Tests
 
 ```powershell
-dotnet test LoyaltyLab.sln
+dotnet test LoyaltyLab.slnx
 Set-Location src/loyaltylab-web
 npx ng test --watch=false
 npm run lint:boundaries

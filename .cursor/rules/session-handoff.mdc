@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-082** Documentation and code consistency pass; resolve every open question in design §12.
+**Next work:** **T-083** Full suite run, warning sweep, and fresh-clone verification.
 
-**Do not:** rewrite the design docs; implement features out of task order. F5 is complete. T-081 is complete.
+**Do not:** rewrite the design docs; implement features out of task order. F5 is complete. T-081 and T-082 are complete.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4), T-060–T-066 (concierge through grounding tests), T-070–T-076 (F5 opportunity), T-080 (README + run-all), T-081 (demo script). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. Polish remaining is T-082–T-083.
+**Already implemented:** T-001–T-082. Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. Remaining polish is T-083.

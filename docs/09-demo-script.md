@@ -158,7 +158,7 @@ Invoke-RestMethod 'http://localhost:5180/api/inbox' -Headers $maya
 Stop the running API first if `dotnet test` reports a locked `LoyaltyLab.Api.dll`.
 
 ```powershell
-dotnet test LoyaltyLab.sln
+dotnet test LoyaltyLab.slnx
 Set-Location src/loyaltylab-web
 npx ng test --watch=false
 npm run lint:boundaries

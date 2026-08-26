@@ -142,7 +142,7 @@ Read this section first. These are the things that would be irresponsible to lea
 
 ### If I had one more day
 
-1. Complete F5 if it was cut, or expand `Resilience.Tests` with randomized fault combinations.
+1. Expand `Resilience.Tests` with randomized fault combinations.
 2. Add the operator retry and force-compensate actions (FR-B-13).
 3. Add the pricing simulation view (FR-P-12) — it is the feature account managers would actually ask for.
 4. Playwright end-to-end tests for the two-partner comparison and a forced booking failure.

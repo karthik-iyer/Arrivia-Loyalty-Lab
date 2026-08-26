@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document** | Low-level design — Angular application |
-| **Status** | Approved for implementation |
+| **Status** | Implemented — aligned with the code in T-082 (NFR-11) |
 | **Prerequisite reading** | [03 — High-level design](03-high-level-design.md), [04 — Backend detailed design](04-detailed-design.md) |
 
 Angular 21, standalone components, signals, SCSS with design tokens. Code is **specification, not final source**.
@@ -245,7 +245,8 @@ export class HttpBookingAdapter implements BookingPort {
 | `/wallet` | Balance and statement | F2 |
 | `/concierge` | Conversational search with audit | F4 |
 | `/inbox` | Nudges with explanations | F5 |
-| `/operator/sagas` | Saga list and timeline | F3 |
+| `/operator/sagas` | Saga list (includes on-demand opportunity scan) | F3 |
+| `/operator/sagas/:id` | Saga timeline and compensation detail | F3 |
 
 ### 6.1 Offer detail — the explanation panel
 

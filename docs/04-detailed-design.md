@@ -3,13 +3,13 @@
 | | |
 |---|---|
 | **Document** | Low-level design — domain, features, application, persistence, API |
-| **Status** | Approved for implementation |
+| **Status** | Implemented — aligned with the code in T-082 (NFR-11) |
 | **Prerequisite reading** | [03 — High-level design](03-high-level-design.md) |
 | **Companion** | [05 — Frontend design](05-frontend-design.md) |
 
 Code shown here is **specification, not final source**. Signatures are binding; bodies are illustrative. Where a decision had a credible alternative, it is linked to an [ADR](adr/).
 
-**Contents:** [1 Domain](#1-domain-layer) · [2 F1 Pricing](#2-feature-1--pricing-engine) · [3 F2 Ledger](#3-feature-2--savings-credits-ledger) · [4 F3 Booking saga](#4-feature-3--resilient-booking-saga) · [5 F4 Concierge](#5-feature-4--grounded-concierge) · [6 F5 Opportunity](#6-feature-5--opportunity-engine-stretch) · [7 Application](#7-application-layer) · [8 Persistence](#8-persistence) · [9 Errors](#9-error-catalog) · [10 API](#10-api-contracts) · [11 Testing](#11-testing-strategy) · [12 Open questions](#12-open-questions)
+**Contents:** [1 Domain](#1-domain-layer) · [2 F1 Pricing](#2-feature-1--pricing-engine) · [3 F2 Ledger](#3-feature-2--savings-credits-ledger) · [4 F3 Booking saga](#4-feature-3--resilient-booking-saga) · [5 F4 Concierge](#5-feature-4--grounded-concierge) · [6 F5 Opportunity](#6-feature-5--opportunity-engine-stretch) · [7 Application](#7-application-layer) · [8 Persistence](#8-persistence) · [9 Errors](#9-error-catalog) · [10 API](#10-api-contracts) · [11 Testing](#11-testing-strategy) · [12 Resolved questions](#12-resolved-questions)
 
 ---
 
@@ -652,7 +652,7 @@ public sealed class PoisonMessage
 
 The message is inserted in the **same database transaction** as the state change it describes, so the two cannot diverge. A hosted dispatcher then polls undispatched rows in `OccurredAt` order (one attempt per message per cycle), delivers, and marks dispatched. The poll interval is the retry delay. Delivery is at-least-once, so every handler must be idempotent — an explicit constraint, documented at the handler interface. The dispatcher ignores tenant query filters to see every partner’s queue, then sets tenant context from `PartnerId` before invoking the handler.
 
-After `MaxAttempts` a message **moves** to `PoisonMessages` (insert poison, delete outbox) rather than blocking the queue behind it, and appears in the operator view. Known types: `booking.confirmed`, `credits.burned`, `booking.compensated`, `booking.requires-manual-review`. The outbox does not drive the saga (open question 5).
+After `MaxAttempts` a message **moves** to `PoisonMessages` (insert poison, delete outbox) rather than blocking the queue behind it, and appears in the operator view. Known types: `booking.confirmed`, `credits.burned`, `booking.compensated`, `booking.requires-manual-review`. The outbox does not drive the saga ([resolved question 5](#12-resolved-questions)).
 
 ### 4.5 Recovery worker (FR-B-11)
 
@@ -768,7 +768,7 @@ public interface IOfferNarrator
 }
 ```
 
-`NullOfferNarrator` is the default and returns a templated sentence, so the application is fully functional with no key and no network (NFR-08). `LlmOfferNarrator` is opt-in.
+`NullOfferNarrator` is the registered implementation and returns a templated sentence, so the application is fully functional with no key and no network (NFR-08). An LLM narrator remains in [future improvements](06-future-improvements.md); the `IOfferNarrator` port is the seam.
 
 The narrator receives only the already-computed result and cannot query anything. Its output passes a validator that rejects narration containing a currency amount not present in the facts, or a property name not in the returned set; on rejection the system falls back to the template and records `NarrationApplied = false`. A misbehaving model degrades prose, never facts.
 
@@ -863,12 +863,12 @@ Plain classes registered in DI, no mediator library ([ADR-0003](adr/)). Dependen
 | `EarnCredits` / `BurnCredits` / `AdjustCredits` / `ReverseLedger` | F2 | FR-L-03, FR-L-05, FR-L-06, FR-L-08 |
 | `GetLiabilityReport` / `ReconcileLedger` | F2 | FR-L-10, FR-L-11 |
 | `ExpireCredits` / `ExpireDueCredits` | F2 | FR-L-09 |
-| `StartBookingSaga` / `AdvanceSaga` / `CompensateSaga` | F3 | FR-B-01 … FR-B-07 |
-| `RecoverStalledSagas` / `GetSagaInstance` | F3 | FR-B-08, FR-B-11 |
+| `StartBookingSaga` / `AdvanceSaga` / `GetBooking` | F3 | FR-B-01 … FR-B-07 |
+| `RecoverStalledSagas` / `GetSagaInstance` / `ListSagas` / `RunAdminWorker` | F3 | FR-B-08, FR-B-11 |
 | `CancelBooking` | F3 | FR-L-08 |
 | `Recommend` | F4 | FR-C-01 … FR-C-07 |
 | `DetectTravelWindows` / `EvaluateOpportunities` / `ScanOpportunities` | F5 | FR-O-01 … FR-O-06, FR-O-11 |
-| `ActionNudge` / `DismissNudge` | F5 | FR-O-09, FR-O-10 |
+| `GetInbox` / `ActionNudge` / `DismissNudge` | F5 | FR-O-07, FR-O-09, FR-O-10 |
 
 ### 7.2 Ports
 
@@ -997,10 +997,10 @@ Base path `/api`. Partner context in `X-Partner-Code`; member identity in `X-Mem
 | `POST` | `/offers/{id}/quote` | `QuoteOffer` |
 | `GET` | `/quotes/{id}/explain` | `ExplainQuote` |
 | `POST` | `/bookings` | `StartBookingSaga` — requires `Idempotency-Key` |
-| `GET` | `/bookings/{id}` | Booking with saga summary |
+| `GET` | `/bookings/{id}` | `GetBooking` — booking with saga summary |
 | `POST` | `/bookings/{id}/cancel` | `CancelBooking` — requires `Idempotency-Key` |
 | `GET` | `/wallet/balance` · `/wallet/statement` | `GetBalance` · `GetStatement` |
-| `GET` | `/reports/liability?asOf=` | Finance role only |
+| `GET` | `/reports/liability?asOf=` | `GetLiabilityReport` — finance role only. `ReconcileLedger` is a use case with no HTTP report. |
 | `GET` | `/operator/sagas` · `/operator/sagas/{id}` | Operator role only |
 | `POST` | `/operator/sagas/{id}/retry` *(COULD)* | FR-B-13 |
 | `POST` | `/concierge/recommend` | `Recommend` |
@@ -1106,16 +1106,18 @@ Two of these deserve emphasis. Asserting on **raw JSON** rather than a mapped DT
 
 ---
 
-## 12. Open questions
+## 12. Resolved questions
+
+Closed against the implementation in T-082. None remain open.
 
 | # | Question | Resolution |
 |---|---|---|
-| 1 | Earn on booking or on completed stay? | Booking, for demo immediacy. Real programs accrue on stay — noted in [future improvements](06-future-improvements.md). |
-| 2 | Partial cancellation? | Out of scope; full cancellation only. |
-| 3 | Campaign stacking? | One campaign per quote, chosen by precedence. |
+| 1 | Earn on booking or on completed stay? | Booking, for demo immediacy (`ConfirmBookingStep` posts `EarnCredits`). Real programs accrue on stay — noted in [future improvements](06-future-improvements.md). |
+| 2 | Partial cancellation? | Out of scope; `CancelBooking` reverses the full confirmed tender only. |
+| 3 | Campaign stacking? | One campaign per quote, chosen by precedence (`CampaignDiscountStage`). |
 | 4 | Currency conversion? | Single currency per partner; both seeded partners use USD. |
-| 5 | Should the outbox drive the saga itself? | No. The saga is driven synchronously with a recovery fallback; using the outbox as the driver would make every step asynchronous and obscure the orchestration being demonstrated. |
-| 6 | Real calendar integration for F5? | No. A seeded availability feed behind the same port; a real integration changes the adapter only. |
+| 5 | Should the outbox drive the saga itself? | No. `AdvanceSaga` runs synchronously with `RecoverStalledSagas` as fallback; using the outbox as the driver would make every step asynchronous and obscure the orchestration being demonstrated. |
+| 6 | Real calendar integration for F5? | No. Seeded `BusyPeriod` rows behind the same port; a real integration changes the adapter only. |
 
 ---
 

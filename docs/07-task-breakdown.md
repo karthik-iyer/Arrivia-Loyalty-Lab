@@ -155,7 +155,7 @@ The largest phase, and the one that most rewards being built in this order — t
 |---|---|
 | **T-080** | README: prerequisites from a bare machine, `scripts/run-all.ps1`, three-terminal alternative, troubleshooting. |
 | **T-081** | Demo script — the numbered walkthrough from [problem statement §7](01-problem-statement.md), verified end to end on a clean clone. |
-| **T-082** | Documentation and code consistency pass; resolve every open question in [design §12](04-detailed-design.md#12-open-questions). |
+| **T-082** | Documentation and code consistency pass; resolve every open question in [design §12](04-detailed-design.md#12-resolved-questions). |
 | **T-083** | Full suite run, warning sweep, fresh-clone verification. |
 
 ---
@@ -205,6 +205,8 @@ Dropped in this order, highest number first:
 **Never cut, regardless of schedule:** architecture tests, the raw-JSON rate-leak assertion, ledger property-based tests, the saga crash-recovery test, and the prompt-injection test. Each of these is the *only* evidence for a claim this project makes, and a claim without evidence is worse than an absent feature.
 
 If F5 is cut, [README](../README.md) and this document mark it *designed, not implemented*, with a link to its design. Documented-and-deferred is a defensible engineering position; half-built and unmentioned is not.
+
+**Outcome:** F5 was kept (T-070–T-076). Playwright, operator retry (FR-B-13), pricing simulation (FR-P-12), and an HTTP reconciliation report remain deferred. `ReconcileLedger` exists as a use case.
 
 ---
 

@@ -3,7 +3,7 @@
 | | |
 |---|---|
 | **Document** | High-level design (HLD) |
-| **Status** | Approved for detailed design |
+| **Status** | Implemented — aligned with the code in T-082 |
 | **Prerequisite reading** | [01 — Problem statement](01-problem-statement.md), [02 — Requirements](02-requirements.md) |
 
 This document covers *shape*: the structure of the solution, how the layers relate, and how the main journeys flow. Concrete types, algorithms, schemas, and endpoint contracts are in the [detailed design](04-detailed-design.md).
@@ -20,7 +20,7 @@ The design is shaped by six forces, in priority order.
 | 2 | **Tenant isolation must be structural** (FR-X-02) | Partner scoping is enforced in one place at the persistence boundary, not repeated in every query where it can be forgotten. |
 | 3 | **Consistency must survive partial failure** (FR-B-01, FR-B-05) | Work that crosses a process boundary is orchestrated as a saga with persisted state and explicit compensations, never as a hopeful sequence of calls. |
 | 4 | **Everything must be explainable** (FR-P-07, FR-C-05, FR-B-08, FR-O-05) | Prices, recommendations, saga outcomes, and nudges each produce their justification as a *first-class return value*, not a logging side effect. |
-| 5 | **Runs anywhere, with nothing** (NFR-08) | SQLite, a sibling payment simulator, an outbox in place of a broker, and an AI adapter that degrades to a no-op. No cloud, no keys, no installs. |
+| 5 | **Runs anywhere, with nothing** (NFR-08) | SQLite, a sibling payment simulator, an outbox in place of a broker, and a template narrator behind `IOfferNarrator`. No cloud, no keys, no installs. |
 | 6 | **Architecture claims must be enforced** (NFR-01) | Layer rules are asserted by a test project that fails the build, not by documentation alone. |
 
 ---
@@ -35,12 +35,12 @@ The two ideas combine rather than compete. Layers answer *"what may depend on wh
 flowchart TB
     subgraph Outer["Infrastructure & delivery — replaceable"]
         API["LoyaltyLab.Api<br/>REST + MCP endpoints · workers"]
-        INF["LoyaltyLab.Infrastructure<br/>EF Core/SQLite · simulated supplier · HTTP payment gateway<br/>outbox dispatcher · AI narrator · clock"]
+        INF["LoyaltyLab.Infrastructure<br/>EF Core/SQLite · simulated supplier · HTTP payment gateway<br/>outbox dispatcher · clock"]
         WEB["loyaltylab-web<br/>Angular 21"]
     end
 
     subgraph Mid["Application — use cases & ports"]
-        APP["LoyaltyLab.Application<br/>SearchOffers · QuoteOffer · ExplainQuote<br/>BookingSaga · CancelBooking · RecoverSagas<br/>GetBalance · LiabilityReport · Recommend<br/>DetectOpportunities · EvaluateNudges"]
+        APP["LoyaltyLab.Application<br/>SearchOffers · QuoteOffer · ExplainQuote<br/>StartBookingSaga · CancelBooking · RecoverStalledSagas<br/>GetBalance · GetLiabilityReport · Recommend<br/>ScanOpportunities · GetInbox"]
     end
 
     subgraph Core["Domain — pure business rules"]
@@ -69,9 +69,9 @@ The one deliberate exception is the **payment simulator**, which runs as a sibli
 
 ```
 Arrivia-Loyalty-Lab/
-├─ LoyaltyLab.sln
+├─ LoyaltyLab.slnx
 ├─ docs/
-├─ scripts/                              run-all · seed · demo helpers
+├─ scripts/                              run-all.ps1
 ├─ src/
 │  ├─ LoyaltyLab.Domain/                 ← no project references
 │  │  ├─ Common/                         Money · Percent · Result · Entity · DomainEvent · IClock
@@ -88,30 +88,30 @@ Arrivia-Loyalty-Lab/
 │  │  │                                  IOfferNarrator · IOutbox · IUnitOfWork · IClock
 │  │  │                                  ITenantContextAccessor · IIdempotencyStore
 │  │  ├─ Catalog/                        SearchOffers
-│  │  ├─ Pricing/            [F1] QuoteOffer · ExplainQuote · SimulateRuleChange
+│  │  ├─ Pricing/            [F1] QuoteOffer · ExplainQuote
 │  │  ├─ Loyalty/            [F2] GetBalance · GetStatement · GetLiabilityReport
 │  │  │                          ExpireCredits · ReconcileLedger
-│  │  ├─ Booking/            [F3] StartBookingSaga · AdvanceSaga · CompensateSaga
-│  │  │                          RecoverStalledSagas · CancelBooking · GetSagaInstance
-│  │  ├─ Concierge/          [F4] Recommend
-│  │  └─ Opportunity/        [F5] DetectTravelWindows · EvaluateOpportunities
-│  │                             ApplyFatigueRules · ActionNudge · DismissNudge
+│  │  ├─ Booking/            [F3] StartBookingSaga · AdvanceSaga · GetBooking · ListSagas
+│  │  │                          RecoverStalledSagas · CancelBooking · GetSagaInstance · RunAdminWorker
+│  │  ├─ Concierge/          [F4] Recommend · NullOfferNarrator
+│  │  └─ Opportunity/        [F5] DetectTravelWindows · EvaluateOpportunities · ScanOpportunities
+│  │                             GetInbox · ActionNudge · DismissNudge
 │  │
 │  ├─ LoyaltyLab.Infrastructure/         ← references Application + Domain
-│  │  ├─ Persistence/                    DbContext · configurations · migrations · seeding
-│  │  ├─ Persistence/Repositories/       EF implementations of Application ports
+│  │  ├─ Persistence/                    DbContext · configurations · migrations · seeding · repositories
 │  │  ├─ Persistence/Outbox/             outbox table, dispatcher, poison handling
 │  │  ├─ Suppliers/                      SimulatedSupplierClient (deterministic + fault hooks)
 │  │  ├─ Payments/                       HttpPaymentGateway → talks to PaymentSim over HTTP
-│  │  ├─ Resilience/                     retry/backoff policies · FaultInjector
-│  │  ├─ Ai/                             NullOfferNarrator (default) · LlmOfferNarrator (optional)
+│  │  ├─ Tenancy/                        MutableTenantContextAccessor
 │  │  └─ Time/                           SystemClock · FixedDemoClock
 │  │
 │  ├─ LoyaltyLab.Api/                    ← composition root
 │  │  ├─ Endpoints/                      catalog · pricing · booking · loyalty · concierge
 │  │  │                                  opportunity · operator · admin
-│  │  ├─ Mcp/                            MCP tools — thin adapters over the same use cases
+│  │  ├─ Http/                           problem details · MCP use-case forwarding
+│  │  ├─ Mcp/                            ConciergeTools — thin adapters over the same use cases
 │  │  ├─ Workers/                        OutboxDispatcher · SagaRecovery · OpportunityScan
+│  │  ├─ FaultInjection/                 demo chaos switch (Development)
 │  │  ├─ Middleware/                     tenant resolution · correlation id · problem details
 │  │  └─ Program.cs                      DI wiring — the only place adapters are chosen
 │  │
@@ -151,8 +151,8 @@ Each feature is a column, each layer a row. Nothing in a feature column may reac
 | Layer | F1 Pricing | F2 Ledger | F3 Booking saga | F4 Concierge | F5 Opportunity |
 |---|---|---|---|---|---|
 | **Domain** | Rules, stages, quote, trace | Accounts, transactions, invariants | Saga instance, steps, compensations | Criteria, scoring, audit | Windows, signals, nudges, suppression |
-| **Application** | `QuoteOffer`, `ExplainQuote` | `GetBalance`, `GetLiabilityReport` | `StartBookingSaga`, `AdvanceSaga`, `CompensateSaga` | `Recommend` | `DetectTravelWindows`, `EvaluateOpportunities` |
-| **Infrastructure** | Rule repo, supplier client | Ledger repo, idempotency store | Outbox, payment gateway, retry policies | Narrator adapter | Price-watch store |
+| **Application** | `QuoteOffer`, `ExplainQuote` | `GetBalance`, `GetLiabilityReport` | `StartBookingSaga`, `AdvanceSaga` | `Recommend` | `DetectTravelWindows`, `EvaluateOpportunities`, `ScanOpportunities`, `GetInbox` |
+| **Infrastructure** | Rule repo, supplier client | Ledger repo, idempotency store | Outbox, payment gateway, retry policies | — (template `NullOfferNarrator` in Application) | Price-watch store |
 | **Api** | `/offers`, `/quotes` | `/wallet`, `/reports` | `/bookings`, `/operator/sagas`, workers | `/concierge`, MCP tools | `/inbox`, scan worker |
 | **Web** | Catalog, explain panel | Wallet, statement | Checkout, operator view | Concierge panel | Nudge inbox |
 
@@ -500,7 +500,7 @@ Notable choices, expanded in the [detailed design](04-detailed-design.md):
 | Frontend | Angular 21 standalone + signals | Matches the target environment; signals suit facade-based state |
 | Styling | SCSS with design tokens | Partner theming through CSS custom properties |
 | Tests | xUnit, FluentAssertions, property-based tests, NetArchTest | Behaviour *and* structure are verified |
-| AI | Provider-agnostic narrator port; no-op default | Demo never depends on a key or a network call |
+| AI | Provider-agnostic narrator port; template default (`NullOfferNarrator`) | Demo never depends on a key or a network call |
 
 ---
 
