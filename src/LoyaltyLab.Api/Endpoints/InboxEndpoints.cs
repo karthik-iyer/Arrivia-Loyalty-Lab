@@ -9,9 +9,24 @@ internal static class InboxEndpoints
 {
     public static void MapInboxEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/inbox", ListAsync);
-        app.MapPost("/api/inbox/{nudgeId:guid}/action", ActionAsync);
-        app.MapPost("/api/inbox/{nudgeId:guid}/dismiss", DismissAsync);
+        app.MapGet("/api/inbox", ListAsync)
+            .WithTags("Inbox")
+            .WithSummary("Live delivered nudges with named scoring signals.")
+            .Produces<InboxHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapPost("/api/inbox/{nudgeId:guid}/action", ActionAsync)
+            .WithTags("Inbox")
+            .WithSummary("Action a nudge by re-quoting through the engine.")
+            .Produces<ActionedNudgeHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status404NotFound)
+            .ProducesProblem(StatusCodes.Status410Gone);
+        app.MapPost("/api/inbox/{nudgeId:guid}/dismiss", DismissAsync)
+            .WithTags("Inbox")
+            .WithSummary("Dismiss a nudge and start the fatigue cooldown.")
+            .Produces<DismissedNudgeHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> ListAsync(

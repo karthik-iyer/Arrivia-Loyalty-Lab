@@ -10,9 +10,23 @@ internal static class PricingEndpoints
 {
     public static void MapPricingEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/offers", SearchAsync);
-        app.MapPost("/api/offers/{offerId:guid}/quote", QuoteAsync);
-        app.MapGet("/api/quotes/{quoteId:guid}/explain", ExplainAsync);
+        app.MapGet("/api/offers", SearchAsync)
+            .WithTags("Pricing")
+            .WithSummary("Search permitted offers for a stay date.")
+            .Produces<OfferHttp[]>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest);
+        app.MapPost("/api/offers/{offerId:guid}/quote", QuoteAsync)
+            .WithTags("Pricing")
+            .WithSummary("Quote an offer through the pricing engine.")
+            .Produces<QuoteHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapGet("/api/quotes/{quoteId:guid}/explain", ExplainAsync)
+            .WithTags("Pricing")
+            .WithSummary("Explain a quote. Net rate is omitted for members.")
+            .Produces<ExplainHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
     }
 
     private static async Task<IResult> SearchAsync(

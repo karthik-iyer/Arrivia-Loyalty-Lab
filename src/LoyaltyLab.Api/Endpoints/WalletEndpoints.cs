@@ -9,9 +9,24 @@ internal static class WalletEndpoints
 {
     public static void MapWalletEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapGet("/api/wallet/balance", BalanceAsync);
-        app.MapGet("/api/wallet/statement", StatementAsync);
-        app.MapGet("/api/reports/liability", LiabilityAsync);
+        app.MapGet("/api/wallet/balance", BalanceAsync)
+            .WithTags("Wallet")
+            .WithSummary("Member credit balance and monetary value.")
+            .Produces<WalletBalanceHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapGet("/api/wallet/statement", StatementAsync)
+            .WithTags("Wallet")
+            .WithSummary("Member ledger statement.")
+            .Produces<WalletStatementHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapGet("/api/reports/liability", LiabilityAsync)
+            .WithTags("Wallet")
+            .WithSummary("Outstanding credit liability as of a date. Operator.")
+            .Produces<LiabilityHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
     }
 
     private static async Task<IResult> BalanceAsync(

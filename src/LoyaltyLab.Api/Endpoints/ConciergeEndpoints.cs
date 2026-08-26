@@ -7,7 +7,12 @@ namespace LoyaltyLab.Api.Endpoints;
 internal static class ConciergeEndpoints
 {
     public static void MapConciergeEndpoints(this IEndpointRouteBuilder app) =>
-        app.MapPost("/api/concierge/recommend", RecommendAsync);
+        app.MapPost("/api/concierge/recommend", RecommendAsync)
+            .WithTags("Concierge")
+            .WithSummary("Rank offers for a member prompt. Does not invent inventory.")
+            .Produces<ConciergeRecommendHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
 
     private static async Task<IResult> RecommendAsync(
         RecommendHttpRequest? body,

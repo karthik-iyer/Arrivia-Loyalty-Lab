@@ -42,7 +42,9 @@ public sealed class TenantResolutionMiddleware(RequestDelegate next)
         path.StartsWithSegments("/health")
         || path.StartsWithSegments("/alive")
         || path.StartsWithSegments("/favicon.ico")
-        || path.StartsWithSegments("/mcp");
+        || path.StartsWithSegments("/mcp")
+        || path.StartsWithSegments("/openapi")
+        || path.StartsWithSegments("/scalar");
 
     private static Task WritePartnerNotResolvedAsync(HttpContext context)
     {

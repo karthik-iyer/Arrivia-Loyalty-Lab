@@ -3,6 +3,7 @@ using LoyaltyLab.Api.FaultInjection;
 using LoyaltyLab.Api.Http;
 using LoyaltyLab.Api.Mcp;
 using LoyaltyLab.Api.Middleware;
+using LoyaltyLab.Api.OpenApi;
 using LoyaltyLab.Api.Workers;
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Application.Booking;
@@ -26,6 +27,7 @@ FaultInjectionStartup.EnsureAllowed(builder.Environment, builder.Configuration);
 
 builder.Services.AddExceptionHandler<UnhandledExceptionHandler>();
 builder.Services.AddProblemDetails();
+builder.Services.AddLoyaltyLabOpenApi();
 builder.Services.AddLoyaltyLabInfrastructure();
 builder.Services.AddHostedService<OutboxDispatcherWorker>();
 builder.Services.AddHostedService<SagaRecoveryWorker>();
@@ -110,7 +112,10 @@ if (FaultInjectionStartup.IsEnabled(app.Configuration))
     app.UseMiddleware<FaultInjectionMiddleware>();
 }
 
-app.MapGet("/health", () => Results.Ok(new { status = "ok" }));
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+    .WithTags("Meta")
+    .WithSummary("Liveness probe. No partner header required.");
+app.MapLoyaltyLabOpenApi();
 app.MapPricingEndpoints();
 app.MapWalletEndpoints();
 app.MapBookingEndpoints();
@@ -136,7 +141,9 @@ app.MapGet("/api/partners/current/theme", async (
         accentColor = partner.Theme.AccentColor,
         logoUrl = partner.Theme.LogoUrl,
     });
-});
+})
+    .WithTags("Meta")
+    .WithSummary("Resolved partner theme for the current X-Partner-Code.");
 
 await using (var scope = app.Services.CreateAsyncScope())
 {

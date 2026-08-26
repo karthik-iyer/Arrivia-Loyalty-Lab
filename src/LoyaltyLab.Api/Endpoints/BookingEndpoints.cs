@@ -12,12 +12,42 @@ internal static class BookingEndpoints
 
     public static void MapBookingEndpoints(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/api/bookings", StartAsync);
-        app.MapGet("/api/bookings/{bookingId:guid}", GetAsync);
-        app.MapPost("/api/bookings/{bookingId:guid}/cancel", CancelAsync);
-        app.MapGet("/api/operator/sagas", ListSagasAsync);
-        app.MapGet("/api/operator/sagas/{sagaId:guid}", GetSagaAsync);
-        app.MapPost("/api/admin/run/{worker}", RunWorkerAsync);
+        app.MapPost("/api/bookings", StartAsync)
+            .WithTags("Booking")
+            .WithSummary("Start checkout as a saga. Requires Idempotency-Key.")
+            .Produces<BookingHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapGet("/api/bookings/{bookingId:guid}", GetAsync)
+            .WithTags("Booking")
+            .WithSummary("Get a booking and its saga.")
+            .Produces<BookingHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapPost("/api/bookings/{bookingId:guid}/cancel", CancelAsync)
+            .WithTags("Booking")
+            .WithSummary("Cancel a booking. Requires Idempotency-Key.")
+            .Produces<BookingHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapGet("/api/operator/sagas", ListSagasAsync)
+            .WithTags("Operator")
+            .WithSummary("List sagas for the resolved partner. Operator.")
+            .Produces<SagaListHttp[]>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
+        app.MapGet("/api/operator/sagas/{sagaId:guid}", GetSagaAsync)
+            .WithTags("Operator")
+            .WithSummary("Saga detail including compensation. Operator.")
+            .Produces<SagaOperatorHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status404NotFound);
+        app.MapPost("/api/admin/run/{worker}", RunWorkerAsync)
+            .WithTags("Operator")
+            .WithSummary("Run an admin worker (scan, expire, …). Operator.")
+            .Produces<AdminWorkerHttp>(StatusCodes.Status200OK)
+            .ProducesProblem(StatusCodes.Status400BadRequest)
+            .ProducesProblem(StatusCodes.Status403Forbidden);
     }
 
     private static async Task<IResult> StartAsync(
