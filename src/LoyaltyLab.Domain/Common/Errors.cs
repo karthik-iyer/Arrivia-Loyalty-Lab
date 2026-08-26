@@ -80,4 +80,10 @@ public static class Errors
 
     public static Error WorkerNotFound { get; } =
         Error.Of("WORKER_NOT_FOUND", "That on-demand worker is not registered.");
+
+    public static Error NudgeNotFound { get; } =
+        Error.Of("NUDGE_NOT_FOUND", "The nudge was not found.");
+
+    public static Error NudgeExpired { get; } =
+        Error.Of("NUDGE_EXPIRED", "The nudge has expired and is no longer actionable.");
 }

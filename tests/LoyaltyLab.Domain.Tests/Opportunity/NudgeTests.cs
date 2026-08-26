@@ -127,4 +127,49 @@ public sealed class NudgeTests
 
         nudge.Status.Should().Be(NudgeStatus.Dismissed);
     }
+
+    [Fact]
+    public void A_delivered_nudge_can_be_actioned()
+    {
+        var nudge = Delivered();
+
+        nudge.Action();
+
+        nudge.Status.Should().Be(NudgeStatus.Actioned);
+    }
+
+    [Fact]
+    public void A_delivered_nudge_can_expire()
+    {
+        var nudge = Delivered();
+
+        nudge.Expire();
+
+        nudge.Status.Should().Be(NudgeStatus.Expired);
+    }
+
+    [Fact]
+    public void A_dismissed_nudge_cannot_be_actioned()
+    {
+        var nudge = Delivered();
+        nudge.Dismiss();
+
+        var act = () => nudge.Action();
+
+        act.Should().Throw<DomainException>();
+    }
+
+    private static Nudge Delivered()
+    {
+        var member = MemberId.New();
+        var window = new TravelWindow(member, new DateOnly(2026, 3, 29), new DateOnly(2026, 4, 12));
+        return Nudge.Deliver(
+            PartnerId.New(),
+            member,
+            OfferId.New(),
+            window,
+            [OpportunitySignal.Of(SignalKind.WindowFit, 14m, 1m, 0.2m)],
+            Fixtures.Opportunities,
+            new MutableClock(AsOf));
+    }
 }

@@ -43,6 +43,9 @@ public sealed class NudgeRepository(LoyaltyLabDbContext db) : INudgeRepository
         return Task.CompletedTask;
     }
 
+    public Task<Nudge?> GetByIdAsync(NudgeId id, CancellationToken cancellationToken) =>
+        db.Nudges.FirstOrDefaultAsync(nudge => nudge.Id == id, cancellationToken);
+
     public async Task<IReadOnlyList<Nudge>> ListForMemberAsync(
         MemberId memberId,
         CancellationToken cancellationToken)

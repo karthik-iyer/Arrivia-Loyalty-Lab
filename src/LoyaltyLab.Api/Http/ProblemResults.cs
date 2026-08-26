@@ -30,7 +30,8 @@ internal static class ProblemResults
             || error == Errors.PaymentNotFound
             || error == Errors.BookingNotFound
             || error == Errors.SagaNotFound
-            || error == Errors.WorkerNotFound)
+            || error == Errors.WorkerNotFound
+            || error == Errors.NudgeNotFound)
         {
             return StatusCodes.Status404NotFound;
         }
@@ -73,6 +74,11 @@ internal static class ProblemResults
             return StatusCodes.Status403Forbidden;
         }
 
+        if (error == Errors.NudgeExpired)
+        {
+            return StatusCodes.Status410Gone;
+        }
+
         return StatusCodes.Status400BadRequest;
     }
 
@@ -82,6 +88,7 @@ internal static class ProblemResults
         StatusCodes.Status402PaymentRequired => "https://tools.ietf.org/html/rfc9110#section-15.5.1",
         StatusCodes.Status403Forbidden => "https://tools.ietf.org/html/rfc9110#section-15.5.4",
         StatusCodes.Status409Conflict => "https://tools.ietf.org/html/rfc9110#section-15.5.10",
+        StatusCodes.Status410Gone => "https://tools.ietf.org/html/rfc9110#section-15.5.11",
         StatusCodes.Status422UnprocessableEntity => "https://tools.ietf.org/html/rfc4918#section-11.2",
         StatusCodes.Status503ServiceUnavailable => "https://tools.ietf.org/html/rfc9110#section-15.6.4",
         _ => "https://tools.ietf.org/html/rfc9110#section-15.5.1",

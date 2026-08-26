@@ -151,6 +151,8 @@ public interface INudgeRepository
 {
     Task AddAsync(Nudge nudge, CancellationToken cancellationToken);
 
+    Task<Nudge?> GetByIdAsync(NudgeId id, CancellationToken cancellationToken);
+
     Task<IReadOnlyList<Nudge>> ListForMemberAsync(MemberId memberId, CancellationToken cancellationToken);
 }
 

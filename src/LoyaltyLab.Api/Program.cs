@@ -39,6 +39,9 @@ builder.Services.AddScoped<Recommend>();
 builder.Services.AddScoped<DetectTravelWindows>();
 builder.Services.AddScoped<EvaluateOpportunities>();
 builder.Services.AddScoped<ScanOpportunities>();
+builder.Services.AddScoped<GetInbox>();
+builder.Services.AddScoped<ActionNudge>();
+builder.Services.AddScoped<DismissNudge>();
 builder.Services.AddScoped<TenantBinder>();
 builder.Services.AddScoped<IMcpUseCases, McpUseCases>();
 builder.Services.AddScoped<ClaimIdempotency>();
@@ -112,6 +115,7 @@ app.MapPricingEndpoints();
 app.MapWalletEndpoints();
 app.MapBookingEndpoints();
 app.MapConciergeEndpoints();
+app.MapInboxEndpoints();
 app.MapMcp("/mcp");
 
 app.MapGet("/api/partners/current/theme", async (

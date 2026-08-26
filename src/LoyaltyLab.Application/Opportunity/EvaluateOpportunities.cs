@@ -12,7 +12,7 @@ namespace LoyaltyLab.Application.Opportunity;
 
 /// <summary>
 /// Detect windows, price eligible inventory through the normal engine, score, and persist (FR-O-01, FR-O-02, FR-O-04).
-/// Does not persist a quote — actioning (T-074) re-quotes (FR-O-09). Fatigue (FR-O-06) runs before a deliver.
+/// Does not persist a quote — actioning re-quotes through QuoteOffer (FR-O-09). Fatigue (FR-O-06) runs before a deliver.
 /// </summary>
 public sealed class EvaluateOpportunities(
     ITenantContextAccessor tenant,

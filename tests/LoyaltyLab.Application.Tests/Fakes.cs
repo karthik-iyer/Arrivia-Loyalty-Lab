@@ -307,6 +307,9 @@ internal sealed class FakeNudges : INudgeRepository
         return Task.CompletedTask;
     }
 
+    public Task<Nudge?> GetByIdAsync(NudgeId id, CancellationToken cancellationToken) =>
+        Task.FromResult(Items.SingleOrDefault(nudge => nudge.Id == id));
+
     public Task<IReadOnlyList<Nudge>> ListForMemberAsync(
         MemberId memberId,
         CancellationToken cancellationToken) =>

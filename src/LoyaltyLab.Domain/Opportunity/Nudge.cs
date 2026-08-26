@@ -92,12 +92,28 @@ public sealed class Nudge : Entity<NudgeId>, ITenantOwned
 
     public void Dismiss()
     {
+        EnsureDelivered("dismissed");
+        Status = NudgeStatus.Dismissed;
+    }
+
+    public void Action()
+    {
+        EnsureDelivered("actioned");
+        Status = NudgeStatus.Actioned;
+    }
+
+    public void Expire()
+    {
+        EnsureDelivered("expired");
+        Status = NudgeStatus.Expired;
+    }
+
+    private void EnsureDelivered(string verb)
+    {
         if (Status != NudgeStatus.Delivered)
         {
-            throw new DomainException("Only a delivered nudge can be dismissed.");
+            throw new DomainException($"Only a delivered nudge can be {verb}.");
         }
-
-        Status = NudgeStatus.Dismissed;
     }
 
     public static Nudge Deliver(

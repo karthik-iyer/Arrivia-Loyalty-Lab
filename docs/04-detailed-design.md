@@ -837,7 +837,7 @@ A `PriceWatch` row stores the baseline net rate and last-checked timestamp per o
 
 ### 6.5 Actioning (FR-O-09)
 
-A nudge stores the offer and its signals, never a reusable price. Actioning calls `QuoteOffer` through the normal path, so the member always sees a live quote and a stale number can never reach checkout.
+A nudge stores the offer and its signals, never a reusable price. `GET /inbox` returns delivered, unexpired nudges for the caller. Actioning calls `QuoteOffer` with the window start as the stay date, so the member always sees a live quote and a stale number can never reach checkout. An expired nudge is stamped `Expired` and returns `NUDGE_EXPIRED`. Dismissal is valid only for a live delivered nudge and feeds the cooldown rule on the next scan (FR-O-07, FR-O-10).
 
 ---
 
@@ -979,6 +979,7 @@ RFC 7807 problem details with the code in an `errorCode` extension member, so th
 | `MISSING_IDEMPOTENCY_KEY` | 400 | Mutation required `Idempotency-Key` |
 | `WORKER_NOT_FOUND` | 404 | `/admin/run/{worker}` named an unknown worker |
 | `IDEMPOTENCY_KEY_REUSED` | 409 | Same key, different payload |
+| `NUDGE_NOT_FOUND` | 404 | Unknown, or belongs to another member or partner |
 | `NUDGE_EXPIRED` | 410 | Actioned after its lifetime |
 | `LEDGER_UNBALANCED` | 500 | Invariant breach — a defect, never expected |
 
