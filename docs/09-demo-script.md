@@ -44,8 +44,9 @@ Coral Bay is Oceanic inventory. Nimbus cannot sell Oceanic, so the two-brand com
 $maya = @{ 'X-Partner-Code' = 'SUMMIT'; 'X-Member-Id' = 'a11ce001-0002-7000-8000-000000000001' }
 $chen = @{ 'X-Partner-Code' = 'NIMBUS'; 'X-Member-Id' = 'a11ce001-0002-7000-8000-000000000003' }
 $offer = 'a11ce001-0004-7000-8000-000000000009'
-Invoke-RestMethod "http://localhost:5180/api/offers/$offer/quote?stayDate=2026-03-15" -Headers $maya
-Invoke-RestMethod "http://localhost:5180/api/offers/$offer/quote?stayDate=2026-03-15" -Headers $chen
+$body = '{"stayDate":"2026-03-15"}'
+Invoke-RestMethod "http://localhost:5180/api/offers/$offer/quote" -Method POST -Headers $maya -ContentType 'application/json' -Body $body
+Invoke-RestMethod "http://localhost:5180/api/offers/$offer/quote" -Method POST -Headers $chen -ContentType 'application/json' -Body $body
 ```
 
 ---
@@ -60,7 +61,7 @@ Invoke-RestMethod "http://localhost:5180/api/offers/$offer/quote?stayDate=2026-0
 **Curl**
 
 ```powershell
-$quote = Invoke-RestMethod 'http://localhost:5180/api/offers/a11ce001-0004-7000-8000-000000000001/quote?stayDate=2026-03-15' -Headers $maya
+$quote = Invoke-RestMethod 'http://localhost:5180/api/offers/a11ce001-0004-7000-8000-000000000001/quote' -Method POST -Headers $maya -ContentType 'application/json' -Body $body
 Invoke-RestMethod "http://localhost:5180/api/quotes/$($quote.quoteId)/explain" -Headers $maya
 ```
 
@@ -120,8 +121,8 @@ Wallet still reads 6 000 credits.
 
 ```powershell
 Invoke-RestMethod 'http://localhost:5180/api/offers?stayDate=2026-03-15' -Headers @{ 'X-Partner-Code' = 'SUMMIT' }
-# Body lists Coral Bay and contains no memberPrice and no netRate.
-Invoke-WebRequest 'http://localhost:5180/api/offers/a11ce001-0004-7000-8000-000000000001/quote?stayDate=2026-03-15' -Headers @{ 'X-Partner-Code' = 'SUMMIT' }
+# Body lists Coral Bay. There is no netRate; memberPrice is null.
+Invoke-WebRequest 'http://localhost:5180/api/offers/a11ce001-0004-7000-8000-000000000001/quote' -Method POST -Headers @{ 'X-Partner-Code' = 'SUMMIT' } -ContentType 'application/json' -Body '{"stayDate":"2026-03-15"}'
 # 404 OFFER_NOT_FOUND — anonymous callers are not told the offer exists as a member rate.
 ```
 
@@ -133,7 +134,7 @@ Hosted scanning is off. The operator button runs the same use case as `POST /api
 
 1. Switch to **Operator · Summit** → **Operator** → **Run opportunity scan**. The page reports members scanned (Maya is the seeded calendar).
 2. Switch to **Maya · Summit Gold** → **Inbox**.
-3. One card: **Coral Bay Resort**, window **29 Mar 2026 – 12 Apr 2026**, score at least 55% (typically **68% fit**). Open **Why am I seeing this?** — five named signals (window fit, destination affinity, tag affinity, credit coverage, price drop).
+3. One card: **Coral Bay Resort**, window **29 Mar 2026 – 12 Apr 2026**, score at least 55% (typically **77% fit**). Open **Why am I seeing this?** — five named signals (window fit, destination affinity, tag affinity, credit coverage, price drop).
 4. Switch back to **Operator · Summit** → **Run opportunity scan** again.
 5. Maya's inbox still has **one** live nudge. The second evaluation did not spam her.
 6. In the API window, an Information line records the silence, for example `Opportunity suppressed for Maya … DuplicateOfRecentNudge`.

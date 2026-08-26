@@ -65,7 +65,9 @@ internal sealed class TravelOfferConfiguration : IEntityTypeConfiguration<Travel
         builder.Property(o => o.Destination).HasConversion(new DestinationConverter());
         builder.Property(o => o.NetRate).HasConversion(new MoneyConverter());
         builder.Property(o => o.TaxesAndFees).HasConversion(new MoneyConverter());
-        builder.Property(o => o.Tags).HasConversion(PersistenceJson.JsonConverter<HashSet<OfferTag>>());
+        builder.Property(o => o.Tags).HasConversion(
+            PersistenceJson.JsonConverter<HashSet<OfferTag>>(),
+            PersistenceJson.CollectionComparer<HashSet<OfferTag>>());
         builder.HasIndex(o => new { o.SupplierId, o.AvailableFrom, o.AvailableTo });
     }
 }
@@ -85,7 +87,8 @@ internal sealed class QuoteConfiguration : IEntityTypeConfiguration<LoyaltyLab.D
         builder.Property(q => q.MemberPrice).HasConversion(new MoneyConverter());
         builder.Property(q => q.MaxCreditTender).HasConversion(new MoneyConverter());
         builder.Property(q => q.Trace).HasConversion(
-            PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Pricing.PriceTraceEntry>>());
+            PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Pricing.PriceTraceEntry>>(),
+            PersistenceJson.CollectionComparer<List<LoyaltyLab.Domain.Pricing.PriceTraceEntry>>());
         builder.HasIndex(q => new { q.PartnerId, q.MemberId, q.ExpiresAt });
     }
 }
@@ -344,7 +347,9 @@ internal sealed class NudgeConfiguration : IEntityTypeConfiguration<LoyaltyLab.D
         builder.Property(n => n.Status).HasConversion<string>().HasMaxLength(32);
         builder.Property(n => n.SuppressedBecause).HasConversion<string>().HasMaxLength(32);
         builder.Property(n => n.Signals)
-            .HasConversion(PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Opportunity.OpportunitySignal>>());
+            .HasConversion(
+                PersistenceJson.JsonConverter<List<LoyaltyLab.Domain.Opportunity.OpportunitySignal>>(),
+                PersistenceJson.CollectionComparer<List<LoyaltyLab.Domain.Opportunity.OpportunitySignal>>());
         builder.HasIndex(n => new { n.PartnerId, n.MemberId, n.CreatedAt });
     }
 }
