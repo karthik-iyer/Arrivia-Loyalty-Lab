@@ -180,6 +180,61 @@ public sealed class EvaluateOpportunitiesTests
     }
 
     [Fact]
+    public async Task A_nudge_appears_with_its_reasoning_and_a_second_is_suppressed_with_a_recorded_reason()
+    {
+        var world = World.Summit(withHistory: true);
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+
+        var first = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+        var second = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        first.IsSuccess.Should().BeTrue();
+        second.IsSuccess.Should().BeTrue();
+        var delivered = first.Value.Nudges.Should().ContainSingle().Subject;
+        delivered.Status.Should().Be(NudgeStatus.Delivered);
+        delivered.Signals.Should().HaveCount(5);
+        delivered.Score.Should().Be(delivered.Signals.Sum(signal => signal.Contribution));
+
+        var silenced = second.Value.Nudges.Should().ContainSingle().Subject;
+        silenced.Status.Should().Be(NudgeStatus.Suppressed);
+        silenced.SuppressedBecause.Should().Be(SuppressionReason.DuplicateOfRecentNudge);
+        world.Nudges.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task Raising_the_score_threshold_turns_a_deliverable_nudge_into_a_recorded_silence()
+    {
+        var world = World.Summit(withHistory: true, policy: World.Opportunities(scoreThreshold: 0.90m));
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+
+        var result = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        var nudge = result.Value.Nudges.Should().ContainSingle().Subject;
+        nudge.Status.Should().Be(NudgeStatus.Suppressed);
+        nudge.SuppressedBecause.Should().Be(SuppressionReason.ScoreBelowThreshold);
+        nudge.Score.Should().Be(0.68m);
+        nudge.Signals.Should().HaveCount(5);
+    }
+
+    [Fact]
+    public async Task Raising_the_weekly_cap_allows_a_delivery_that_the_default_cap_would_block()
+    {
+        var world = World.Summit(withHistory: true, policy: World.Opportunities(maxNudgesPerMemberPerWeek: 3));
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+        var other = new TravelWindow(world.Maya.Id, new DateOnly(2026, 6, 1), new DateOnly(2026, 6, 10));
+        world.Nudges.Items.Add(Prior(world, OfferId.New(), other));
+        world.Nudges.Items.Add(Prior(world, OfferId.New(), other));
+
+        var result = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        var nudge = result.Value.Nudges.Should().ContainSingle().Subject;
+        nudge.Status.Should().Be(NudgeStatus.Delivered);
+        nudge.OfferId.Should().Be(world.Coral.Id);
+    }
+
+    [Fact]
     public async Task A_second_scan_records_a_duplicate_suppression()
     {
         var world = World.Summit(withHistory: true);
@@ -276,7 +331,24 @@ public sealed class EvaluateOpportunitiesTests
 
         public EvaluateOpportunities Evaluate { get; }
 
-        public static World Summit(bool withHistory, bool permitCoral = true, bool includeBusy = true)
+        public static OpportunityPolicy Opportunities(
+            decimal scoreThreshold = 0.55m,
+            int maxNudgesPerMemberPerWeek = 2) =>
+            new(
+                3,
+                14,
+                scoreThreshold,
+                Percent.From(10m),
+                maxNudgesPerMemberPerWeek,
+                30,
+                7,
+                new SignalWeights(0.2m, 0.2m, 0.2m, 0.2m, 0.2m));
+
+        public static World Summit(
+            bool withHistory,
+            bool permitCoral = true,
+            bool includeBusy = true,
+            OpportunityPolicy? policy = null)
         {
             var partner = Partner.Create(
                 "SUMMIT",
@@ -286,7 +358,7 @@ public sealed class EvaluateOpportunitiesTests
                 new CreditPolicy(0.01m, Percent.From(40m), 730, Percent.From(10m)),
                 new QuotePolicy(15, RateDriftPolicy.AbsorbWithinTolerance, Percent.From(2m)),
                 new SagaPolicy(10, 3, 5, 60),
-                new OpportunityPolicy(3, 14, 0.55m, Percent.From(10m), 2, 30, 7, new SignalWeights(0.2m, 0.2m, 0.2m, 0.2m, 0.2m)));
+                policy ?? Opportunities());
             var maya = Member.Create(partner.Id, "Maya", TierCode.Gold);
             var coral = Offer("Coral Bay Resort", "MBJ", "Montego Bay", [OfferTag.Beach, OfferTag.Family], 100m, 15m);
             var alpine = Offer("Matterhorn Lodge", "ZRH", "Zermatt", [OfferTag.Ski], 180m, 22m);

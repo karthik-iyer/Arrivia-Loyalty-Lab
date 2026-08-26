@@ -6,6 +6,9 @@ using LoyaltyLab.Api.Tests.Hosting;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Tenancy;
 using LoyaltyLab.Infrastructure.Persistence;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LoyaltyLab.Api.Tests.Opportunity;
 
@@ -77,6 +80,29 @@ public sealed class InboxEndpointTests
         var listed = await client.SendAsync(inbox);
         var remaining = await listed.Content.ReadFromJsonAsync<JsonElement>(Json);
         remaining.GetProperty("nudges").EnumerateArray().Should().BeEmpty();
+    }
+
+    [Fact]
+    public async Task Actioning_after_the_configured_lifetime_is_gone()
+    {
+        using var factory = new AdvancingClockApiFactory();
+        using var client = factory.CreateClient();
+        var nudgeId = await ScanAndInboxIdAsync(client);
+
+        factory.Clock.UtcNow = factory.Clock.UtcNow.AddDays(7);
+
+        using var inbox = Member("SUMMIT", HttpMethod.Get, "/api/inbox", SeedIds.Maya.Value);
+        var listed = await client.SendAsync(inbox);
+        var remaining = await listed.Content.ReadFromJsonAsync<JsonElement>(Json);
+        listed.StatusCode.Should().Be(HttpStatusCode.OK, because: remaining.ToString());
+        remaining.GetProperty("nudges").EnumerateArray().Should().BeEmpty();
+
+        using var action = Member("SUMMIT", HttpMethod.Post, $"/api/inbox/{nudgeId}/action", SeedIds.Maya.Value);
+        var response = await client.SendAsync(action);
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>(Json);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Gone);
+        payload.GetProperty("errorCode").GetString().Should().Be(Errors.NudgeExpired.Code);
     }
 
     [Fact]
@@ -154,4 +180,29 @@ public sealed class InboxEndpointTests
 
     private static bool ContainsNetRate(string json) =>
         json.Contains("netRate", StringComparison.OrdinalIgnoreCase);
+}
+
+public sealed class AdvancingClockApiFactory : LoyaltyLabApiFactory
+{
+    public MutableTestClock Clock { get; } = new(
+        new DateTimeOffset(2026, 3, 15, 12, 0, 0, TimeSpan.Zero));
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        base.ConfigureWebHost(builder);
+        builder.ConfigureTestServices(services =>
+        {
+            foreach (var descriptor in services.Where(entry => entry.ServiceType == typeof(IClock)).ToList())
+            {
+                services.Remove(descriptor);
+            }
+
+            services.AddSingleton<IClock>(Clock);
+        });
+    }
+}
+
+public sealed class MutableTestClock(DateTimeOffset utcNow) : IClock
+{
+    public DateTimeOffset UtcNow { get; set; } = utcNow;
 }
