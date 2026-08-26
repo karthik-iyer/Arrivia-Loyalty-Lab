@@ -2,7 +2,7 @@ import { TestBed } from '@angular/core/testing';
 
 import { ok, OPERATOR_PORT } from '../domain';
 import { OperatorListStore } from './operator-list.store';
-import { ListSagasUseCase } from './operator.use-case';
+import { ListSagasUseCase, RunAdminWorkerUseCase } from './operator.use-case';
 import { confirmedSagaItem, reviewSagaItem } from './test-fixtures';
 
 describe('OperatorListStore', () => {
@@ -11,6 +11,7 @@ describe('OperatorListStore', () => {
       providers: [
         OperatorListStore,
         ListSagasUseCase,
+        RunAdminWorkerUseCase,
         {
           provide: OPERATOR_PORT,
           useValue: {
@@ -27,5 +28,28 @@ describe('OperatorListStore', () => {
       'RequiresManualReview',
       'Confirmed',
     ]);
+  });
+
+  it('records members scanned after an opportunity scan', async () => {
+    TestBed.configureTestingModule({
+      providers: [
+        OperatorListStore,
+        ListSagasUseCase,
+        RunAdminWorkerUseCase,
+        {
+          provide: OPERATOR_PORT,
+          useValue: {
+            listSagas: async () => ok([]),
+            runWorker: async () => ok({ worker: 'scan', processed: 1 }),
+          },
+        },
+      ],
+    });
+
+    const store = TestBed.inject(OperatorListStore);
+    await store.runScan();
+
+    expect(store.scanResult()?.worker).toBe('scan');
+    expect(store.scanResult()?.processed).toBe(1);
   });
 });

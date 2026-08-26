@@ -1,7 +1,7 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
 
-import type { AppError, SagaListItemView, SagaStatus } from '../domain';
-import { ListSagasUseCase } from './operator.use-case';
+import type { AppError, AdminWorkerView, SagaListItemView, SagaStatus } from '../domain';
+import { ListSagasUseCase, RunAdminWorkerUseCase } from './operator.use-case';
 
 export type OperatorListStatus = 'idle' | 'loading' | 'ready' | 'error';
 export type SagaStatusFilter = 'all' | SagaStatus;
@@ -29,16 +29,23 @@ export function reviewNeededFirst(
 @Injectable()
 export class OperatorListStore {
   private readonly listSagas = inject(ListSagasUseCase);
+  private readonly runWorker = inject(RunAdminWorkerUseCase);
 
   private readonly _sagas = signal<readonly SagaListItemView[]>([]);
   private readonly _status = signal<OperatorListStatus>('idle');
   private readonly _error = signal<AppError | null>(null);
   private readonly _filter = signal<SagaStatusFilter>('all');
+  private readonly _scanBusy = signal(false);
+  private readonly _scanResult = signal<AdminWorkerView | null>(null);
+  private readonly _scanError = signal<AppError | null>(null);
 
   readonly sagas = this._sagas.asReadonly();
   readonly status = this._status.asReadonly();
   readonly error = this._error.asReadonly();
   readonly filter = this._filter.asReadonly();
+  readonly scanBusy = this._scanBusy.asReadonly();
+  readonly scanResult = this._scanResult.asReadonly();
+  readonly scanError = this._scanError.asReadonly();
 
   readonly visible = computed(() => {
     const filter = this._filter();
@@ -62,5 +69,23 @@ export class OperatorListStore {
 
     this._sagas.set(result.value);
     this._status.set('ready');
+  }
+
+  async runScan(): Promise<void> {
+    if (this._scanBusy()) {
+      return;
+    }
+
+    this._scanBusy.set(true);
+    this._scanError.set(null);
+    this._scanResult.set(null);
+    const result = await this.runWorker.execute('scan');
+    this._scanBusy.set(false);
+    if (!result.ok) {
+      this._scanError.set(result.error);
+      return;
+    }
+
+    this._scanResult.set(result.value);
   }
 }

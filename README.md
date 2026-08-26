@@ -2,7 +2,7 @@
 
 A reference implementation of the hardest problems in **white-label travel loyalty**: multi-tenant member pricing, a trustworthy rewards-currency ledger, a booking process that stays consistent when systems fail, an AI concierge that cannot recommend something the member can't actually book, and a nudge engine that knows when to stay quiet.
 
-> **Status:** F1–F4 are implemented. F5 Opportunity engine is in progress. Remaining polish is T-081–T-083 after F5.
+> **Status:** F1–F5 are implemented. Remaining polish is T-082–T-083.
 
 ## Why this exists
 
@@ -51,6 +51,7 @@ The `docs/` folder is the design record, written before the code. Read in order:
 | [06 — Future improvements](docs/06-future-improvements.md) | Honest gaps, production roadmap, and what one more day, week, or month would buy |
 | [07 — Task breakdown](docs/07-task-breakdown.md) | Task-by-task implementation plan, day plan, and a pre-agreed scope cut line |
 | [08 — Session handoff](docs/08-session-handoff.md) | Where we stopped and what to do first in the next session |
+| [09 — Demo script](docs/09-demo-script.md) | Numbered ten-minute walkthrough of problem statement §7 |
 
 ## Getting started
 
@@ -126,7 +127,9 @@ If `dotnet test` fails because `LoyaltyLab.Api.dll` is locked, stop the running 
 | `dotnet test` / build: file locked | Running API holds the output DLL | Stop the API, or test with `-p:UseArtifactsOutput=true`. |
 | SQLite `database is locked` | Two API processes on the same `loyaltylab.db` | Run a single API. Tests use their own temp databases. |
 
-The numbered reviewer walkthrough lives in [problem statement §7](docs/01-problem-statement.md#7-success-criteria-for-the-proof-of-concept).
+## Demo
+
+The click-by-click walkthrough — two partner prices, a clamped explanation, concierge audit, mixed tender and cancel, chaos compensation, signed-out leak protection, a nudge and a suppression, then the test suite — is [09 — Demo script](docs/09-demo-script.md). Success criteria are listed in [problem statement §7](docs/01-problem-statement.md#7-success-criteria-for-the-proof-of-concept).
 
 ## A note on scope
 

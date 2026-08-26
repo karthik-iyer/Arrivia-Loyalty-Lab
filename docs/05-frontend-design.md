@@ -272,6 +272,8 @@ The compensation case is where the design earns its keep. When a step fails, com
 
 `RequiresManualReview` is shown honestly rather than disguised as success: the booking is flagged, a reference is given, and the member is told it is being followed up.
 
+A confirmed booking can be cancelled from the same screen. Cancellation reverses the ledger, refunds the capture, and releases the supplier hold; the member is sent to the wallet to see the restored balance.
+
 ### 6.3 Wallet
 
 Balance in credits and monetary equivalent, with a statement listing each transaction, its reason, and the running balance. Reversals link to the transaction they reverse, so US-04 is verifiable by eye.
@@ -288,7 +290,7 @@ Nudge cards showing the offer, the travel window, and a **"why am I seeing this?
 
 ### 6.6 Operator view
 
-A saga list filterable by status, with `RequiresManualReview` surfaced first. Detail shows the full step timeline with attempts, timings, errors, compensation outcomes, and any poisoned outbox messages for the correlation id — everything Noor needs in US-12 without opening a log.
+A saga list filterable by status, with `RequiresManualReview` surfaced first. Detail shows the full step timeline with attempts, timings, errors, compensation outcomes, and any poisoned outbox messages for the correlation id — everything Noor needs in US-12 without opening a log. The list also runs the opportunity scan on demand (`POST /api/admin/run/scan`) so the demo can deliver a nudge without enabling the hosted worker.
 
 ---
 

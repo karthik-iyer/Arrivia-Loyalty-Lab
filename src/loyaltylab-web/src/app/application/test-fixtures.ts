@@ -278,3 +278,9 @@ export const confirmedBooking: BookingView = {
     ],
   },
 };
+
+export const cancelledBooking: BookingView = {
+  ...confirmedBooking,
+  bookingId: 'b-cancelled',
+  status: 'Cancelled',
+};

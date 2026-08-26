@@ -2,6 +2,8 @@ import { inject, Injectable } from '@angular/core';
 
 import {
   OPERATOR_PORT,
+  type AdminWorkerName,
+  type AdminWorkerView,
   type Result,
   type SagaListItemView,
   type SagaOperatorView,
@@ -22,5 +24,14 @@ export class GetSagaUseCase {
 
   execute(sagaId: string): Promise<Result<SagaOperatorView>> {
     return this.operator.getSaga(sagaId);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class RunAdminWorkerUseCase {
+  private readonly operator = inject(OPERATOR_PORT);
+
+  execute(worker: AdminWorkerName): Promise<Result<AdminWorkerView>> {
+    return this.operator.runWorker(worker);
   }
 }

@@ -2,6 +2,27 @@
   <p><a routerLink="/offers">Back to offers</a></p>
   <h1>Sagas</h1>
 
+  <p class="scan">
+    <button type="button" [disabled]="store.scanBusy()" (click)="store.runScan()">
+      Run opportunity scan
+    </button>
+    @if (store.scanBusy()) {
+      <span>Scanning…</span>
+    }
+    @if (store.scanResult(); as scan) {
+      <span role="status">Scanned {{ scan.processed }} members.</span>
+    }
+    @if (store.scanError(); as scanErr) {
+      <span class="error" role="alert">
+        @if (scanErr.errorCode === 'ROLE_NOT_PERMITTED') {
+          Switch to Operator · Summit to run the scan.
+        } @else {
+          {{ scanErr.message }}
+        }
+      </span>
+    }
+  </p>
+
   @if (store.status() === 'loading') {
     <p>Loading sagas…</p>
   }

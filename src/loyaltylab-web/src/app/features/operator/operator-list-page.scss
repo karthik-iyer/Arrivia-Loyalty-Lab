@@ -45,3 +45,28 @@ td {
 .error {
   color: #9f1239;
 }
+
+.scan {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 0 0 1rem;
+}
+
+.scan button {
+  font: inherit;
+  padding: 0.5rem 1rem;
+  border: 0;
+  border-radius: 8px;
+  background: var(--ll-color-primary);
+  color: #fff;
+  font-weight: 650;
+  cursor: pointer;
+}
+
+.scan button:disabled {
+  opacity: 0.6;
+  cursor: wait;
+}
+

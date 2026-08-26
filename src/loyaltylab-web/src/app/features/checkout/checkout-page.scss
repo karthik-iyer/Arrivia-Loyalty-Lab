@@ -52,6 +52,12 @@ button:disabled {
   cursor: not-allowed;
 }
 
+button.secondary {
+  background: transparent;
+  color: var(--ll-color-primary);
+  box-shadow: inset 0 0 0 1px var(--ll-color-primary);
+}
+
 .error,
 .review {
   color: #9f1239;

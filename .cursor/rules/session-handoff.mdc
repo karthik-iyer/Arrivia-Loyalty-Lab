@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-081** Demo script — the numbered walkthrough from problem statement §7, including a nudge and a suppression.
+**Next work:** **T-082** Documentation and code consistency pass; resolve every open question in design §12.
 
-**Do not:** rewrite the design docs; implement features out of task order. F5 is complete.
+**Do not:** rewrite the design docs; implement features out of task order. F5 is complete. T-081 is complete.
 
-**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4), T-060–T-066 (concierge through grounding tests), T-070 (opportunity domain + persistence), T-071 (window detection and scoring), T-072 (fatigue suppressions), T-073 (PriceWatch scan worker), T-074 (inbox action and dismiss), T-075 (inbox UI), T-076 (opportunity tests: detection, scoring, suppression, expiry), T-080 (README + run-all). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. F5 is T-070–T-076 (done). Polish is T-081–T-083.
+**Already implemented:** T-001–T-007 (Phase 0), T-010–T-016 (Phase 1 pricing), T-020–T-026 (ledger), T-030–T-040 (payment through resilience), T-050–T-057 (Angular Phase 4), T-060–T-066 (concierge through grounding tests), T-070–T-076 (F5 opportunity), T-080 (README + run-all), T-081 (demo script). Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. Polish remaining is T-082–T-083.

@@ -21,7 +21,7 @@
         [max]="store.maxCredits()"
         step="1"
         [value]="store.credits()"
-        [disabled]="store.isSettling()"
+        [disabled]="store.isSettling() || !store.canSubmit()"
         [attr.aria-valuetext]="creditValueText()"
         (input)="onSlider($event)"
       />
@@ -36,21 +36,23 @@
       <input
         type="checkbox"
         [checked]="store.forceDecline()"
-        [disabled]="store.isSettling()"
+        [disabled]="store.isSettling() || !store.canSubmit()"
         (change)="onForceDecline($event)"
       />
       Demonstrate payment decline
     </label>
 
-    <p>
-      <button type="button" [disabled]="store.isSettling()" (click)="store.submit()">
-        @if (store.status() === 'failed') {
-          Retry
-        } @else {
-          Book
-        }
-      </button>
-    </p>
+    @if (store.canSubmit()) {
+      <p>
+        <button type="button" [disabled]="store.isSettling()" (click)="store.submit()">
+          @if (store.status() === 'failed') {
+            Retry
+          } @else {
+            Book
+          }
+        </button>
+      </p>
+    }
   }
 
   @if (store.steps().length) {
@@ -60,6 +62,16 @@
 
   @if (store.outcome() === 'confirmed') {
     <p class="ok" role="status">Booking confirmed.</p>
+    <p>
+      <button type="button" class="secondary" [disabled]="!store.canCancel()" (click)="store.cancel()">
+        Cancel booking
+      </button>
+    </p>
+  }
+
+  @if (store.outcome() === 'cancelled') {
+    <p class="ok" role="status">Booking cancelled. Your credits are restored.</p>
+    <p><a routerLink="/wallet">Open wallet</a></p>
   }
 
   @if (store.outcome() === 'unwound') {

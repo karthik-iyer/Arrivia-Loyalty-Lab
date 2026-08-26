@@ -1,6 +1,6 @@
 import type { SagaStatus, SagaStepView } from './booking';
 
-export type AdminWorkerName = 'outbox' | 'recovery' | 'expiry';
+export type AdminWorkerName = 'outbox' | 'recovery' | 'expiry' | 'scan';
 
 export interface SagaListItemView {
   readonly id: string;

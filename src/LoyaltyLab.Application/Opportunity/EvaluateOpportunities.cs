@@ -7,6 +7,7 @@ using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Opportunity;
 using LoyaltyLab.Domain.Pricing;
 using LoyaltyLab.Domain.Tenancy;
+using Microsoft.Extensions.Logging;
 
 namespace LoyaltyLab.Application.Opportunity;
 
@@ -28,7 +29,8 @@ public sealed class EvaluateOpportunities(
     IPriceWatchRepository watches,
     INudgeRepository nudges,
     GetBalance getBalance,
-    IUnitOfWork unitOfWork) : IUseCase<EvaluateOpportunitiesCommand, EvaluateOpportunitiesResult>
+    IUnitOfWork unitOfWork,
+    ILogger<EvaluateOpportunities>? logger = null) : IUseCase<EvaluateOpportunitiesCommand, EvaluateOpportunitiesResult>
 {
     public async Task<Result<EvaluateOpportunitiesResult>> ExecuteAsync(
         EvaluateOpportunitiesCommand request,
@@ -101,6 +103,15 @@ public sealed class EvaluateOpportunities(
 
         foreach (var nudge in recorded)
         {
+            if (nudge.Status == NudgeStatus.Suppressed && logger is not null)
+            {
+                OpportunityLog.NudgeSuppressed(
+                    logger,
+                    member.DisplayName,
+                    member.Id.Value,
+                    nudge.SuppressedBecause);
+            }
+
             await nudges.AddAsync(nudge, cancellationToken);
         }
 

@@ -1,12 +1,12 @@
 import { computed, DestroyRef, inject, Injectable, signal } from '@angular/core';
 
 import type { AppError, BookingView, Money, PriceExplanationView } from '../domain';
-import { GetBalanceUseCase, GetBookingUseCase, StartBookingUseCase } from './booking.use-case';
+import { GetBalanceUseCase, GetBookingUseCase, StartBookingUseCase, CancelBookingUseCase } from './booking.use-case';
 import { DEMO_STAY_DATE } from './demo-stay';
 import { ExplainQuoteUseCase } from './pricing.use-case';
 
 export type CheckoutStatus = 'idle' | 'loading' | 'ready' | 'settling' | 'done' | 'failed';
-export type SagaOutcome = 'pending' | 'confirmed' | 'unwound' | 'needs-review';
+export type SagaOutcome = 'pending' | 'confirmed' | 'unwound' | 'needs-review' | 'cancelled';
 
 const fastPollMs = 500;
 const slowPollMs = 2000;
@@ -18,9 +18,11 @@ export class CheckoutStore {
   private readonly getBalance = inject(GetBalanceUseCase);
   private readonly startBooking = inject(StartBookingUseCase);
   private readonly getBooking = inject(GetBookingUseCase);
+  private readonly cancelBooking = inject(CancelBookingUseCase);
 
   private quoteId = '';
   private idempotencyKey: string | null = null;
+  private cancelKey: string | null = null;
   private pollTimer: ReturnType<typeof setTimeout> | null = null;
   private pollTicks = 0;
 
@@ -31,6 +33,7 @@ export class CheckoutStore {
   private readonly _booking = signal<BookingView | null>(null);
   private readonly _status = signal<CheckoutStatus>('idle');
   private readonly _error = signal<AppError | null>(null);
+  private readonly _cancelling = signal(false);
 
   readonly explanation = this._explanation.asReadonly();
   readonly credits = this._credits.asReadonly();
@@ -38,10 +41,16 @@ export class CheckoutStore {
   readonly booking = this._booking.asReadonly();
   readonly status = this._status.asReadonly();
   readonly error = this._error.asReadonly();
+  readonly cancelling = this._cancelling.asReadonly();
   readonly steps = computed(() => this._booking()?.saga.steps ?? []);
-  readonly isSettling = computed(() => this._status() === 'settling');
+  readonly isSettling = computed(() => this._status() === 'settling' || this._cancelling());
   readonly outcome = computed<SagaOutcome>(() => {
-    const sagaStatus = this._booking()?.saga.status;
+    const booking = this._booking();
+    if (booking?.status === 'Cancelled') {
+      return 'cancelled';
+    }
+
+    const sagaStatus = booking?.saga.status;
     if (sagaStatus === 'Confirmed') {
       return 'confirmed';
     }
@@ -53,6 +62,10 @@ export class CheckoutStore {
     }
     return 'pending';
   });
+  readonly canSubmit = computed(
+    () => this.memberPrice() !== null && this.outcome() === 'pending' && !this.isSettling(),
+  );
+  readonly canCancel = computed(() => this.outcome() === 'confirmed' && !this._cancelling());
 
   readonly memberPrice = computed(() => this._explanation()?.memberPrice ?? null);
 
@@ -146,6 +159,27 @@ export class CheckoutStore {
       return;
     }
 
+    this._status.set('done');
+  }
+
+  async cancel(): Promise<void> {
+    const booking = this._booking();
+    if (!booking || this._cancelling() || this.outcome() !== 'confirmed') {
+      return;
+    }
+
+    this.cancelKey ??= crypto.randomUUID();
+    this._cancelling.set(true);
+    this._error.set(null);
+
+    const result = await this.cancelBooking.execute(booking.bookingId, this.cancelKey);
+    this._cancelling.set(false);
+    if (!result.ok) {
+      this._error.set(result.error);
+      return;
+    }
+
+    this._booking.set(result.value);
     this._status.set('done');
   }
 

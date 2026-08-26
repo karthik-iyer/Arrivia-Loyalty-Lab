@@ -33,6 +33,15 @@ export class GetBookingUseCase {
 }
 
 @Injectable({ providedIn: 'root' })
+export class CancelBookingUseCase {
+  private readonly bookings = inject(BOOKING_PORT);
+
+  execute(bookingId: string, idempotencyKey: string): Promise<Result<BookingView>> {
+    return this.bookings.cancel(bookingId, idempotencyKey);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
 export class GetBalanceUseCase {
   private readonly wallet = inject(WALLET_PORT);
 
