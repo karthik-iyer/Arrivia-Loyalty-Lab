@@ -12,7 +12,7 @@ namespace LoyaltyLab.Application.Opportunity;
 
 /// <summary>
 /// Detect windows, price eligible inventory through the normal engine, score, and persist (FR-O-01, FR-O-02, FR-O-04).
-/// Does not persist a quote — actioning (T-074) re-quotes (FR-O-09). Fatigue is T-072.
+/// Does not persist a quote — actioning (T-074) re-quotes (FR-O-09). Fatigue (FR-O-06) runs before a deliver.
 /// </summary>
 public sealed class EvaluateOpportunities(
     ITenantContextAccessor tenant,
@@ -79,20 +79,23 @@ public sealed class EvaluateOpportunities(
             var history = await LoadHistoryAsync(memberId, catalog, cancellationToken);
             var watchByOffer = (await watches.ListAsync(cancellationToken))
                 .ToDictionary(watch => watch.OfferId);
+            var prior = (await nudges.ListForMemberAsync(memberId, cancellationToken)).ToList();
 
             foreach (var window in windows)
             {
-                recorded.Add(
-                    EvaluateWindow(
-                        member,
-                        partner,
-                        window,
-                        catalog,
-                        permitted,
-                        partnerRules,
-                        history,
-                        watchByOffer,
-                        balance.Value.MonetaryValue));
+                var nudge = EvaluateWindow(
+                    member,
+                    partner,
+                    window,
+                    catalog,
+                    permitted,
+                    partnerRules,
+                    history,
+                    watchByOffer,
+                    balance.Value.MonetaryValue,
+                    prior);
+                recorded.Add(nudge);
+                prior.Add(nudge);
             }
         }
 
@@ -115,7 +118,8 @@ public sealed class EvaluateOpportunities(
         IReadOnlyList<PricingRule> partnerRules,
         IReadOnlyList<CompletedStay> history,
         Dictionary<OfferId, PriceWatch> watchByOffer,
-        Money creditBalance)
+        Money creditBalance,
+        IReadOnlyList<Nudge> prior)
     {
         var policy = partner.OpportunityPolicy;
         var asOf = clock.UtcNow;
@@ -174,6 +178,20 @@ public sealed class EvaluateOpportunities(
                 member.Id,
                 window,
                 SuppressionReason.ScoreBelowThreshold,
+                policy,
+                clock,
+                best.OfferId,
+                best.Signals);
+        }
+
+        var fatigue = FatigueRules.FirstMatch(best.OfferId, window, prior, policy, clock);
+        if (fatigue is { } reason)
+        {
+            return Nudge.Suppress(
+                partner.Id,
+                member.Id,
+                window,
+                reason,
                 policy,
                 clock,
                 best.OfferId,

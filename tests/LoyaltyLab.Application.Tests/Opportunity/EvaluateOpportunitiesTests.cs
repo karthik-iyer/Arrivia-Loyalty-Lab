@@ -179,6 +179,65 @@ public sealed class EvaluateOpportunitiesTests
         world.UnitOfWork.Saves.Should().Be(0);
     }
 
+    [Fact]
+    public async Task A_second_scan_records_a_duplicate_suppression()
+    {
+        var world = World.Summit(withHistory: true);
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+
+        await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+        var second = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        second.IsSuccess.Should().BeTrue();
+        var nudge = second.Value.Nudges.Should().ContainSingle().Subject;
+        nudge.Status.Should().Be(NudgeStatus.Suppressed);
+        nudge.SuppressedBecause.Should().Be(SuppressionReason.DuplicateOfRecentNudge);
+        world.Nudges.Items.Should().HaveCount(2);
+    }
+
+    [Fact]
+    public async Task The_weekly_cap_is_recorded_rather_than_a_third_delivery()
+    {
+        var world = World.Summit(withHistory: true);
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+        var other = new TravelWindow(world.Maya.Id, new DateOnly(2026, 6, 1), new DateOnly(2026, 6, 10));
+        world.Nudges.Items.Add(Prior(world, OfferId.New(), other));
+        world.Nudges.Items.Add(Prior(world, OfferId.New(), other));
+
+        var result = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        result.IsSuccess.Should().BeTrue();
+        var nudge = result.Value.Nudges.Should().ContainSingle().Subject;
+        nudge.Status.Should().Be(NudgeStatus.Suppressed);
+        nudge.SuppressedBecause.Should().Be(SuppressionReason.FatigueCapReached);
+    }
+
+    [Fact]
+    public async Task Dismissing_a_nudge_records_cooldown_on_the_next_scan()
+    {
+        var world = World.Summit(withHistory: true);
+        world.Tenant.Current = TenantContext.ForMember(world.Maya);
+
+        await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+        world.Nudges.Items[0].Dismiss();
+        var second = await world.Evaluate.ExecuteAsync(new EvaluateOpportunitiesCommand(), CancellationToken.None);
+
+        second.IsSuccess.Should().BeTrue();
+        var nudge = second.Value.Nudges.Should().ContainSingle().Subject;
+        nudge.Status.Should().Be(NudgeStatus.Suppressed);
+        nudge.SuppressedBecause.Should().Be(SuppressionReason.CooldownActive);
+    }
+
+    private static Nudge Prior(World world, OfferId offer, TravelWindow window) =>
+        Nudge.Deliver(
+            world.Partner.Id,
+            world.Maya.Id,
+            offer,
+            window,
+            [OpportunitySignal.Of(SignalKind.WindowFit, 14m, 1m, 1m)],
+            world.Partner.OpportunityPolicy,
+            new FakeClock(AsOf));
+
     private sealed class World
     {
         private World(

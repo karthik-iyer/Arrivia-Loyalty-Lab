@@ -90,6 +90,16 @@ public sealed class Nudge : Entity<NudgeId>, ITenantOwned
         return clock.UtcNow >= ExpiresAt;
     }
 
+    public void Dismiss()
+    {
+        if (Status != NudgeStatus.Delivered)
+        {
+            throw new DomainException("Only a delivered nudge can be dismissed.");
+        }
+
+        Status = NudgeStatus.Dismissed;
+    }
+
     public static Nudge Deliver(
         PartnerId partnerId,
         MemberId memberId,

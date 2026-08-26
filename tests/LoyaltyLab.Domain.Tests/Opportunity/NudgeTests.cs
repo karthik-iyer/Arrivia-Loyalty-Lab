@@ -108,4 +108,23 @@ public sealed class NudgeTests
         nudge.OfferId.Should().BeNull();
         nudge.Signals.Should().BeEmpty();
     }
+
+    [Fact]
+    public void A_delivered_nudge_can_be_dismissed()
+    {
+        var member = MemberId.New();
+        var window = new TravelWindow(member, new DateOnly(2026, 3, 29), new DateOnly(2026, 4, 12));
+        var nudge = Nudge.Deliver(
+            PartnerId.New(),
+            member,
+            OfferId.New(),
+            window,
+            [OpportunitySignal.Of(SignalKind.WindowFit, 14m, 1m, 0.2m)],
+            Fixtures.Opportunities,
+            new MutableClock(AsOf));
+
+        nudge.Dismiss();
+
+        nudge.Status.Should().Be(NudgeStatus.Dismissed);
+    }
 }
