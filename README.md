@@ -2,7 +2,7 @@
 
 A reference implementation of the hardest problems in **white-label travel loyalty**: multi-tenant member pricing, a trustworthy rewards-currency ledger, a booking process that stays consistent when systems fail, an AI concierge that cannot recommend something the member can't actually book, and a nudge engine that knows when to stay quiet.
 
-> **Status:** F1–F5 are implemented. Remaining polish is T-083.
+> **Status:** F1–F5 are implemented. T-001–T-083 are complete.
 
 ## Why this exists
 

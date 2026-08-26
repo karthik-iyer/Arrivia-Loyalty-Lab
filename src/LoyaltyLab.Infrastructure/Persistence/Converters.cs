@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using LoyaltyLab.Domain.Common;
+using Microsoft.EntityFrameworkCore.ChangeTracking;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace LoyaltyLab.Infrastructure.Persistence;
@@ -29,6 +30,16 @@ internal static class PersistenceJson
         new(
             v => JsonSerializer.Serialize(v, Options),
             v => JsonSerializer.Deserialize<T>(v, Options)!);
+
+    /// <summary>
+    /// JSON-converted collections need a comparer or EF logs warning 10620 on every start.
+    /// </summary>
+    public static ValueComparer<T> CollectionComparer<T>()
+        where T : class =>
+        new(
+            (left, right) => JsonSerializer.Serialize(left, Options) == JsonSerializer.Serialize(right, Options),
+            value => JsonSerializer.Serialize(value, Options).GetHashCode(StringComparison.Ordinal),
+            value => JsonSerializer.Deserialize<T>(JsonSerializer.Serialize(value, Options), Options)!);
 
     public static ValueConverter<T?, string?> NullableJsonConverter<T>()
         where T : class =>

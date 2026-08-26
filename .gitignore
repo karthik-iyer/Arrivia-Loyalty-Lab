@@ -34,8 +34,6 @@ yarn-error.log*
 .pnpm-debug.log*
 
 # ---- Environment & secrets ----
-.env
-.env.*
 !.env.example
 appsettings.Local.json
 secrets.json
@@ -49,3 +47,7 @@ Thumbs.db
 # ---- Misc ----
 *.log
 .cache/
+branch_structure.json
+temp_auto_push.bat
+temp_interactive_push.bat
+config.bat

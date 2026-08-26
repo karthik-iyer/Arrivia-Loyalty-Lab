@@ -7,8 +7,8 @@ alwaysApply: true
 
 Read `docs/08-session-handoff.md` before writing code. Then follow `docs/07-task-breakdown.md` in order.
 
-**Next work:** **T-083** Full suite run, warning sweep, and fresh-clone verification.
+**Next work:** none. **T-083 is complete** (full suite, warning sweep, fresh-clone demo). All of T-001–T-083 are done.
 
-**Do not:** rewrite the design docs; implement features out of task order. F5 is complete. T-081 and T-082 are complete.
+**Do not:** rewrite the design docs; restart the task list; implement features out of task order.
 
-**Already implemented:** T-001–T-082. Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. Remaining polish is T-083.
+**Already implemented:** T-001–T-083. Payment is out-of-process. Checkout is a saga (ADR-0006). Angular is Phase 4. Optional follow-ons are in `docs/06-future-improvements.md`.
