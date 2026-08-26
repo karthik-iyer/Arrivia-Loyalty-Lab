@@ -41,7 +41,7 @@ export type {
   RecommendationAuditView,
   RecommendationItemView,
 } from './concierge';
-export type { NudgeView } from './inbox';
+export type { NudgeSignalView, NudgeView } from './inbox';
 export type {
   AdminWorkerName,
   AdminWorkerView,

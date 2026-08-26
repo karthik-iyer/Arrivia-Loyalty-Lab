@@ -45,7 +45,7 @@ export interface ConciergePort {
 
 export interface InboxPort {
   list(): Promise<Result<readonly NudgeView[]>>;
-  action(nudgeId: string): Promise<Result<NudgeView>>;
+  action(nudgeId: string): Promise<Result<QuoteView>>;
   dismiss(nudgeId: string): Promise<Result<void>>;
 }
 

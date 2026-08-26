@@ -26,6 +26,7 @@ public sealed class InboxUseCaseTests
 
         result.IsSuccess.Should().BeTrue();
         result.Value.Nudges.Should().ContainSingle(nudge => nudge.Id == live.Id);
+        result.Value.Nudges[0].PropertyName.Should().Be("Coral Bay Resort");
         world.UnitOfWork.Saves.Should().Be(0);
     }
 
@@ -192,7 +193,7 @@ public sealed class InboxUseCaseTests
         public DismissNudge Dismiss { get; }
 
         public GetInbox InboxAt(DateTimeOffset when) =>
-            new(Tenant, new FakeClock(when), Nudges, UnitOfWork);
+            new(Tenant, new FakeClock(when), Nudges, new FakeOffers(Coral), UnitOfWork);
 
         public ActionNudge ActionAt(DateTimeOffset when)
         {
@@ -248,7 +249,7 @@ public sealed class InboxUseCaseTests
                 quotes,
                 unitOfWork,
                 clock);
-            var inbox = new GetInbox(tenant, clock, nudges, unitOfWork);
+            var inbox = new GetInbox(tenant, clock, nudges, new FakeOffers(coral), unitOfWork);
             var action = new ActionNudge(tenant, clock, nudges, quote, unitOfWork);
             var dismiss = new DismissNudge(tenant, clock, nudges, unitOfWork);
 

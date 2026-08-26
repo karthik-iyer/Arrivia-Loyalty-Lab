@@ -45,15 +45,17 @@ public sealed record GetInboxQuery;
 public sealed record InboxNudge(
     NudgeId Id,
     OfferId OfferId,
+    string PropertyName,
     DateOnly WindowStart,
     DateOnly WindowEnd,
     decimal Score,
     IReadOnlyList<OpportunitySignal> Signals,
     DateTimeOffset ExpiresAt)
 {
-    public static InboxNudge From(Nudge nudge)
+    public static InboxNudge From(Nudge nudge, string propertyName)
     {
         ArgumentNullException.ThrowIfNull(nudge);
+        ArgumentException.ThrowIfNullOrWhiteSpace(propertyName);
         if (nudge.OfferId is not { } offerId)
         {
             throw new DomainException("A delivered nudge must name an offer.");
@@ -62,6 +64,7 @@ public sealed record InboxNudge(
         return new(
             nudge.Id,
             offerId,
+            propertyName.Trim(),
             nudge.WindowStart,
             nudge.WindowEnd,
             nudge.Score,

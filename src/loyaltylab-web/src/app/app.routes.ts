@@ -25,6 +25,10 @@ export const routes: Routes = [
       import('./features/concierge/concierge-page').then((m) => m.ConciergePage),
   },
   {
+    path: 'inbox',
+    loadComponent: () => import('./features/inbox/inbox-page').then((m) => m.InboxPage),
+  },
+  {
     path: 'operator/sagas',
     loadComponent: () =>
       import('./features/operator/operator-list-page').then((m) => m.OperatorListPage),

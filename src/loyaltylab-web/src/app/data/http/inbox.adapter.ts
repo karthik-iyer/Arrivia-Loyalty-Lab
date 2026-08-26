@@ -2,9 +2,9 @@ import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { firstValueFrom } from 'rxjs';
 
-import type { InboxPort, NudgeView, Result } from '../../domain';
-import type { NudgeDto } from '../dto/inbox.dto';
-import { toNudgeView } from '../mappers/inbox.mapper';
+import type { InboxPort, NudgeView, QuoteView, Result } from '../../domain';
+import type { ActionedNudgeDto, InboxDto } from '../dto/inbox.dto';
+import { toActionedQuote, toInboxNudges } from '../mappers/inbox.mapper';
 import { HttpResult } from './http-result';
 
 @Injectable()
@@ -14,21 +14,23 @@ export class HttpInboxAdapter implements InboxPort {
 
   list(): Promise<Result<readonly NudgeView[]>> {
     return this.results.capture(async () => {
-      const dto = await firstValueFrom(this.http.get<readonly NudgeDto[]>('/api/inbox'));
-      return dto.map(toNudgeView);
+      const dto = await firstValueFrom(this.http.get<InboxDto>('/api/inbox'));
+      return toInboxNudges(dto);
     });
   }
 
-  action(nudgeId: string): Promise<Result<NudgeView>> {
+  action(nudgeId: string): Promise<Result<QuoteView>> {
     return this.results.capture(async () => {
-      const dto = await firstValueFrom(this.http.post<NudgeDto>(`/api/inbox/${nudgeId}/action`, {}));
-      return toNudgeView(dto);
+      const dto = await firstValueFrom(
+        this.http.post<ActionedNudgeDto>(`/api/inbox/${nudgeId}/action`, {}),
+      );
+      return toActionedQuote(dto);
     });
   }
 
   dismiss(nudgeId: string): Promise<Result<void>> {
     return this.results.capture(async () => {
-      await firstValueFrom(this.http.post<void>(`/api/inbox/${nudgeId}/dismiss`, {}));
+      await firstValueFrom(this.http.post(`/api/inbox/${nudgeId}/dismiss`, {}));
     });
   }
 }

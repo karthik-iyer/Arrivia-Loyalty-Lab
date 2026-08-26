@@ -1,6 +1,7 @@
 import type {
   BookingView,
   ConciergeView,
+  NudgeView,
   OfferSummary,
   PriceExplanationView,
   SagaListItemView,
@@ -22,6 +23,23 @@ export const coralOffer: OfferSummary = {
 };
 
 export const anonymousCoral: OfferSummary = { ...coralOffer, memberPrice: null };
+
+export const coralNudge: NudgeView = {
+  nudgeId: 'n-coral',
+  offerId: coralOffer.offerId,
+  propertyName: coralOffer.propertyName,
+  windowStart: '2026-03-29',
+  windowEnd: '2026-04-12',
+  score: 0.68,
+  signals: [
+    { kind: 'WindowFit', weight: 0.2, contribution: 0.2 },
+    { kind: 'DestinationAffinity', weight: 0.2, contribution: 0.2 },
+    { kind: 'TagAffinity', weight: 0.2, contribution: 0.08 },
+    { kind: 'CreditCoverage', weight: 0.2, contribution: 0.08 },
+    { kind: 'PriceDrop', weight: 0.2, contribution: 0.12 },
+  ],
+  expiresAt: '2026-03-22T12:00:00+00:00',
+};
 
 export const mayaBalance: WalletBalanceView = {
   memberId: 'a11ce001-0002-7000-8000-000000000001',

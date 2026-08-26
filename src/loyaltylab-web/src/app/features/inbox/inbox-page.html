@@ -1,0 +1,57 @@
+<main class="inbox">
+  <p><a routerLink="/offers">Back to offers</a></p>
+  <h1>Inbox</h1>
+  <p class="lede">Stays that fit a gap in your calendar, with the reasons they surfaced.</p>
+
+  @if (store.status() === 'loading') {
+    <p>Loading inbox…</p>
+  }
+
+  @if (store.error(); as err) {
+    <p class="error" role="alert">{{ err.message }}</p>
+  }
+
+  @if (store.status() === 'ready' && store.nudges().length === 0) {
+    <p>Nothing waiting right now.</p>
+  }
+
+  <ul class="grid">
+    @for (nudge of store.nudges(); track nudge.nudgeId) {
+      <li class="card" [class.expired]="store.isExpired(nudge.nudgeId)">
+        <h2>{{ nudge.propertyName }}</h2>
+        <p class="meta">{{ windowLabel(nudge) }} · {{ scoreLabel(nudge.score) }}</p>
+
+        @if (store.isExpired(nudge.nudgeId)) {
+          <p class="expired-note" role="status">This offer has expired</p>
+        } @else {
+          <details class="why">
+            <summary>Why am I seeing this?</summary>
+            <ul class="signals">
+              @for (signal of nudge.signals; track signal.kind) {
+                <li>{{ contributionLabel(signal) }}</li>
+              }
+            </ul>
+          </details>
+
+          <p class="actions">
+            <button
+              type="button"
+              [disabled]="store.busyId() === nudge.nudgeId"
+              (click)="onAction(nudge.nudgeId)"
+            >
+              Book this stay
+            </button>
+            <button
+              type="button"
+              class="secondary"
+              [disabled]="store.busyId() === nudge.nudgeId"
+              (click)="onDismiss(nudge.nudgeId)"
+            >
+              Dismiss
+            </button>
+          </p>
+        }
+      </li>
+    }
+  </ul>
+</main>

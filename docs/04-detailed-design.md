@@ -1008,6 +1008,29 @@ Base path `/api`. Partner context in `X-Partner-Code`; member identity in `X-Mem
 | `POST` | `/admin/run/{worker}` | Trigger outbox, recovery, expiry, or opportunity scan on demand |
 | `GET` | `/partners/current/theme` | Frontend theming |
 
+**Inbox response**
+
+```jsonc
+{
+  "nudges": [
+    {
+      "nudgeId": "...",
+      "offerId": "...",
+      "propertyName": "Coral Bay Resort",
+      "windowStart": "2026-03-29",
+      "windowEnd": "2026-04-12",
+      "score": 0.68,
+      "expiresAt": "2026-03-22T12:00:00Z",
+      "signals": [
+        { "kind": "WindowFit", "rawValue": 14, "normalized": 1, "weight": 0.2, "contribution": 0.2 }
+      ]
+    }
+  ]
+}
+```
+
+Actioning returns a live quote (`quoteId`, `memberPrice`, `maxCredits`) — never a stored price (FR-O-09).
+
 **Quote response**
 
 ```jsonc

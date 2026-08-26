@@ -27,6 +27,7 @@ public sealed class InboxEndpointTests
         response.StatusCode.Should().Be(HttpStatusCode.OK, because: payload.ToString());
         var nudge = payload.GetProperty("nudges").EnumerateArray().Should().ContainSingle().Subject;
         nudge.GetProperty("offerId").GetGuid().Should().Be(SeedIds.Offer(1).Value);
+        nudge.GetProperty("propertyName").GetString().Should().Be("Coral Bay Resort");
         nudge.GetProperty("windowStart").GetString().Should().Be("2026-03-29");
         nudge.GetProperty("windowEnd").GetString().Should().Be("2026-04-12");
         nudge.GetProperty("score").GetDecimal().Should().BeGreaterThanOrEqualTo(0.55m);

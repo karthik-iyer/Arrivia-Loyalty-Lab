@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-075** inbox UI with the "why am I seeing this?" signal breakdown. F5 is in scope.
+Stop here and resume from **T-076** opportunity tests: detection, scoring, each suppression reason, expiry. F5 is in scope.
 
 ## Where we are
 
@@ -17,26 +17,26 @@ Stop here and resume from **T-075** inbox UI with the "why am I seeing this?" si
 | T-072 | Done — fatigue in order, suppressions persisted |
 | T-073 | Done — PriceWatch baselines and batched scan worker |
 | T-074 | Done — `/inbox`, action, and dismiss — actioning re-quotes |
+| T-075 | Done — Inbox UI with the "why am I seeing this?" signal breakdown |
 | T-080 | Done — README prerequisites, `scripts/run-all.ps1`, troubleshooting |
-| Next | **T-075** Inbox UI with the "why am I seeing this?" signal breakdown |
+| Next | **T-076** Tests: detection, scoring, each suppression reason, expiry |
 
 ## Verify
 
-- `GET /inbox` lists only delivered, unexpired nudges; actioning returns a live `QuoteOffer` price, not a stored one.
-- Expired nudges are stamped `Expired` and return `NUDGE_EXPIRED` (410); cross-member and cross-partner ids return `NUDGE_NOT_FOUND` (404).
-- Dismissal removes the card and feeds cooldown on the next scan.
+- Inbox cards show the offer, travel window, and a collapsed **"Why am I seeing this?"** listing each signal's weight and contribution.
+- **Book this stay** calls `POST /inbox/{id}/action` and navigates to `/checkout/{quoteId}` with a live quote.
+- **Dismiss** removes the card. `NUDGE_EXPIRED` fades the card with "This offer has expired".
 
 ## First actions next session
 
-1. **T-075** Inbox UI with the "why am I seeing this?" signal breakdown (FR-O-05).
-2. Then T-076 tests (detection, scoring, each suppression reason, expiry).
-3. Then polish T-081–T-083 so the demo walkthrough can include a nudge and a suppression.
+1. **T-076** Tests: detection, scoring, each suppression reason, expiry (G15, G16).
+2. Then polish T-081–T-083 so the demo walkthrough can include a nudge and a suppression.
 
 Do not rewrite docs 01–07 unless implementation forces a same-commit design update (NFR-11).
 
 ## Progress vs remaining
 
-**Done: 53 of 58 tasks with F5 included.** Remaining: T-075–T-076 (opportunity) then T-081–T-083 (demo and polish).
+**Done: 54 of 58 tasks with F5 included.** Remaining: T-076 (opportunity tests) then T-081–T-083 (demo and polish).
 
 ## Scope we already agreed
 

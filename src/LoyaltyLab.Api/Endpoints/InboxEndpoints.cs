@@ -64,6 +64,7 @@ internal sealed record OpportunitySignalHttp(
 internal sealed record InboxNudgeHttp(
     Guid NudgeId,
     Guid OfferId,
+    string PropertyName,
     DateOnly WindowStart,
     DateOnly WindowEnd,
     decimal Score,
@@ -74,6 +75,7 @@ internal sealed record InboxNudgeHttp(
         new(
             nudge.Id.Value,
             nudge.OfferId.Value,
+            nudge.PropertyName,
             nudge.WindowStart,
             nudge.WindowEnd,
             nudge.Score,
