@@ -43,6 +43,9 @@ public static class SeedIds
     public static BusyPeriodId BusyPeriod(int index) =>
         new(Guid.Parse($"a11ce001-000a-7000-8000-{index:D12}"));
 
+    public static PriceWatchId PriceWatch(int index) =>
+        new(Guid.Parse($"a11ce001-000d-7000-8000-{index:D12}"));
+
     public static PricingRuleId Rule(int index) =>
         new(Guid.Parse($"a11ce001-0005-7000-8000-{index:D12}"));
 }
@@ -121,6 +124,19 @@ public static class DemoSeed
         if (!await db.Bookings.IgnoreQueryFilters().AnyAsync(cancellationToken))
         {
             SeedMayaStayHistory(db);
+        }
+
+        if (!await db.PriceWatches.IgnoreQueryFilters().AnyAsync(cancellationToken))
+        {
+            var coral = CreateOffers()[0];
+            var checkedAt = new FixedDemoClock(new DateTimeOffset(2026, 3, 1, 0, 0, 0, TimeSpan.Zero));
+            db.PriceWatches.Add(
+                PriceWatch.Open(
+                    SeedIds.Summit,
+                    coral.Id,
+                    Money.Of(115m, Currency.Usd),
+                    checkedAt,
+                    SeedIds.PriceWatch(1)));
         }
 
         await db.SaveChangesAsync(cancellationToken);

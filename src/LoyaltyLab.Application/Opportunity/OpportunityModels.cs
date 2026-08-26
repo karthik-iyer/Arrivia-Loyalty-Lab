@@ -35,3 +35,7 @@ public sealed record EvaluatedNudge(
 }
 
 public sealed record EvaluateOpportunitiesResult(IReadOnlyList<EvaluatedNudge> Nudges);
+
+public sealed record ScanOpportunitiesCommand(int WatchBatchSize = 10);
+
+public sealed record ScanOpportunitiesResult(int MembersScanned, int WatchesRefreshed, int NudgesWritten);

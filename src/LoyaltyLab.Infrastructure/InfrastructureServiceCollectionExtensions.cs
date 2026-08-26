@@ -44,6 +44,7 @@ public static class InfrastructureServiceCollectionExtensions
         services.AddScoped<IPriceWatchRepository, PriceWatchRepository>();
         services.AddScoped<IPoisonMessageQuery, PoisonMessageQuery>();
         services.AddOptions<SagaRecoveryOptions>().BindConfiguration(SagaRecoveryOptions.SectionName);
+        services.AddOptions<OpportunityScanOptions>().BindConfiguration(OpportunityScanOptions.SectionName);
         services.AddScoped<IOutbox, EfOutbox>();
         services.AddScoped<OutboxDispatcher>();
         services.AddScoped<IOutboxDispatch>(sp => sp.GetRequiredService<OutboxDispatcher>());

@@ -14,6 +14,9 @@ public sealed class PartnerRepository(LoyaltyLabDbContext db) : IPartnerReposito
 
     public Task<Partner?> GetByIdAsync(PartnerId id, CancellationToken cancellationToken) =>
         db.Partners.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, cancellationToken);
+
+    public async Task<IReadOnlyList<Partner>> ListAsync(CancellationToken cancellationToken) =>
+        await db.Partners.AsNoTracking().OrderBy(partner => partner.Code).ToListAsync(cancellationToken);
 }
 
 public sealed class MemberRepository(LoyaltyLabDbContext db) : IMemberRepository

@@ -14,6 +14,8 @@ public interface IPartnerRepository
     Task<Partner?> GetByCodeAsync(string code, CancellationToken cancellationToken);
 
     Task<Partner?> GetByIdAsync(PartnerId id, CancellationToken cancellationToken);
+
+    Task<IReadOnlyList<Partner>> ListAsync(CancellationToken cancellationToken);
 }
 
 public interface IMemberRepository
@@ -138,6 +140,11 @@ public interface IBookingRepository
 public interface IBusyPeriodRepository
 {
     Task<IReadOnlyList<BusyPeriod>> ListForMemberAsync(MemberId memberId, CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Cross-tenant availability rows so the scan worker can iterate members who have a feed (FR-O-01).
+    /// </summary>
+    Task<IReadOnlyList<BusyPeriod>> ListAllAsync(CancellationToken cancellationToken);
 }
 
 public interface INudgeRepository
@@ -149,9 +156,16 @@ public interface INudgeRepository
 
 public interface IPriceWatchRepository
 {
+    Task AddAsync(PriceWatch watch, CancellationToken cancellationToken);
+
     Task<PriceWatch?> FindByOfferAsync(OfferId offerId, CancellationToken cancellationToken);
 
     Task<IReadOnlyList<PriceWatch>> ListAsync(CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Oldest watches first, bounded so supplier volume tracks batch size (FR-O-11).
+    /// </summary>
+    Task<IReadOnlyList<PriceWatch>> ListStaleAsync(int take, CancellationToken cancellationToken);
 }
 
 public interface IPoisonMessageQuery

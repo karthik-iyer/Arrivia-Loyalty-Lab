@@ -140,10 +140,24 @@ public sealed class BookingEndpointTests : IClassFixture<BookingApiFactory>
     }
 
     [Fact]
+    public async Task Operator_can_run_the_opportunity_scan_worker()
+    {
+        using var client = _factory.CreateClient();
+        using var request = Role("SUMMIT", HttpMethod.Post, "/api/admin/run/scan", AccessRole.Operator);
+
+        var response = await client.SendAsync(request);
+        var payload = await response.Content.ReadFromJsonAsync<JsonElement>(Json);
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK, because: payload.ToString());
+        payload.GetProperty("worker").GetString().Should().Be("scan");
+        payload.GetProperty("processed").GetInt32().Should().BeGreaterThanOrEqualTo(1);
+    }
+
+    [Fact]
     public async Task Unknown_admin_worker_is_not_found()
     {
         using var client = _factory.CreateClient();
-        using var request = Role("SUMMIT", HttpMethod.Post, "/api/admin/run/opportunity", AccessRole.Operator);
+        using var request = Role("SUMMIT", HttpMethod.Post, "/api/admin/run/nope", AccessRole.Operator);
 
         var response = await client.SendAsync(request);
         var payload = await response.Content.ReadFromJsonAsync<JsonElement>(Json);

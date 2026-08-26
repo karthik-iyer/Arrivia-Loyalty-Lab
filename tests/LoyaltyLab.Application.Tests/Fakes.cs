@@ -61,6 +61,9 @@ internal sealed class FakePartners(params Partner[] partners) : IPartnerReposito
 
     public Task<Partner?> GetByIdAsync(PartnerId id, CancellationToken cancellationToken) =>
         Task.FromResult(partners.SingleOrDefault(p => p.Id == id));
+
+    public Task<IReadOnlyList<Partner>> ListAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<Partner>>(partners);
 }
 
 internal sealed class FakeRules(params PricingRule[] rules) : IPricingRuleRepository
@@ -288,6 +291,9 @@ internal sealed class FakeBusyPeriods : IBusyPeriodRepository
         MemberId memberId,
         CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<BusyPeriod>>([.. _items.Where(period => period.MemberId == memberId)]);
+
+    public Task<IReadOnlyList<BusyPeriod>> ListAllAsync(CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<BusyPeriod>>(_items);
 }
 
 internal sealed class FakeNudges : INudgeRepository
@@ -311,18 +317,35 @@ internal sealed class FakePriceWatches : IPriceWatchRepository
 {
     private readonly List<PriceWatch> _items = [];
 
+    public IReadOnlyList<PriceWatch> Items => _items;
+
     public void Add(PriceWatch watch) => _items.Add(watch);
+
+    public Task AddAsync(PriceWatch watch, CancellationToken cancellationToken)
+    {
+        ArgumentNullException.ThrowIfNull(watch);
+        _items.Add(watch);
+        return Task.CompletedTask;
+    }
 
     public Task<PriceWatch?> FindByOfferAsync(OfferId offerId, CancellationToken cancellationToken) =>
         Task.FromResult(_items.SingleOrDefault(watch => watch.OfferId == offerId));
 
     public Task<IReadOnlyList<PriceWatch>> ListAsync(CancellationToken cancellationToken) =>
         Task.FromResult<IReadOnlyList<PriceWatch>>(_items);
+
+    public Task<IReadOnlyList<PriceWatch>> ListStaleAsync(int take, CancellationToken cancellationToken) =>
+        Task.FromResult<IReadOnlyList<PriceWatch>>(
+            [.. _items.OrderBy(watch => watch.LastCheckedAt).ThenBy(watch => watch.Id.Value).Take(take)]);
 }
 
 internal sealed class FakeSupplier : ISupplierClient
 {
     public Result<Money> NetRate { get; set; } = Result<Money>.Failure(Errors.OfferNotFound);
+
+    public Dictionary<OfferId, Result<Money>> Rates { get; } = [];
+
+    public int RateCalls { get; private set; }
 
     public StepOutcome Reserve { get; set; } = StepOutcome.Succeeded("res-1");
 
@@ -344,7 +367,12 @@ internal sealed class FakeSupplier : ISupplierClient
 
     public Task<Result<Money>> GetCurrentNetRateAsync(OfferId offerId, CancellationToken cancellationToken)
     {
-        _ = offerId;
+        RateCalls++;
+        if (Rates.TryGetValue(offerId, out var rate))
+        {
+            return Task.FromResult(rate);
+        }
+
         return Task.FromResult(NetRate);
     }
 

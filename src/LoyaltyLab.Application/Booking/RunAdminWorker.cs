@@ -1,5 +1,6 @@
 using LoyaltyLab.Application.Abstractions;
 using LoyaltyLab.Application.Loyalty;
+using LoyaltyLab.Application.Opportunity;
 using LoyaltyLab.Domain.Common;
 using LoyaltyLab.Domain.Tenancy;
 
@@ -9,7 +10,8 @@ public sealed class RunAdminWorker(
     ITenantContextAccessor tenant,
     IOutboxDispatch outbox,
     RecoverStalledSagas recover,
-    ExpireDueCredits expire) : IUseCase<RunAdminWorkerCommand, RunAdminWorkerResult>
+    ExpireDueCredits expire,
+    ScanOpportunities scan) : IUseCase<RunAdminWorkerCommand, RunAdminWorkerResult>
 {
     public async Task<Result<RunAdminWorkerResult>> ExecuteAsync(
         RunAdminWorkerCommand request,
@@ -36,6 +38,12 @@ public sealed class RunAdminWorker(
                     ? Result<RunAdminWorkerResult>.Failure(expired.Error)
                     : Result<RunAdminWorkerResult>.Success(
                         new RunAdminWorkerResult(name, expired.Value.Posted.Count));
+            case "scan":
+                var scanned = await scan.ExecuteAsync(new ScanOpportunitiesCommand(), cancellationToken);
+                return scanned.IsFailure
+                    ? Result<RunAdminWorkerResult>.Failure(scanned.Error)
+                    : Result<RunAdminWorkerResult>.Success(
+                        new RunAdminWorkerResult(name, scanned.Value.MembersScanned));
             default:
                 return Result<RunAdminWorkerResult>.Failure(Errors.WorkerNotFound);
         }

@@ -812,7 +812,7 @@ Each signal normalizes to `0..1`, is weighted, and contributes to a total. Every
 | `CreditCoverage` | Share of member price payable with credits | Direct proportion, capped by burn cap |
 | `PriceDrop` | Decrease against the watched baseline | Percentage over threshold, capped at 30% |
 
-Typical stay length is **7 nights** until destination-specific stays exist. Destination affinity saturates at **three confirmed bookings**. Tag affinity is the Jaccard similarity of the offer's tags against the union of tags on those stays. Credit coverage uses the live balance, capped by the pricing engine's `MaxCreditTender` (the burn cap). Price-drop is `0` below the partner threshold and otherwise `min(1, dropFraction / 0.30)`; with no `PriceWatch` row the signal is `0` (watches are T-073).
+Typical stay length is **7 nights** until destination-specific stays exist. Destination affinity saturates at **three confirmed bookings**. Tag affinity is the Jaccard similarity of the offer's tags against the union of tags on those stays. Credit coverage uses the live balance, capped by the pricing engine's `MaxCreditTender` (the burn cap). Price-drop is `0` below the partner threshold and otherwise `min(1, dropFraction / 0.30)`; with no `PriceWatch` row the signal is `0`.
 
 ```csharp
 score = signals.Sum(s => s.Normalized * s.Weight);   // weights sum to 1.0
@@ -833,7 +833,7 @@ Suppressed nudges are persisted with `Status = Suppressed` (§1.5), which is wha
 
 ### 6.4 Price watching (FR-O-03, FR-O-11)
 
-A `PriceWatch` row stores the baseline net rate and last-checked timestamp per offer. The scan worker refreshes in bounded batches ordered by staleness, so supplier call volume stays proportional to batch size rather than to membership. Baselines update on a rolling basis, so a permanently cheap offer stops registering as a drop.
+A `PriceWatch` row stores the baseline net rate and last-checked timestamp per offer. The scan worker evaluates members who have an availability feed first (so a seeded elevated baseline can still register as a drop), then refreshes the stalest watches in a bounded batch via `ISupplierClient.GetCurrentNetRateAsync`. Each successful check rolls `BaselineNetRate` to the live net and stamps `LastCheckedAt`, so a permanently cheap offer stops registering as a drop. Missing watches are opened at the catalog net so the first observation is not a false drop. Supplier call volume is therefore proportional to batch size, not membership (FR-O-11). The hosted worker is off by default; `POST /api/admin/run/scan` runs the same use case on demand.
 
 ### 6.5 Actioning (FR-O-09)
 
@@ -867,7 +867,7 @@ Plain classes registered in DI, no mediator library ([ADR-0003](adr/)). Dependen
 | `RecoverStalledSagas` / `GetSagaInstance` | F3 | FR-B-08, FR-B-11 |
 | `CancelBooking` | F3 | FR-L-08 |
 | `Recommend` | F4 | FR-C-01 … FR-C-07 |
-| `DetectTravelWindows` / `EvaluateOpportunities` | F5 | FR-O-01 … FR-O-06 |
+| `DetectTravelWindows` / `EvaluateOpportunities` / `ScanOpportunities` | F5 | FR-O-01 … FR-O-06, FR-O-11 |
 | `ActionNudge` / `DismissNudge` | F5 | FR-O-09, FR-O-10 |
 
 ### 7.2 Ports

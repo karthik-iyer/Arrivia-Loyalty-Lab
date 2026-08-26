@@ -38,7 +38,31 @@ public sealed class PriceWatch : Entity<PriceWatchId>, ITenantOwned
     public static PriceWatch Open(PartnerId partnerId, OfferId offerId, Money baselineNetRate, IClock clock, PriceWatchId? id = null)
     {
         ArgumentNullException.ThrowIfNull(clock);
+        if (baselineNetRate.IsNegative)
+        {
+            throw new DomainException("A price-watch baseline cannot be negative.");
+        }
 
         return new PriceWatch(id ?? PriceWatchId.New(), partnerId, offerId, baselineNetRate, clock.UtcNow);
+    }
+
+    /// <summary>
+    /// Rolling baseline: a permanently cheap offer stops registering as a drop (FR-O-03, FR-O-11).
+    /// </summary>
+    public void RecordCheck(Money currentNet, IClock clock)
+    {
+        ArgumentNullException.ThrowIfNull(clock);
+        if (currentNet.Currency != BaselineNetRate.Currency)
+        {
+            throw new DomainException("A price-watch check must use the baseline currency.");
+        }
+
+        if (currentNet.IsNegative)
+        {
+            throw new DomainException("A live net rate cannot be negative.");
+        }
+
+        BaselineNetRate = currentNet;
+        LastCheckedAt = clock.UtcNow;
     }
 }

@@ -51,6 +51,7 @@ public sealed class ChaosApiFactory : WebApplicationFactory<Program>
                 ["DemoClock:UtcNow"] = _clock,
                 ["Outbox:Dispatcher:Enabled"] = "false",
                 ["SagaRecovery:Enabled"] = "false",
+                ["OpportunityScan:Enabled"] = "false",
                 [FaultInjectionStartup.ConfigKey] = "true",
                 [FaultInjectionStartup.FailFastConfigKey] = "false",
             });

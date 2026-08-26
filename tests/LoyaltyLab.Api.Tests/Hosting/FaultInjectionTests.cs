@@ -190,6 +190,7 @@ public sealed class DevelopmentFaultInjectionApiFactory : WebApplicationFactory<
                 ["DemoClock:UtcNow"] = "2026-03-15T12:00:00+00:00",
                 ["Outbox:Dispatcher:Enabled"] = "false",
                 ["SagaRecovery:Enabled"] = "false",
+                ["OpportunityScan:Enabled"] = "false",
                 ["Features:FaultInjection"] = "true",
             });
         });
@@ -227,6 +228,7 @@ public sealed class ProductionFaultInjectionApiFactory : WebApplicationFactory<P
                 ["DemoClock:Enabled"] = "false",
                 ["Outbox:Dispatcher:Enabled"] = "false",
                 ["SagaRecovery:Enabled"] = "false",
+                ["OpportunityScan:Enabled"] = "false",
                 ["Features:FaultInjection"] = "true",
             });
         });

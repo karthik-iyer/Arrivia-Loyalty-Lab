@@ -1,6 +1,6 @@
 # Session handoff — 25 Aug 2026
 
-Stop here and resume from **T-073** price-watch baselines and the batched scan worker. F5 is in scope.
+Stop here and resume from **T-074** `/inbox`, action, and dismiss — actioning re-quotes. F5 is in scope.
 
 ## Where we are
 
@@ -15,26 +15,27 @@ Stop here and resume from **T-073** price-watch baselines and the batched scan w
 | T-070 | Done — TravelWindow, Nudge, BusyPeriod, PriceWatch, persistence |
 | T-071 | Done — window detection, engine-priced scoring, delivered nudges |
 | T-072 | Done — fatigue in order, suppressions persisted |
+| T-073 | Done — PriceWatch baselines and batched scan worker |
 | T-080 | Done — README prerequisites, `scripts/run-all.ps1`, troubleshooting |
-| Next | **T-073** `PriceWatch` baselines and the batched scan worker |
+| Next | **T-074** `/inbox`, action, and dismiss — actioning re-quotes |
 
 ## Verify
 
-- A second scan for Maya records `DuplicateOfRecentNudge` rather than another delivery.
-- Two delivered nudges in the trailing week record `FatigueCapReached` on the next candidate.
-- Dismissing a delivered nudge records `CooldownActive` on the next similar candidate.
+- A scan evaluates Maya before rolling Coral Bay's elevated baseline, so PriceDrop still fires.
+- Refresh takes the stalest watches first and stops at batch size.
+- `POST /api/admin/run/scan` is the on-demand trigger; the hosted worker is off by default.
 
 ## First actions next session
 
-1. **T-073** PriceWatch baselines and the batched scan worker (FR-O-03, FR-O-11).
-2. Then T-074–T-076 inbox and tests.
+1. **T-074** `/inbox`, action, and dismiss — actioning re-quotes (FR-O-07, FR-O-09, FR-O-10).
+2. Then T-075 inbox UI, T-076 tests.
 3. Then polish T-081–T-083 so the demo walkthrough can include a nudge and a suppression.
 
 Do not rewrite docs 01–07 unless implementation forces a same-commit design update (NFR-11).
 
 ## Progress vs remaining
 
-**Done: 51 of 58 tasks with F5 included.** Remaining: T-073–T-076 (opportunity) then T-081–T-083 (demo and polish).
+**Done: 52 of 58 tasks with F5 included.** Remaining: T-074–T-076 (opportunity) then T-081–T-083 (demo and polish).
 
 ## Scope we already agreed
 
